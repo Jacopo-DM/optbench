@@ -10,12 +10,12 @@ other). The approved spec and task list are in DESIGN.md.
 ## Current state (2026-10-16)
 
 - Tier 1 (walking skeleton) done and on `main` (4133d55; `main` had no
-  commits, so the branch `tier1-skeleton` simply became `main`): `Problem`,
-  `Minimum`, `Group`, the registry, `Tracked`, and Sphere, Branin and Shekel,
-  with the tests of spec criterion 6. 36 tests pass, coverage 100%, ruff and
-  pyright clean.
-- No GitHub repo yet. Creating the private repo `Jacopo-DM/optbench` and
-  pushing need the user's say-so.
+  commits, so the branch `tier1-skeleton` simply became `main`).
+- Private GitHub repo `Jacopo-DM/optbench` created and `main` pushed
+  (2026-10-16, the user's say-so).
+- Tier 2, first group done on branch `tier2-many-local-minima`: the 16
+  "many local minima" functions (19 functions in all), 184 tests, coverage
+  100%, ruff and pyright clean.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
@@ -27,25 +27,18 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Ask the user to create the private GitHub repo and push, then start Tier 2.
+Merge `tier2-many-local-minima`, then the bowl-shaped group.
 
 ### Next steps in priority order
 
-0. todo, needs say-so: create the private GitHub repo `Jacopo-DM/optbench`
-   (`gh repo create Jacopo-DM/optbench --private --source . --remote origin`)
-   and push `main`.
-1. todo, approved: Tier 2, one commit per SFU group, largest value first:
-   many local minima (16 pages: Ackley, Bukin N. 6, Cross-in-Tray, Drop-Wave,
-   Eggholder, Gramacy and Lee 2012, Griewank, Holder Table, Langermann, Levy,
-   Levy N. 13, Rastrigin, Schaffer N. 2, Schaffer N. 4, Schwefel, Shubert);
-   bowl-shaped (the rest: Bohachevsky 1 to 3, Perm 0 d beta, Rotated
-   Hyper-Ellipsoid, Sum of Different Powers, Sum Squares, Trid); valley-shaped
-   (Three-Hump Camel, Six-Hump Camel, Dixon-Price, Rosenbrock); plate-shaped
-   (Booth, Matyas, McCormick, Power Sum, Zakharov); steep ridges or drops (De
-   Jong N. 5, Easom, Michalewicz); other (the rest: Beale, Colville, Forrester
-   et al. 2008, Goldstein-Price, Hartmann 3-D, 4-D and 6-D, Perm d beta,
-   Powell, Styblinski-Tang).
-2. todo, approved: a random-search baseline and a timing script for spec
+0. todo, approved: Tier 2, one commit per SFU group: bowl-shaped (Bohachevsky
+   1 to 3, Perm 0 d beta, Rotated Hyper-Ellipsoid, Sum of Different Powers,
+   Sum Squares, Trid); valley-shaped (Three-Hump Camel, Six-Hump Camel,
+   Dixon-Price, Rosenbrock); plate-shaped (Booth, Matyas, McCormick, Power
+   Sum, Zakharov); steep ridges or drops (De Jong N. 5, Easom, Michalewicz);
+   other (Beale, Colville, Forrester et al. 2008, Goldstein-Price, Hartmann
+   3-D, 4-D and 6-D, Perm d beta, Powell, Styblinski-Tang).
+1. todo, approved: a random-search baseline and a timing script for spec
    criterion 2 (100,000 points under 0.1 s).
 
 ## Open questions for the user
@@ -54,10 +47,14 @@ None.
 
 ## Known problems
 
-- Seven SFU pages state no global minimum (Gramacy and Lee 2012, Langermann,
-  Schaffer N. 4, Power Sum, De Jong N. 5, Forrester et al. 2008, Hartmann
-  4-D). Their minima must come from the literature or a dense search, marked
-  with source and accuracy (spec criterion 5).
-- Langermann's recommended constants are given for d = 2 only, and Power
-  Sum's b vector for d = 4 only; other d need the user to supply them, or a
-  rule must be chosen and recorded.
+- Four SFU pages state no global minimum and are not done yet (Power Sum,
+  De Jong N. 5, Forrester et al. 2008, Hartmann 4-D). Their minima must come
+  from the literature or a dense search, marked with source and accuracy
+  (spec criterion 5), as was done for Gramacy and Lee 2012, Langermann and
+  Schaffer N. 4.
+- Power Sum's recommended b vector is given for d = 4 only. Langermann's
+  constants are for d = 2; other dimensions work when the caller passes `a`
+  (and its minimum is then unknown).
+- Functions whose minimum was found numerically know it only at the
+  published constants; any changed constant gives `minimum is None`. A
+  caller who wants the minimum of a variant must search for it.

@@ -37,19 +37,33 @@ Before every commit run lint, type check and the tests above.
   SFU site's MATLAB or R code (GPL-2.0). Read the formula image on the
   function's SFU page (`<page>2.png` and so on) and the cited paper.
 - Adding a function (spec criteria 1 to 7): a frozen, keyword-only dataclass
-  subclass of `Problem` in the module of its SFU group under
+  subclass of `Problem` (or of `AnyDimension` when any `d` works, which
+  supplies the `d` field) in the module of its SFU group under
   `src/optbench/functions/`; every constant of the formula is a field with
-  the published default; `name`, `group`, `url` and `references` as
-  `ClassVar`s; `dimension`, `default_bounds`, `minimum` and `_evaluate`;
-  a `_check` for parameters that can be wrong; register it in
-  `registry.py` and export it from both `__init__.py` files. The tests in
-  `tests/test_all_problems.py` then cover it automatically; add a test of its
-  published constants and published minimum in `tests/test_functions.py`.
+  the published default (see DESIGN.md for which constants count);
+  `name`, `group`, `url` and `references` as `ClassVar`s (shared references
+  in `functions/references.py`); `dimension`, `default_bounds`, `minimum`
+  and `_evaluate`; a `_check` for parameters that can be wrong (call
+  `super()._check()` in an `AnyDimension`). Export it from
+  `functions/__init__.py` (the registry reads that list) and from
+  `optbench/__init__.py`. The tests in `tests/test_all_problems.py` then
+  cover it automatically; add tests of its published constants, its
+  published minimum and its parameter handling in the group's test file.
+- A numerically found minimum goes in `functions/numerical_minima.py` with
+  how it was found, and the function returns
+  `at_defaults(self, CONSTANT)`, which gives it only for the published
+  constants and domain. Check a candidate with a grid over the whole domain,
+  not only near the published point, and keep Newton steps inside the
+  domain: the Eggholder's minimum is on the edge, and unconstrained steps
+  left the box to a lower value.
 - A minimum is only stated when it is certain: from a formula, from the
   literature, or found numerically from a published point (say which in
   `Minimum.source`, and give its accuracy in `Minimum.tolerance`).
 - Evaluation is vectorised over the batch: no Python loop over points.
-- Keep each file under 400 lines; split a group module before it grows past.
+- Keep each file under 400 lines; split a group module before it grows past,
+  alphabetically, naming the parts after their first and last function
+  (`many_local_minima_bukin_to_gramacy.py`) or after what they share
+  (`many_local_minima_any_d.py`).
 - No abstraction without two real call sites today. Delete replaced code
   outright: no shims or old and new versions side by side.
 - Indentation in Python files, docstrings and comments included, is always a

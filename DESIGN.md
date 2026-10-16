@@ -139,6 +139,40 @@ Task list (approved 2026-10-16 with the spec):
   evaluations and record the best-so-far curve, so problems stay pure and an
   optimiser needs no changes to be measured.
 
+- Which constants are parameters: every number in a formula that sets a
+  scale, weight, frequency, shift, offset, exponent or count, named after
+  what it does (`Bukin6(scale, curvature, slope, shift)`), or after the
+  letter the literature uses (`Ackley(a, b, c)`). Not parameters: pi and e
+  where they are part of the formula's structure (except where the
+  literature makes them one, such as Ackley's `c = 2 pi`), the square in a
+  squared distance, and the 1 in terms like `1 + cos(...)` that keep a term
+  non-negative. Applied from the "many local minima" group on (2026-10-16).
+- `AnyDimension` (a `Problem` with a `d` field, default 2, and its check)
+  for the functions defined for any number of variables; it replaced the
+  per-class `d` handling once six classes needed it. `Problem.contains`
+  replaced two copies of the same domain check.
+- Minima the literature does not give exactly are found once, offline, and
+  stored with how they were found (`functions/numerical_minima.py`): a grid
+  over the whole default domain, then Newton steps with central differences
+  from the best grid points. They hold only at the published constants and
+  domain (`at_defaults`); a changed constant gives `None`, never a guess.
+  The scripts were in a session scratch folder; the method is the record.
+- Several published minima are rounded or slightly off, and the stored
+  values are the true ones: Shekel (see above); Cross-in-Tray at
+  (+-1.349407, +-1.349407), not 1.3491; the Schwefel function's published
+  offset 418.9829 rounds the true peak 418.98288727..., so its minimum is
+  about 1.27e-5 per dimension, not 0. The SFU values are kept in the tests
+  at their printed precision.
+- The Eggholder's minimum lies on the domain's edge (x1 = 512); outside the
+  box the function goes lower (-976.9 at about (522, 413)), so it was found
+  along the edge.
+- Langermann takes its dimension from its centre matrix `a` (published for
+  d = 2 only), not from a `d` field: other dimensions need other centres.
+  Its minimum with the SFU constants, -4.1558 at (2.7934, 1.5972), comes
+  from a grid over the whole domain; other collections quote other values
+  (such as -5.1621), which must come from other constants or another form
+  of the formula, so they do not apply here.
+
 ## Rejected approaches
 
 - Porting the GPL-2.0 R code: see Decisions.
@@ -156,3 +190,4 @@ Task list (approved 2026-10-16 with the spec):
 | What | Measure | Result | Notes |
 |------|---------|--------|-------|
 | Batch speed, Tier 1 functions (100,000 points, CPU time, min of 5, Apple silicon under load, 2026-10-16) | ms per call | Sphere (d = 10) 0.5; Branin 1.6; Shekel (m = 10) 7.3 | spec criterion 2 asks for under 100 ms |
+| Batch speed, "many local minima" group (100,000 points, d = 10 where free, CPU time, min of 5, load average 5 to 9, 2026-10-16) | ms per call | Ackley 11.0; Bukin N. 6 0.3; Cross-in-Tray 2.9; Drop-Wave 1.5; Eggholder 2.0; Gramacy and Lee 1.8; Griewank 10.4; Holder Table 2.1; Langermann 13.2; Levy 13.0; Levy N. 13 2.8; Rastrigin 9.8; Schaffer N. 2 1.1; Schaffer N. 4 1.7; Schwefel 9.6; Shubert 14.5 | all under the 100 ms budget |

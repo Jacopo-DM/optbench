@@ -9,10 +9,19 @@ import optbench
 from optbench import Group, Sphere, Tracked
 
 
-def test_names_lists_every_problem_and_filters_by_group() -> None:
-    assert optbench.names() == ["branin", "shekel", "sphere"]
-    assert optbench.names(Group.BOWL) == ["sphere"]
-    assert optbench.names(Group.STEEP) == []
+def test_names_lists_every_exported_problem_and_filters_by_group() -> None:
+    exported = {
+        getattr(optbench, name).name
+        for name in optbench.__all__
+        if isinstance(getattr(optbench, name), type)
+        and issubclass(getattr(optbench, name), optbench.Problem)
+        and hasattr(getattr(optbench, name), "name")
+    }
+    assert optbench.names() == sorted(exported)
+    for group in Group:
+        names = optbench.names(group)
+        assert all(optbench.make(name).group == group for name in names)
+    assert "sphere" in optbench.names(Group.BOWL)
 
 
 def test_make_builds_with_changed_parameters() -> None:

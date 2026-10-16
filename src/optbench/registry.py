@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from .functions import Branin, Shekel, Sphere
+from . import functions
 
 if TYPE_CHECKING:
     from .problem import Group, Problem
 
 _PROBLEMS: dict[str, type[Problem]] = {
-    cls.name: cls for cls in (Sphere, Branin, Shekel)
+    getattr(functions, name).name: getattr(functions, name)
+    for name in functions.__all__
 }
 
 

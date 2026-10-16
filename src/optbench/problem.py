@@ -130,6 +130,18 @@ class Problem(ABC):
             self.default_bounds(),
         )
 
+    def contains(self, points: ArrayLike) -> bool:
+        """Whether every point lies in the domain in use.
+
+        Returns
+        -------
+        bool
+            True if all coordinates are within ``bounds``.
+        """
+        bounds = self.bounds
+        array = np.asarray(points, dtype=np.float64)
+        return bool(np.all((array >= bounds[:, 0]) & (array <= bounds[:, 1])))
+
     def __call__(self, x: ArrayLike) -> NDArray[np.float64]:
         """Evaluate a batch of points.
 
@@ -156,6 +168,30 @@ class Problem(ABC):
             )
             raise ValueError(msg)
         return self._evaluate(points)
+
+
+@dataclass(frozen=True, kw_only=True)
+class AnyDimension(Problem):
+    """A problem defined for any number of variables.
+
+    Attributes
+    ----------
+    d
+        Number of variables, at least ``smallest_dimension``.
+    """
+
+    smallest_dimension: ClassVar[int] = 1
+
+    d: int = 2
+
+    def _check(self) -> None:
+        if self.d < self.smallest_dimension:
+            msg = f"d must be at least {self.smallest_dimension}, got {self.d}"
+            raise ValueError(msg)
+
+    @property
+    def dimension(self) -> int:
+        return self.d
 
 
 def box(low: float, high: float, d: int) -> NDArray[np.float64]:

@@ -13,13 +13,10 @@ import numpy as np
 
 from optbench.problem import Group, Minimum, Problem, box
 
+from .references import DIXON_SZEGO, HEDAR, MOLGA, PICHENY
+
 if TYPE_CHECKING:
     from numpy.typing import NDArray
-
-_MOLGA = (
-    "Molga, M., & Smutnicki, C. (2005). Test functions for optimization needs."
-)
-_HEDAR = "Hedar, A. Global Optimization Test Problems (retrieved June 2013)."
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -40,20 +37,14 @@ class Branin(Problem):
     group: ClassVar[Group] = Group.OTHER
     url: ClassVar[str] = "https://www.sfu.ca/~ssurjano/branin.html"
     references: ClassVar[tuple[str, ...]] = (
-        (
-            "Dixon, L. C. W., & Szego, G. P. (1978). The global optimization "
-            "problem: an introduction. Towards global optimization, 2, 1-15."
-        ),
+        DIXON_SZEGO,
         (
             "Forrester, A., Sobester, A., & Keane, A. (2008). Engineering "
             "design via surrogate modelling: a practical guide. Wiley."
         ),
-        _HEDAR,
-        _MOLGA,
-        (
-            "Picheny, V., Wagner, T., & Ginsbourger, D. (2012). A benchmark of "
-            "kriging-based infill criteria for noisy optimization."
-        ),
+        HEDAR,
+        MOLGA,
+        PICHENY,
     )
 
     a: float = 1.0
@@ -148,7 +139,7 @@ class Shekel(Problem):
     name: ClassVar[str] = "shekel"
     group: ClassVar[Group] = Group.OTHER
     url: ClassVar[str] = "https://www.sfu.ca/~ssurjano/shekel.html"
-    references: ClassVar[tuple[str, ...]] = (_HEDAR, _MOLGA)
+    references: ClassVar[tuple[str, ...]] = (HEDAR, MOLGA)
 
     m: int = 10
     beta: tuple[float, ...] = _SHEKEL_BETA

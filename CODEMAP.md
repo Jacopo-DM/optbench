@@ -7,38 +7,58 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (578 lines, 7 files)
+## `src/optbench` (1701 lines, 12 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
 Public interface (`optbench/__init__.py`):
 - `Problem`: abstract frozen dataclass. Call it with `(n, d)` points to get
   `(n,)` values. `dimension`, `bounds` (the `domain` field or
-  `default_bounds()`), `uses_default_domain`, `minimum` (a `Minimum` or
-  `None`), class variables `name`, `group`, `url`, `references`.
+  `default_bounds()`), `uses_default_domain`, `contains(points)`, `minimum`
+  (a `Minimum` or `None`), class variables `name`, `group`, `url`,
+  `references`.
+- `AnyDimension`: a `Problem` with a `d` field (default 2), for functions
+  defined for any number of variables.
 - `Minimum`: `value`, `points` (`(k, d)`), `source`, `tolerance`.
 - `Group`: the six SFU groups (`many_local_minima`, `bowl`, `plate`,
   `valley`, `steep`, `other`).
-- Functions: `Sphere(d)` (bowl), `Branin(a, b, c, r, s, t)` and
-  `Shekel(m, beta, c)` (other).
+- Functions (19), by group:
+  - many local minima: `Ackley(d, a, b, c)`, `Griewank(d, divisor)`,
+    `Langermann(m, c, a)`, `Levy(d, shift, scale, weight)`,
+    `Rastrigin(d, a)`, `Schwefel(d, offset)`, `Bukin6(scale, curvature,
+    slope, shift)`, `CrossInTray(scale, offset, power)`, `DropWave(frequency,
+    curvature, offset)`, `Eggholder(shift, ratio)`, `GramacyLee2012(frequency,
+    scale, shift, power)`, `HolderTable(offset)`, `LevyN13(a, b, c)`,
+    `SchafferN2(scale)`, `SchafferN4(scale)`, `Shubert(terms)`;
+  - bowl: `Sphere(d)`;
+  - other: `Branin(a, b, c, r, s, t)`, `Shekel(m, beta, c)`.
 - `names(group=None)`, `make(name, **params)`: the registry.
 - `Tracked(problem)`: counts evaluations, keeps `best_value` and
   `best_point`, and `curve` (rows of evaluations, best so far).
 
 Depends on: numpy.
 
-Files: `problem.py` (`Problem`, `Minimum`, `Group`, `box`), `functions/bowl.py`,
-`functions/other.py`, `functions/__init__.py`, `registry.py`, `tracking.py`,
-`__init__.py`. Order: `problem` is the leaf; `functions` use it; `registry`
-uses `functions`; `tracking` uses only the `Problem` type.
+Files: `problem.py` (`Problem`, `AnyDimension`, `Minimum`, `Group`, `box`);
+`functions/`: `bowl.py`, `other.py`, `many_local_minima_any_d.py`,
+`many_local_minima_bukin_to_gramacy.py`,
+`many_local_minima_holder_to_shubert.py`, `numerical_minima.py`
+(`NumericalMinimum`, `at_defaults` and the stored minima), `references.py`
+(shared citations), `__init__.py` (the list the registry reads);
+`registry.py`; `tracking.py`; `__init__.py`. Order: `problem` is the leaf;
+`references` and `numerical_minima` use only `problem`; the group modules use
+those; `registry` reads `functions.__all__`; `tracking` uses only the
+`Problem` type.
 
-## `tests` (233 lines, 3 files)
+## `tests` (432 lines, 4 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
-its defaults and free dimensions at d = 5), `test_functions.py` (published
-constants and minima, parameter and domain handling), `test_registry_and_tracking.py`.
-Depends on: `optbench`, numpy, pytest.
+its defaults and free dimensions at d = 5), `test_functions.py` (Sphere,
+Branin, Shekel: published constants and minima, parameter and domain
+handling), `test_many_local_minima.py` (the group's published values,
+constants, minima that follow parameters, refusals),
+`test_registry_and_tracking.py`. Depends on: `optbench`, numpy, pytest.
 
 ## Size checks (400 lines per file)
 
-No file over 400 lines; the largest is `functions/other.py` (198).
+No file over 400 lines; the largest is
+`functions/many_local_minima_any_d.py` (351).

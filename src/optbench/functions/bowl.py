@@ -10,48 +10,25 @@ from typing import TYPE_CHECKING, ClassVar
 
 import numpy as np
 
-from optbench.problem import Group, Minimum, Problem, box
+from optbench.problem import AnyDimension, Group, Minimum, box
+
+from .references import DIXON_SZEGO, MOLGA, PICHENY
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
 
 @dataclass(frozen=True, kw_only=True)
-class Sphere(Problem):
+class Sphere(AnyDimension):
     """Sphere function, ``f(x) = sum_i x_i^2``.
 
     Continuous, convex and unimodal. It has no constants.
-
-    Attributes
-    ----------
-    d
-        Number of variables.
     """
 
     name: ClassVar[str] = "sphere"
     group: ClassVar[Group] = Group.BOWL
     url: ClassVar[str] = "https://www.sfu.ca/~ssurjano/spheref.html"
-    references: ClassVar[tuple[str, ...]] = (
-        (
-            "Dixon, L. C. W., & Szego, G. P. (1978). The global optimization "
-            "problem: an introduction. Towards global optimization, 2, 1-15."
-        ),
-        (
-            "Molga, M., & Smutnicki, C. (2005). Test functions for "
-            "optimization needs."
-        ),
-    )
-
-    d: int = 2
-
-    def _check(self) -> None:
-        if self.d < 1:
-            msg = f"d must be at least 1, got {self.d}"
-            raise ValueError(msg)
-
-    @property
-    def dimension(self) -> int:
-        return self.d
+    references: ClassVar[tuple[str, ...]] = (DIXON_SZEGO, MOLGA, PICHENY)
 
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-5.12, 5.12, self.d)
