@@ -20,7 +20,8 @@ other). The approved spec and task list are in DESIGN.md.
   the working tree is clean.
 - Tier 2 is complete (2026-10-17): `optbench.random_search` (the baseline)
   and `scripts/timing.py` and `scripts/baseline.py`; results in DESIGN.md.
-  All 49 functions are under the 100 ms budget. On `main`, not pushed.
+  All 49 functions are under the 100 ms budget. On `main` and pushed
+  (2026-10-17); the branch `tier2-baseline` was deleted.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
