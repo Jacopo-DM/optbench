@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (2038 lines, 12 files)
+## `src/optbench` (2284 lines, 13 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -22,7 +22,7 @@ Public interface (`optbench/__init__.py`):
 - `Minimum`: `value`, `points` (`(k, d)`), `source`, `tolerance`.
 - `Group`: the six SFU groups (`many_local_minima`, `bowl`, `plate`,
   `valley`, `steep`, `other`).
-- Functions (27), by group:
+- Functions (31), by group:
   - many local minima: `Ackley(d, a, b, c)`, `Griewank(d, divisor)`,
     `Langermann(m, c, a)`, `Levy(d, shift, scale, weight)`,
     `Rastrigin(d, a)`, `Schwefel(d, offset)`, `Bukin6(scale, curvature,
@@ -34,6 +34,8 @@ Public interface (`optbench/__init__.py`):
     `Bohachevsky2` and `Bohachevsky3(weight, a, p, q, offset)`,
     `Perm0(d, beta)`, `RotatedHyperEllipsoid(d)`,
     `SumOfDifferentPowers(d, power_shift)`, `SumSquares(d)`, `Trid(d, shift)`;
+  - valley: `ThreeHumpCamel(a, b, c)`, `SixHumpCamel(a, b, c, e, g)`,
+    `DixonPrice(d, shift, weight)`, `Rosenbrock(d, a, b)` (d >= 2);
   - other: `Branin(a, b, c, r, s, t)`, `Shekel(m, beta, c)`.
 - `names(group=None)`, `make(name, **params)`: the registry.
 - `Tracked(problem)`: counts evaluations, keeps `best_value` and
@@ -41,24 +43,26 @@ Public interface (`optbench/__init__.py`):
 
 Depends on: numpy.
 
-Files: `problem.py` (`Problem`, `AnyDimension`, `Minimum`, `Group`, `box`);
-`functions/`: `bowl.py` (also `formula_minimum`, a minimum from a formula
-if its minimisers lie in the domain), `other.py`, `many_local_minima_any_d.py`,
+Files: `problem.py` (`Problem`, `AnyDimension`, `Minimum`, `Group`, `box`,
+`formula_minimum`: a minimum from a formula if its minimisers lie in the
+domain);
+`functions/`: `bowl.py`, `valley.py`, `other.py`, `many_local_minima_any_d.py`,
 `many_local_minima_bukin_to_gramacy.py`,
-`many_local_minima_holder_to_shubert.py`, `numerical_minima.py`
-(`NumericalMinimum`, `at_defaults` and the stored minima), `references.py`
+`many_local_minima_holder_to_shubert.py`, `known_minima.py`
+(`KnownMinimum`, `at_defaults` and the minima known only for the published
+constants), `references.py`
 (shared citations), `__init__.py` (the list the registry reads);
 `registry.py`; `tracking.py`; `__init__.py`. Order: `problem` is the leaf;
-`references` and `numerical_minima` use only `problem`; the group modules use
+`references` and `known_minima` use only `problem`; the group modules use
 those; `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type.
 
-## `tests` (540 lines, 5 files)
+## `tests` (648 lines, 6 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 5), `test_functions.py` (Sphere,
 Branin, Shekel: published constants and minima, parameter and domain
-handling), `test_bowl.py` (the bowl group), `test_many_local_minima.py` (the group's published values,
+handling), `test_bowl.py` and `test_valley.py` (those groups), `test_many_local_minima.py` (the group's published values,
 constants, minima that follow parameters, refusals),
 `test_registry_and_tracking.py`. Depends on: `optbench`, numpy, pytest.
 

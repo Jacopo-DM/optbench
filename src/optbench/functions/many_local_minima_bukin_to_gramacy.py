@@ -3,7 +3,7 @@
 https://www.sfu.ca/~ssurjano/optimization.html, group "Many Local Minima".
 Holder Table to Shubert are in ``many_local_minima_holder_to_shubert``, and
 the functions for any dimension in ``many_local_minima_any_d``. Minima the
-SFU page rounds or omits were found numerically; see ``numerical_minima``.
+SFU page rounds or omits were found numerically; see ``known_minima``.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import numpy as np
 
 from optbench.problem import Group, Minimum, Problem, box
 
-from .numerical_minima import (
+from .known_minima import (
     CROSS_IN_TRAY,
     EGGHOLDER,
     GRAMACY_LEE_2012,

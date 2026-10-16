@@ -152,7 +152,8 @@ Task list (approved 2026-10-16 with the spec):
   per-class `d` handling once six classes needed it. `Problem.contains`
   replaced two copies of the same domain check.
 - Minima the literature does not give exactly are found once, offline, and
-  stored with how they were found (`functions/numerical_minima.py`): a grid
+  stored with how they were found (`functions/known_minima.py`, named
+  `numerical_minima.py` until the valley group): a grid
   over the whole default domain, then Newton steps with central differences
   from the best grid points. They hold only at the published constants and
   domain (`at_defaults`); a changed constant gives `None`, never a guess.
@@ -188,6 +189,20 @@ Task list (approved 2026-10-16 with the spec):
   for 100,000 points at d = 10, which brought it under the spec's 100 ms
   budget. The results differ from `x ** i` only in the last bits.
 
+- Valley-shaped group (2026-10-16): `functions/numerical_minima.py` became
+  `known_minima.py` (`KnownMinimum`), because the Three-Hump Camel's
+  minimum (0 at the origin) is published and confirmed by a grid but not
+  proven for other constants, and it belongs with the numerically found
+  ones: both hold only at the published constants. `formula_minimum` moved
+  to `problem.py` once two group modules used it. Dixon-Price has two
+  minimisers for d >= 2, the published all-positive one and the same with
+  `x_d` negated; flipping an earlier coordinate is not a minimiser, because
+  it appears unsquared in the next term (a first version listed `2^(d-1)`
+  sign flips; its test caught the error). Rosenbrock's minimum follows `b`
+  only where every term can vanish: `(b, ..., b, b^2)` needs `b` equal to 0
+  or 1 unless d = 2. The SFU page's rescaled Rosenbrock (Picheny et al.) is
+  a variant and is not included.
+
 ## Rejected approaches
 
 - Porting the GPL-2.0 R code: see Decisions.
@@ -207,3 +222,4 @@ Task list (approved 2026-10-16 with the spec):
 | Batch speed, Tier 1 functions (100,000 points, CPU time, min of 5, Apple silicon under load, 2026-10-16) | ms per call | Sphere (d = 10) 0.5; Branin 1.6; Shekel (m = 10) 7.3 | spec criterion 2 asks for under 100 ms |
 | Batch speed, "many local minima" group (100,000 points, d = 10 where free, CPU time, min of 5, load average 5 to 9, 2026-10-16) | ms per call | Ackley 11.0; Bukin N. 6 0.3; Cross-in-Tray 2.9; Drop-Wave 1.5; Eggholder 2.0; Gramacy and Lee 1.8; Griewank 10.4; Holder Table 2.1; Langermann 13.2; Levy 13.0; Levy N. 13 2.8; Rastrigin 9.8; Schaffer N. 2 1.1; Schaffer N. 4 1.7; Schwefel 9.6; Shubert 14.5 | all under the 100 ms budget |
 | Batch speed, bowl-shaped group (100,000 points, d = 10 where free, CPU time, min of 5, load average 7 to 10, 2026-10-16) | ms per call | Bohachevsky 1 1.9, 2 2.0, 3 1.1; Perm 0, d, beta 43.1 (126.3 with `x ** i`); Rotated Hyper-Ellipsoid 1.6; Sphere 0.4; Sum of Different Powers 9.4; Sum Squares 1.7; Trid 2.8 | all under the 100 ms budget |
+| Batch speed, valley-shaped group (100,000 points, d = 10 where free, CPU time, min of 5, load average 4 to 9, 2026-10-16) | ms per call | Dixon-Price 2.9; Rosenbrock 2.9; Six-Hump Camel 1.5; Three-Hump Camel 0.3 | all under the 100 ms budget |

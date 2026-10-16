@@ -11,7 +11,14 @@ from typing import TYPE_CHECKING, ClassVar
 
 import numpy as np
 
-from optbench.problem import AnyDimension, Group, Minimum, Problem, box
+from optbench.problem import (
+    AnyDimension,
+    Group,
+    Minimum,
+    Problem,
+    box,
+    formula_minimum,
+)
 
 from .references import ADORIO, DIXON_SZEGO, HEDAR, MOLGA, PICHENY
 
@@ -20,23 +27,6 @@ if TYPE_CHECKING:
 
 _GROUP = Group.BOWL
 _SFU = "https://www.sfu.ca/~ssurjano/"
-
-
-def formula_minimum(
-    problem: Problem,
-    value: float,
-    points: NDArray[np.float64],
-) -> Minimum | None:
-    """Return a minimum known from a formula, if it lies in the domain.
-
-    Returns
-    -------
-    Minimum or None
-        The minimum, or ``None`` when a minimiser is outside the domain.
-    """
-    if not problem.contains(points):
-        return None
-    return Minimum(value, points, "formula")
 
 
 @dataclass(frozen=True, kw_only=True)

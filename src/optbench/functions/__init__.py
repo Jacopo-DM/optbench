@@ -34,6 +34,7 @@ from .many_local_minima_holder_to_shubert import (
     Shubert,
 )
 from .other import Branin, Shekel
+from .valley import DixonPrice, Rosenbrock, SixHumpCamel, ThreeHumpCamel
 
 __all__ = [
     "Ackley",
@@ -43,6 +44,7 @@ __all__ = [
     "Branin",
     "Bukin6",
     "CrossInTray",
+    "DixonPrice",
     "DropWave",
     "Eggholder",
     "GramacyLee2012",
@@ -53,14 +55,17 @@ __all__ = [
     "LevyN13",
     "Perm0",
     "Rastrigin",
+    "Rosenbrock",
     "RotatedHyperEllipsoid",
     "SchafferN2",
     "SchafferN4",
     "Schwefel",
     "Shekel",
     "Shubert",
+    "SixHumpCamel",
     "Sphere",
     "SumOfDifferentPowers",
     "SumSquares",
+    "ThreeHumpCamel",
     "Trid",
 ]

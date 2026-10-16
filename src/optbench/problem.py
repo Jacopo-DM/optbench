@@ -203,3 +203,20 @@ def box(low: float, high: float, d: int) -> NDArray[np.float64]:
         ``(d, 2)`` bounds.
     """
     return np.tile(np.array([low, high], dtype=np.float64), (d, 1))
+
+
+def formula_minimum(
+    problem: Problem,
+    value: float,
+    points: NDArray[np.float64],
+) -> Minimum | None:
+    """Return a minimum known from a formula, if it lies in the domain.
+
+    Returns
+    -------
+    Minimum or None
+        The minimum, or ``None`` when a minimiser is outside the domain.
+    """
+    if not problem.contains(points):
+        return None
+    return Minimum(value, points, "formula")

@@ -49,8 +49,10 @@ Before every commit run lint, type check and the tests above.
   `optbench/__init__.py`. The tests in `tests/test_all_problems.py` then
   cover it automatically; add tests of its published constants, its
   published minimum and its parameter handling in the group's test file.
-- A numerically found minimum goes in `functions/numerical_minima.py` with
-  how it was found, and the function returns
+- A minimum that holds only for the published constants (found
+  numerically, or published without a proof for other constants) goes in
+  `functions/known_minima.py` with where it comes from, and the function
+  returns
   `at_defaults(self, CONSTANT)`, which gives it only for the published
   constants and domain. Check a candidate with a grid over the whole domain,
   not only near the published point, and keep Newton steps inside the

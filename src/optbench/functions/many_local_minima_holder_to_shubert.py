@@ -3,7 +3,7 @@
 https://www.sfu.ca/~ssurjano/optimization.html, group "Many Local Minima".
 Bukin to Gramacy and Lee are in ``many_local_minima_bukin_to_gramacy``, and
 the functions for any dimension in ``many_local_minima_any_d``. Minima the
-SFU page rounds or omits were found numerically; see ``numerical_minima``.
+SFU page rounds or omits were found numerically; see ``known_minima``.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import numpy as np
 
 from optbench.problem import Group, Minimum, Problem, box
 
-from .numerical_minima import HOLDER_TABLE, SCHAFFER_N4, SHUBERT, at_defaults
+from .known_minima import HOLDER_TABLE, SCHAFFER_N4, SHUBERT, at_defaults
 from .references import GAVANA, HEDAR, WIKIPEDIA
 
 if TYPE_CHECKING:

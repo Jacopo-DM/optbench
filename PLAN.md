@@ -13,9 +13,10 @@ other). The approved spec and task list are in DESIGN.md.
   commits, so the branch `tier1-skeleton` simply became `main`).
 - Private GitHub repo `Jacopo-DM/optbench` created and `main` pushed
   (2026-10-16, the user's say-so).
-- Tier 2: the "many local minima" group is on `main` and pushed (c185f2f);
-  the bowl-shaped group (8 more, 27 functions in all) is done on branch
-  `tier2-bowl`: 268 tests, coverage 100%, ruff and pyright clean.
+- Tier 2: the "many local minima" and bowl-shaped groups are on `main` and
+  pushed (b7bc119); the valley-shaped group (4 more, 31 functions in all) is
+  done on branch `tier2-valley`: 317 tests, coverage 100%, ruff and pyright
+  clean.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
@@ -27,7 +28,7 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Merge `tier2-bowl`, then the valley-shaped group.
+Merge `tier2-valley`, then the plate-shaped group.
 
 ### Next steps in priority order
 
@@ -53,6 +54,7 @@ None.
 - Power Sum's recommended b vector is given for d = 4 only. Langermann's
   constants are for d = 2; other dimensions work when the caller passes `a`
   (and its minimum is then unknown).
-- Functions whose minimum was found numerically know it only at the
+- Functions whose minimum was found numerically (or is published without a
+  proof for other constants) know it only at the
   published constants; any changed constant gives `minimum is None`. A
   caller who wants the minimum of a variant must search for it.

@@ -16,7 +16,7 @@ import numpy as np
 
 from optbench.problem import AnyDimension, Group, Minimum, Problem, box
 
-from .numerical_minima import LANGERMANN, at_defaults
+from .known_minima import LANGERMANN, at_defaults
 from .references import (
     ADORIO,
     BACK,
