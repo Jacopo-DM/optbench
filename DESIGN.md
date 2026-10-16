@@ -100,6 +100,86 @@ Task list (approved 2026-10-16 with the spec):
   baseline and a timing script for criterion 2.
 - Tier 3, not built: the non-goals above.
 
+## Approved spec: bbob and classics (the user, 2026-10-17)
+
+The user reviewed other collections of test functions on 2026-10-17 (see
+"Other sources of test functions" below) and approved these two modules.
+`bbob` replaces the first version's non-goal "shifted, rotated or noisy
+variants" for the BBOB noiseless suite only; the rest of that non-goal
+stands.
+
+Answers to the questions asked with the specs:
+- BBOB instances reproduce COCO's exactly (its random generator and
+  instance-to-seed rule, read from COCO's BSD-3-Clause code), so results
+  compare with published COCO data. Own numpy seeds were rejected: the
+  numbers would match nothing published.
+- Tests check BBOB values against COCO's Python package, added as a
+  dev-only dependency; run time stays numpy-only. Hand-copied values were
+  rejected as too thin a check.
+
+### Module `bbob` (build): the 24 noiseless COCO/BBOB functions
+
+Goal: the BBOB 2009 noiseless suite in optbench, so optimisers (CGP-evolved
+ones included) can be compared with published COCO results.
+
+Acceptance criteria, each testable:
+1. f1 to f24, written from the formulas of Hansen, Finck, Ros and Auger
+   (2009), "Real-Parameter Black-Box Optimization Benchmarking 2009:
+   Noiseless Functions Definitions", INRIA RR-6829, in their five groups:
+   separable (f1 sphere, f2 ellipsoidal, f3 Rastrigin, f4 Buche-Rastrigin,
+   f5 linear slope); low or moderate conditioning (f6 attractive sector,
+   f7 step ellipsoidal, f8 Rosenbrock, f9 rotated Rosenbrock); high
+   conditioning and unimodal (f10 ellipsoidal, f11 discus, f12 bent cigar,
+   f13 sharp ridge, f14 different powers); multimodal with adequate global
+   structure (f15 Rastrigin, f16 Weierstrass, f17 Schaffers F7, f18
+   ill-conditioned Schaffers F7, f19 composite Griewank-Rosenbrock);
+   multimodal with weak global structure (f20 Schwefel, f21 Gallagher 101
+   peaks, f22 Gallagher 21 peaks, f23 Katsuura, f24 Lunacek bi-Rastrigin).
+2. A problem is built from `(d, instance)`: the instance fixes `x_opt`,
+   `f_opt` and the rotation matrices, so the same arguments always give the
+   same function. Any `d >= 2`; domain [-5, 5]^d.
+3. Every constant of a formula is a field, as spec criterion 3 says
+   (conditioning 10^6, the asymmetry beta, the Weierstrass and Katsuura
+   constants, Gallagher's peak count and so on).
+4. The shared transformations (T_osz, T_asy, the diagonal Lambda^alpha, the
+   boundary penalty f_pen, the seeded rotations) are one helper each; each
+   has several real call sites.
+5. Each problem knows its minimum `f_opt` and minimiser (`x_opt` for most;
+   from the definitions for f5, f20, f21 and f22).
+6. The existing criterion-6 tests run on every BBOB problem; values match
+   COCO's Python package at fixed points.
+7. 100,000 points at d = 10 in under 0.1 s, as criterion 2.
+
+Non-goals: the noisy suite, bbob-biobj, large-scale, mixed-integer and
+constrained suites; COCO's experiment runner and post-processing.
+
+Architecture: a new module area `functions/bbob_*.py` (split by group to
+stay under 400 lines) and `functions/bbob_transforms.py`. A new class
+variable `suite` (`"sfu"`, `"bbob"`, `"classic"`) beside `group`, with BBOB's
+five groups as their own `Group` values, and `names(group=None, suite=None)`.
+Names like `bbob_f01_sphere`.
+
+Tiers: Tier 1, the instance machinery and transforms plus f1 to f5, with
+the reference check. Tier 2, one commit per group: f6 to f9, f10 to f14,
+f15 to f19, f20 to f24. Tier 3: the non-goals.
+
+Source: RR-6829, the PDF at
+https://inria.hal.science/inria-00362633/document (573,076 bytes; download
+approved 2026-10-17), and COCO's code for the instance generation.
+
+### Module `classics` (build): ten well-known functions not on the SFU pages
+
+Each from its formula in Jamil and Yang (2013) and Gavana's AMPGO pages,
+with every constant a field, its minimum and the criterion-6 tests:
+Himmelblau (2-D, four minimisers, 0), Bird (2-D, two minimisers,
+-106.7645), Alpine N. 1 (any d, 0 at the origin), Salomon (any d, 0 at the
+origin), Schwefel 2.21 (any d, max of |x_i|, 0), Schwefel 2.22 (any d, sum
+plus product of |x_i|, 0), Qing (any d, 0 at x_i = +-sqrt(i)), Happy Cat
+(any d, 0 at x = -1), Whitley (any d, 0 at x = 1), Deceptive (any d, -1 at
+the alpha vector). `suite = "classic"`, and each in the SFU shape group that
+fits it. One commit; the minima are checked numerically as for SFU.
+
+
 ## Decisions and reasons
 
 - Written from the published formulas, not ported: the site's MATLAB and R
