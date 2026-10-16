@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (1701 lines, 12 files)
+## `src/optbench` (2038 lines, 12 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -22,7 +22,7 @@ Public interface (`optbench/__init__.py`):
 - `Minimum`: `value`, `points` (`(k, d)`), `source`, `tolerance`.
 - `Group`: the six SFU groups (`many_local_minima`, `bowl`, `plate`,
   `valley`, `steep`, `other`).
-- Functions (19), by group:
+- Functions (27), by group:
   - many local minima: `Ackley(d, a, b, c)`, `Griewank(d, divisor)`,
     `Langermann(m, c, a)`, `Levy(d, shift, scale, weight)`,
     `Rastrigin(d, a)`, `Schwefel(d, offset)`, `Bukin6(scale, curvature,
@@ -30,7 +30,10 @@ Public interface (`optbench/__init__.py`):
     curvature, offset)`, `Eggholder(shift, ratio)`, `GramacyLee2012(frequency,
     scale, shift, power)`, `HolderTable(offset)`, `LevyN13(a, b, c)`,
     `SchafferN2(scale)`, `SchafferN4(scale)`, `Shubert(terms)`;
-  - bowl: `Sphere(d)`;
+  - bowl: `Sphere(d)`, `Bohachevsky1(weight, a, b, p, q, offset)`,
+    `Bohachevsky2` and `Bohachevsky3(weight, a, p, q, offset)`,
+    `Perm0(d, beta)`, `RotatedHyperEllipsoid(d)`,
+    `SumOfDifferentPowers(d, power_shift)`, `SumSquares(d)`, `Trid(d, shift)`;
   - other: `Branin(a, b, c, r, s, t)`, `Shekel(m, beta, c)`.
 - `names(group=None)`, `make(name, **params)`: the registry.
 - `Tracked(problem)`: counts evaluations, keeps `best_value` and
@@ -39,7 +42,8 @@ Public interface (`optbench/__init__.py`):
 Depends on: numpy.
 
 Files: `problem.py` (`Problem`, `AnyDimension`, `Minimum`, `Group`, `box`);
-`functions/`: `bowl.py`, `other.py`, `many_local_minima_any_d.py`,
+`functions/`: `bowl.py` (also `formula_minimum`, a minimum from a formula
+if its minimisers lie in the domain), `other.py`, `many_local_minima_any_d.py`,
 `many_local_minima_bukin_to_gramacy.py`,
 `many_local_minima_holder_to_shubert.py`, `numerical_minima.py`
 (`NumericalMinimum`, `at_defaults` and the stored minima), `references.py`
@@ -49,12 +53,12 @@ Files: `problem.py` (`Problem`, `AnyDimension`, `Minimum`, `Group`, `box`);
 those; `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type.
 
-## `tests` (432 lines, 4 files)
+## `tests` (540 lines, 5 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 5), `test_functions.py` (Sphere,
 Branin, Shekel: published constants and minima, parameter and domain
-handling), `test_many_local_minima.py` (the group's published values,
+handling), `test_bowl.py` (the bowl group), `test_many_local_minima.py` (the group's published values,
 constants, minima that follow parameters, refusals),
 `test_registry_and_tracking.py`. Depends on: `optbench`, numpy, pytest.
 

@@ -13,9 +13,9 @@ other). The approved spec and task list are in DESIGN.md.
   commits, so the branch `tier1-skeleton` simply became `main`).
 - Private GitHub repo `Jacopo-DM/optbench` created and `main` pushed
   (2026-10-16, the user's say-so).
-- Tier 2, first group done on branch `tier2-many-local-minima`: the 16
-  "many local minima" functions (19 functions in all), 184 tests, coverage
-  100%, ruff and pyright clean.
+- Tier 2: the "many local minima" group is on `main` and pushed (c185f2f);
+  the bowl-shaped group (8 more, 27 functions in all) is done on branch
+  `tier2-bowl`: 268 tests, coverage 100%, ruff and pyright clean.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
@@ -27,13 +27,11 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Merge `tier2-many-local-minima`, then the bowl-shaped group.
+Merge `tier2-bowl`, then the valley-shaped group.
 
 ### Next steps in priority order
 
-0. todo, approved: Tier 2, one commit per SFU group: bowl-shaped (Bohachevsky
-   1 to 3, Perm 0 d beta, Rotated Hyper-Ellipsoid, Sum of Different Powers,
-   Sum Squares, Trid); valley-shaped (Three-Hump Camel, Six-Hump Camel,
+0. todo, approved: Tier 2, one commit per SFU group: valley-shaped (Three-Hump Camel, Six-Hump Camel,
    Dixon-Price, Rosenbrock); plate-shaped (Booth, Matyas, McCormick, Power
    Sum, Zakharov); steep ridges or drops (De Jong N. 5, Easom, Michalewicz);
    other (Beale, Colville, Forrester et al. 2008, Goldstein-Price, Hartmann
