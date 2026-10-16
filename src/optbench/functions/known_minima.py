@@ -264,3 +264,34 @@ HARTMANN_6 = KnownMinimum(
     "random search and Newton refinement (SFU: -3.32237)",
     1e-12,
 )
+
+# Gavana: -106.7645367198034 at (4.701055751981055, 3.152946019601391) and
+# (-1.582142172055011, -3.130246799635430). Grid step 0.002 over the whole
+# domain, then Newton on the exact gradient (below 1e-13 at both points); the
+# published value is 3e-8 too high.
+BIRD = KnownMinimum(
+    -106.7645367492647,
+    (
+        (4.701043130249553, 3.15293850372493),
+        (-1.5821421769300335, -3.1302468034546562),
+    ),
+    "grid search and Newton refinement on the exact gradient (Gavana: "
+    "-106.7645367198034)",
+    1e-12,
+)
+
+# Wikipedia: 0 at (3, 2), (-2.805118, 3.131312), (-3.779310, -3.283186) and
+# (3.584428, -1.848126). Each is a zero of both squared terms; Newton on that
+# pair of equations with the exact Jacobian, and a grid of step 0.002 over
+# the domain finds no fifth.
+HIMMELBLAU = KnownMinimum(
+    0.0,
+    (
+        (3.0, 2.0),
+        (-2.805118086952745, 3.131312518250573),
+        (-3.779310253377747, -3.283185991286169),
+        (3.5844283403304917, -1.8481265269644036),
+    ),
+    "published (Wikipedia), refined by Newton on the two squared terms",
+    1e-12,
+)

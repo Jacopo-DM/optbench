@@ -11,6 +11,20 @@ from .bowl import (
     SumSquares,
     Trid,
 )
+from .classics_alpine_to_himmelblau import (
+    AlpineN2,
+    Bird,
+    Deceptive,
+    HappyCat,
+    Himmelblau,
+)
+from .classics_qing_to_whitley import (
+    Qing,
+    Salomon,
+    Schwefel221,
+    Schwefel222,
+    Whitley,
+)
 from .many_local_minima_any_d import (
     Ackley,
     Griewank,
@@ -53,7 +67,9 @@ from .valley import DixonPrice, Rosenbrock, SixHumpCamel, ThreeHumpCamel
 
 __all__ = [
     "Ackley",
+    "AlpineN2",
     "Beale",
+    "Bird",
     "Bohachevsky1",
     "Bohachevsky2",
     "Bohachevsky3",
@@ -63,6 +79,7 @@ __all__ = [
     "Colville",
     "CrossInTray",
     "DeJong5",
+    "Deceptive",
     "DixonPrice",
     "DropWave",
     "Easom",
@@ -71,9 +88,11 @@ __all__ = [
     "GoldsteinPrice",
     "GramacyLee2012",
     "Griewank",
+    "HappyCat",
     "Hartmann3",
     "Hartmann4",
     "Hartmann6",
+    "Himmelblau",
     "HolderTable",
     "Langermann",
     "Levy",
@@ -85,12 +104,16 @@ __all__ = [
     "PermDBeta",
     "Powell",
     "PowerSum",
+    "Qing",
     "Rastrigin",
     "Rosenbrock",
     "RotatedHyperEllipsoid",
+    "Salomon",
     "SchafferN2",
     "SchafferN4",
     "Schwefel",
+    "Schwefel221",
+    "Schwefel222",
     "Shekel",
     "Shubert",
     "SixHumpCamel",
@@ -100,5 +123,6 @@ __all__ = [
     "SumSquares",
     "ThreeHumpCamel",
     "Trid",
+    "Whitley",
     "Zakharov",
 ]

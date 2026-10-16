@@ -41,7 +41,8 @@ Before every commit run lint, type check and the tests above.
 - Adding a function (spec criteria 1 to 7): a frozen, keyword-only dataclass
   subclass of `Problem` (or of `AnyDimension` when any `d` works, which
   supplies the `d` field) in the module of its SFU group under
-  `src/optbench/functions/`; every constant of the formula is a field with
+  `src/optbench/functions/` (a function from another collection goes in
+  that collection's modules, `classics_*.py`, with its `suite` set); every constant of the formula is a field with
   the published default (see DESIGN.md for which constants count);
   `name`, `group`, `url` and `references` as `ClassVar`s (shared references
   in `functions/references.py`); `dimension`, `default_bounds`, `minimum`

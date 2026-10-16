@@ -15,13 +15,16 @@ _PROBLEMS: dict[str, type[Problem]] = {
 }
 
 
-def names(group: Group | None = None) -> list[str]:
+def names(group: Group | None = None, suite: str | None = None) -> list[str]:
     """List the problem names, sorted.
 
     Parameters
     ----------
     group
-        Only the problems of this SFU group; all of them by default.
+        Only the problems of this shape group; all of them by default.
+    suite
+        Only the problems of this collection: ``"sfu"`` (the SFU pages) or
+        ``"classic"`` (well-known functions not on them); all by default.
 
     Returns
     -------
@@ -31,7 +34,8 @@ def names(group: Group | None = None) -> list[str]:
     return sorted(
         name
         for name, cls in _PROBLEMS.items()
-        if group is None or cls.group == group
+        if (group is None or cls.group == group)
+        and (suite is None or cls.suite == suite)
     )
 
 

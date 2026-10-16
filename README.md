@@ -26,5 +26,8 @@ run = optbench.random_search(branin, 10_000, np.random.default_rng(0))
 run.best_value, run.best_point, run.curve
 ```
 
-`optbench.names()` lists the 49 functions, `optbench.names(group)` those of
-one SFU group. MIT license.
+`optbench.names()` lists the 59 functions: the 49 of the SFU pages
+(`optbench.names(suite="sfu")`) and ten well-known ones not on them
+(`suite="classic"`: Alpine N. 2, Bird, Deceptive, Happy Cat, Himmelblau,
+Qing, Salomon, Schwefel 2.21 and 2.22, Whitley). `optbench.names(group)`
+lists those of one shape group. MIT license.

@@ -78,7 +78,11 @@ def test_wrong_shapes_are_refused(problem: Problem) -> None:
 
 @pytest.mark.parametrize("problem", PROBLEMS, ids=IDS)
 def test_the_metadata_is_complete(problem: Problem) -> None:
-    assert problem.url.startswith("https://www.sfu.ca/~ssurjano/")
+    if problem.suite == "sfu":
+        assert problem.url.startswith("https://www.sfu.ca/~ssurjano/")
+    else:
+        assert problem.suite == "classic"
+        assert problem.url.startswith("https://")
     assert problem.references
     assert problem.group in optbench.Group
     assert problem.bounds.shape == (problem.dimension, 2)

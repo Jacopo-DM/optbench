@@ -8,6 +8,11 @@ BACK = (
     "Back, T. (1996). Evolutionary algorithms in theory and practice. Oxford "
     "University Press."
 )
+BEYER_FINCK = (
+    "Beyer, H.-G., & Finck, S. (2012). HappyCat - A Simple Function Class "
+    "Where Well-Known Direct Search Algorithms Do Fail. Parallel Problem "
+    "Solving from Nature, PPSN XII, 367-376."
+)
 DIXON_SZEGO = (
     "Dixon, L. C. W., & Szego, G. P. (1978). The global optimization "
     "problem: an introduction. Towards global optimization, 2, 1-15."
@@ -17,6 +22,11 @@ GAVANA = (
     "http://infinity77.net/global_optimization/test_functions.html."
 )
 HEDAR = "Hedar, A. Global Optimization Test Problems (retrieved June 2013)."
+JAMIL_YANG = (
+    "Jamil, M., & Yang, X.-S. (2013). A literature survey of benchmark "
+    "functions for global optimisation problems. International Journal of "
+    "Mathematical Modelling and Numerical Optimisation, 4(2), 150-194."
+)
 LAGUNA_MARTI = (
     "Laguna, M., & Marti, R. (2002). Experimental Testing of Advanced Scatter "
     "Search Designs for Global Optimization of Multimodal Functions."

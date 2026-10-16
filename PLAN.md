@@ -22,6 +22,9 @@ other). The approved spec and task list are in DESIGN.md.
   and `scripts/timing.py` and `scripts/baseline.py`; results in DESIGN.md.
   All 49 functions are under the 100 ms budget. On `main` and pushed
   (2026-10-17); the branch `tier2-baseline` was deleted.
+- `classics` done (2026-10-17, branch `classics`): ten functions, 605
+  tests, coverage 100%, ruff and pyright clean. Whitley is over the speed
+  budget (Known problems, open question 1).
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
@@ -33,8 +36,8 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-The `classics` module: ten functions, one commit on branch `classics`
-(DESIGN.md has the spec). The full order is below.
+`bbob` Tier 1, after the open question on Whitley's budget. The full order
+is below.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -44,17 +47,22 @@ then BBOB, then the `ailigment` adapters. Downloading RR-6829 (573,076
 bytes, from https://inria.hal.science/inria-00362633/document) and adding
 COCO's Python package as a dev-only dependency are approved too.
 
-1. in progress: `classics`, one commit on branch `classics`.
-2. todo: `bbob` Tier 1 (instance machinery as COCO does it, transforms,
+1. todo: `bbob` Tier 1 (instance machinery as COCO does it, transforms,
    f1 to f5, the dev dependency and the reference test), then Tier 2, one
    commit per group: f6 to f9, f10 to f14, f15 to f19, f20 to f24.
-3. later: the `ailigment` adapters (its PLAN.md).
+2. later: the `ailigment` adapters (its PLAN.md).
 
 ## Open questions for the user
 
-None.
+1. Whitley (d = 10) takes about 125 ms per 100,000 points, over the 0.1 s
+   budget of spec criterion 2, because its d^2 cosines alone take 70 to 90
+   ms. Accept it as a stated exception (the timing script would then allow
+   it), or leave it failing.
 
 ## Known problems
+
+- `python -m scripts.timing` exits with status 1: Whitley at d = 10 is over
+  the 100 ms budget (open question 1).
 
 - Power Sum's recommended b vector is given for d = 4 only (other b give
   other dimensions, with an unknown minimum). Langermann's constants are for

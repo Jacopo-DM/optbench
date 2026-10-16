@@ -68,6 +68,7 @@ class Problem(ABC):
     group: ClassVar[Group]
     url: ClassVar[str]
     references: ClassVar[tuple[str, ...]]
+    suite: ClassVar[str] = "sfu"
 
     domain: ArrayLike | None = field(default=None, repr=False)
 

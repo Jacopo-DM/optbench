@@ -172,8 +172,8 @@ approved 2026-10-17), and COCO's code for the instance generation.
 Each from its formula in Jamil and Yang (2013) and Gavana's AMPGO pages,
 with every constant a field, its minimum and the criterion-6 tests:
 Himmelblau (2-D, four minimisers, 0), Bird (2-D, two minimisers,
--106.7645), Alpine N. 1 (any d, 0 at the origin), Salomon (any d, 0 at the
-origin), Schwefel 2.21 (any d, max of |x_i|, 0), Schwefel 2.22 (any d, sum
+-106.7645), Alpine N. 2 (any d, -2.808^d at x_i = 7.917; it replaced
+Alpine N. 1, see Decisions), Salomon (any d, 0 at the origin), Schwefel 2.21 (any d, max of |x_i|, 0), Schwefel 2.22 (any d, sum
 plus product of |x_i|, 0), Qing (any d, 0 at x_i = +-sqrt(i)), Happy Cat
 (any d, 0 at x = -1), Whitley (any d, 0 at x = 1), Deceptive (any d, -1 at
 the alpha vector). `suite = "classic"`, and each in the SFU shape group that
@@ -332,6 +332,34 @@ fits it. One commit; the minima are checked numerically as for SFU.
   Powell needs `d` to be a multiple of 4, so `tests/test_all_problems.py`
   checks free-dimension functions at d = 8 (it was 5).
 
+- Classics (2026-10-17): ten functions in
+  `functions/classics_alpine_to_himmelblau.py` and
+  `functions/classics_qing_to_whitley.py`, with `suite = "classic"`. The
+  class variable `suite` (default `"sfu"` on `Problem`) tells the collections
+  apart, and `names(group, suite)` filters by both; `group` stays the shape
+  group, so each classic takes the SFU group that fits it: many local minima
+  (Alpine N. 2, Bird, Salomon, Whitley), bowl (Schwefel 2.21 and 2.22,
+  convex), valley (Happy Cat, a groove around |x|^2 = d), other (Deceptive,
+  Himmelblau, Qing).
+- Alpine N. 1 was swapped for Alpine N. 2 (the user, 2026-10-17). Alpine
+  N. 1's terms |x_i (sin x_i + 0.1)| vanish at 0 and at the seven roots of
+  sin x = -0.1 in [-10, 10], so it has 8^d minimisers, about 1.07 billion at
+  d = 10, and criterion 4 (every minimiser listed) cannot hold. Alpine N. 2
+  is written as a minimisation, -prod sqrt(x_i) sin(x_i) on [0, 10]^d, with
+  one minimiser. Qing keeps all 2^d minimisers, built only when `minimum` is
+  read (80 kB at d = 10, 168 MB at d = 20).
+- Deceptive: Gavana's page formula leaves out the `+ 1` and `+ 4/5` of the
+  last two pieces of g, so g would jump at alpha_i and at (1 + 4 alpha_i)/5;
+  SciPy's benchmark code (BSD, "based on his code") has them and says the
+  page is wrong, and so does optbench. alpha_i defaults to i / (d + 1), as
+  in that code; beta = 2. Outside [0, 1] the end pieces continue as lines.
+- Happy Cat's formula is Beyer and Finck's (PPSN 2012) as the soobench R
+  package states it, alpha = 1/8; its domain [-100, 100]^d is the CEC 2014
+  one (the paper sets none). Himmelblau's domain is Wikipedia's [-5, 5]^2
+  (Gavana uses [-6, 6] and gives a wrong minimiser, [0, 0], where f = 170).
+- Bird's minimum, -106.7645367492647 (Newton on the exact gradient), is
+  3e-8 below Gavana's published -106.7645367198034.
+
 - The random-search baseline (2026-10-17) is `optbench.random_search`, in the
   package rather than in a script, because the `ailigment` adapters will
   import it as the result to beat. It is not an optimiser library: one
@@ -386,4 +414,6 @@ optbench, and what was decided:
 | Batch speed, steep group (100,000 points, d = 10 where free, CPU time, min of 5, load average 3 to 9, 2026-10-16) | ms per call | De Jong N. 5 53.5; Easom 2.0; Michalewicz 25.2 | all under the 100 ms budget; De Jong pays for a float power over 25 drops |
 | Batch speed, "other" group (100,000 points, d = 10 where free, Powell d = 8, CPU time, min of 5, load average 3 to 7, 2026-10-17) | ms per call | Beale 1.7; Branin 1.0; Colville 0.7; Forrester 0.9; Goldstein-Price 0.7; Hartmann 3-D 8.5, 4-D 10.7, 6-D 9.9; Perm d, beta 42.3; Powell 6.3; Shekel 6.8; Styblinski-Tang 13.1 | all under the 100 ms budget; every one of the 49 functions now meets spec criterion 2 |
 | Batch speed, all 49 by `scripts.timing` (100,000 points, d = 10 where free, Powell d = 8, CPU time, min of 5, load average 6 to 13, 2026-10-17) | ms per call | fastest Matyas 0.2; median 2.7 (Zakharov); slowest Michalewicz 26.1, Perm d, beta 42.5, Perm 0 43.0, De Jong N. 5 54.5 | 0 of 49 over the 100 ms budget; the per-group rows above agree within 1 ms |
+| Batch speed, the ten classics by `scripts.timing` (100,000 points, d = 10 where free, CPU time, min of 5, load average about 7, 2026-10-17) | ms per call | Himmelblau 0.3; Salomon 1.3; Schwefel 2.21 1.4; Qing 1.7; Schwefel 2.22 1.8; Happy Cat 2.1; Bird 4.7; Alpine N. 2 10.8; Deceptive 20.8; Whitley 128.4 | Whitley is over the 100 ms budget: it has d^2 = 100 terms per point, and the 10 million cosines alone take 70 to 90 ms; an in-place rewrite saved 3% (noise), so it was not kept |
+| Random-search baseline, the ten classics by `scripts.baseline` (as the row below) | median final value (minimum) | Alpine N. 2 -1563 (-30491); Bird -106.59 (-106.76); Deceptive -0.494 (-1); Happy Cat 250 (0); Himmelblau 0.026 (0); Qing 3.3e9 (0); Salomon 7.8 (0); Schwefel 2.21 37 (0); Schwefel 2.22 1.7e8 (0); Whitley 2.6e6 (0) | |
 | Random-search baseline, all 49 by `scripts.baseline` (10 seeds of 10,000 points, d = 10 where free, Powell d = 8, 2026-10-17) | median final value minus the minimum | 1-D: about 1e-6 (Forrester, Gramacy and Lee); 2-D: 1e-4 to 10 (Cross-in-Tray 3e-4, Branin 4e-3, Eggholder 16); d = 10: Sphere 13, Rastrigin 72, Rosenbrock 1.1e4, Perm 0 2e14, Perm d, beta 2e15 | the reference an optimiser must beat at the same budget; Michalewicz d = 10 reaches -4.8 of -9.66, Shekel -3.2 of -10.54 |
