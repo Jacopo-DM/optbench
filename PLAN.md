@@ -7,16 +7,16 @@ optimisation pages of the SFU Virtual Library of Simulation Experiments, for
 testing optimisation algorithms (CGP-based ones from `ailigment`, and any
 other). The approved spec and task list are in DESIGN.md.
 
-## Current state (2026-10-16)
+## Current state (2026-10-17)
 
 - Tier 1 (walking skeleton) done and on `main` (4133d55; `main` had no
   commits, so the branch `tier1-skeleton` simply became `main`).
 - Private GitHub repo `Jacopo-DM/optbench` created and `main` pushed
   (2026-10-16, the user's say-so).
-- Tier 2: the "many local minima", bowl, valley and plate groups are on
-  `main` and pushed (1253cc7); the steep group (3 more, 39 functions in all)
-  is done on branch `tier2-steep`: 401 tests, coverage 100%, ruff and
-  pyright clean.
+- Tier 2, the functions: all six SFU groups are done, 49 functions. Five
+  groups are on `main` and pushed (8fce5ee); the last, "other", is done on
+  branch `tier2-other`: 500 tests, coverage 100%, ruff and pyright clean,
+  and every function evaluates 100,000 points in under 55 ms.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
@@ -28,15 +28,14 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Merge `tier2-steep`, then the last group, "other".
+Merge `tier2-other`, then the rest of Tier 2: the random-search baseline
+and the timing script.
 
 ### Next steps in priority order
 
-0. todo, approved: Tier 2, the last SFU group, other: Beale, Colville,
-   Forrester et al. 2008, Goldstein-Price, Hartmann 3-D, 4-D and 6-D, Perm d
-   beta, Powell, Styblinski-Tang (Branin and Shekel are done).
-1. todo, approved: a random-search baseline and a timing script for spec
-   criterion 2 (100,000 points under 0.1 s).
+0. todo, approved: a random-search baseline and a timing script for spec
+   criterion 2 (100,000 points under 0.1 s). The timings so far were taken
+   by hand per group (DESIGN.md results).
 
 ## Open questions for the user
 
@@ -44,11 +43,6 @@ None.
 
 ## Known problems
 
-- Two SFU pages state no global minimum and are not done yet (Forrester et
-  al. 2008, Hartmann 4-D). Their minima must come
-  from the literature or a dense search, marked with source and accuracy
-  (spec criterion 5), as was done for Gramacy and Lee 2012, Langermann,
-  Schaffer N. 4, Power Sum and De Jong N. 5.
 - Power Sum's recommended b vector is given for d = 4 only (other b give
   other dimensions, with an unknown minimum). Langermann's constants are for
   d = 2; other dimensions work when the caller passes `a`

@@ -33,27 +33,47 @@ from .many_local_minima_holder_to_shubert import (
     SchafferN4,
     Shubert,
 )
-from .other import Branin, Shekel
+from .other_beale_to_goldstein_price import (
+    Beale,
+    Branin,
+    Colville,
+    Forrester2008,
+    GoldsteinPrice,
+)
+from .other_hartmann import Hartmann3, Hartmann4, Hartmann6
+from .other_perm_to_styblinski_tang import (
+    PermDBeta,
+    Powell,
+    Shekel,
+    StyblinskiTang,
+)
 from .plate import Booth, Matyas, McCormick, PowerSum, Zakharov
 from .steep import DeJong5, Easom, Michalewicz
 from .valley import DixonPrice, Rosenbrock, SixHumpCamel, ThreeHumpCamel
 
 __all__ = [
     "Ackley",
+    "Beale",
     "Bohachevsky1",
     "Bohachevsky2",
     "Bohachevsky3",
     "Booth",
     "Branin",
     "Bukin6",
+    "Colville",
     "CrossInTray",
     "DeJong5",
     "DixonPrice",
     "DropWave",
     "Easom",
     "Eggholder",
+    "Forrester2008",
+    "GoldsteinPrice",
     "GramacyLee2012",
     "Griewank",
+    "Hartmann3",
+    "Hartmann4",
+    "Hartmann6",
     "HolderTable",
     "Langermann",
     "Levy",
@@ -62,6 +82,8 @@ __all__ = [
     "McCormick",
     "Michalewicz",
     "Perm0",
+    "PermDBeta",
+    "Powell",
     "PowerSum",
     "Rastrigin",
     "Rosenbrock",
@@ -73,6 +95,7 @@ __all__ = [
     "Shubert",
     "SixHumpCamel",
     "Sphere",
+    "StyblinskiTang",
     "SumOfDifferentPowers",
     "SumSquares",
     "ThreeHumpCamel",

@@ -22,5 +22,5 @@ tracked(np.random.default_rng(0).uniform(-5.12, 5.12, size=(100, 10)))
 tracked.evaluations, tracked.best_value, tracked.curve
 ```
 
-`optbench.names()` lists the functions (39 so far, of the 49 planned).
-MIT license.
+`optbench.names()` lists the 49 functions, `optbench.names(group)` those of
+one SFU group. MIT license.

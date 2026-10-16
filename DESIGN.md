@@ -231,6 +231,27 @@ Task list (approved 2026-10-16 with the spec):
   weighted by their index, so the two coordinates differ slightly). Its
   drop centres `a` are a parameter, defaulting to the published 5 by 5 grid.
 
+- "Other" group (2026-10-17): split into three modules
+  (`other_beale_to_goldstein_price.py`, `other_hartmann.py`,
+  `other_perm_to_styblinski_tang.py`), and Branin and Shekel moved there
+  from `other.py`. Beale's minimum follows `c` when its three brackets can
+  vanish together (the first two fix `x2 = c_2 / c_1 - 1`,
+  `x1 = c_1 / (1 - x2)`, and the third must then hold). Colville's is 0 at
+  (1, 1, 1, 1) while `c >= |e| / 2`. Goldstein-Price's polynomial
+  coefficients are two parameter tuples (`p`, `q`, one entry per term of
+  `(1, x1, x1^2, x2, x1 x2, x2^2)`) plus the two offsets, rather than twelve
+  separate fields. The Hartmann functions share a base `_Hartmann`; 4-D uses
+  the first four columns of the 6-D constants, rescaled as Picheny et al.
+  give it. Their minima and Forrester's came from a search (200,000 random
+  points, Newton from the 25 best distinct ones); Hartmann 3-D and 6-D match
+  the published -3.86278 and -3.32237, and Hartmann 4-D (none published) is
+  -3.13449. Perm d, beta takes `beta = 0.5` from the default stated in the
+  SFU page's code header. Styblinski-Tang is separable and its minimum is
+  exact for any constants and domain (the roots of a cubic per coordinate):
+  -39.1661657 per dimension, so the SFU page's -39.16599 is 1.7e-4 too high.
+  Powell needs `d` to be a multiple of 4, so `tests/test_all_problems.py`
+  checks free-dimension functions at d = 8 (it was 5).
+
 ## Rejected approaches
 
 - Porting the GPL-2.0 R code: see Decisions.
@@ -253,3 +274,4 @@ Task list (approved 2026-10-16 with the spec):
 | Batch speed, valley-shaped group (100,000 points, d = 10 where free, CPU time, min of 5, load average 4 to 9, 2026-10-16) | ms per call | Dixon-Price 2.9; Rosenbrock 2.9; Six-Hump Camel 1.5; Three-Hump Camel 0.3 | all under the 100 ms budget |
 | Batch speed, plate-shaped group (100,000 points, d = 10 where free, CPU time, min of 5, load average 11 to 20, 2026-10-16) | ms per call | Booth 0.3; Matyas 0.2; McCormick 1.0; Power Sum (d = 4) 8.9; Zakharov 2.8 | all under the 100 ms budget |
 | Batch speed, steep group (100,000 points, d = 10 where free, CPU time, min of 5, load average 3 to 9, 2026-10-16) | ms per call | De Jong N. 5 53.5; Easom 2.0; Michalewicz 25.2 | all under the 100 ms budget; De Jong pays for a float power over 25 drops |
+| Batch speed, "other" group (100,000 points, d = 10 where free, Powell d = 8, CPU time, min of 5, load average 3 to 7, 2026-10-17) | ms per call | Beale 1.7; Branin 1.0; Colville 0.7; Forrester 0.9; Goldstein-Price 0.7; Hartmann 3-D 8.5, 4-D 10.7, 6-D 9.9; Perm d, beta 42.3; Powell 6.3; Shekel 6.8; Styblinski-Tang 13.1 | all under the 100 ms budget; every one of the 49 functions now meets spec criterion 2 |

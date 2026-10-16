@@ -204,3 +204,63 @@ DE_JONG_5 = KnownMinimum(
     _SEARCH + " (the SFU page states no minimum)",
     1e-12,
 )
+
+# The SFU page states no minimum. Grid step 1e-6 over [0, 1].
+FORRESTER_2008 = KnownMinimum(
+    -6.020740055767083,
+    ((0.757248757699377,),),
+    _SEARCH + " (the SFU page states no minimum)",
+    1e-12,
+)
+
+# SFU: 3 at (0, -1). Exact there: x1 + x2 + 1 = 0 makes the first factor 1,
+# and 2 x1 - 3 x2 = 3 makes the second 30 + 9 (18 - 48 + 27) = 3. A grid
+# with step 0.001 over the whole domain finds nothing lower.
+GOLDSTEIN_PRICE = KnownMinimum(
+    3.0,
+    ((0.0, -1.0),),
+    "published (SFU: 3 at (0, -1)), checked by a grid over the domain",
+    1e-12,
+)
+
+# SFU: -3.86278 at (0.114614, 0.555649, 0.852547). Best of 200,000 random
+# points, Newton steps from the 25 best distinct ones.
+HARTMANN_3 = KnownMinimum(
+    -3.862779787332663,
+    ((0.11458887666777617, 0.5556488946139297, 0.8525469846234259),),
+    "random search and Newton refinement (SFU: -3.86278)",
+    1e-12,
+)
+
+# The SFU page states no minimum. Same search as Hartmann 3-D.
+HARTMANN_4 = KnownMinimum(
+    -3.1344941412224,
+    (
+        (
+            0.1873952729895325,
+            0.19415152929501436,
+            0.5579177800547765,
+            0.26477962415486545,
+        ),
+    ),
+    "random search and Newton refinement (the SFU page states no minimum)",
+    1e-12,
+)
+
+# SFU: -3.32237 at (0.20169, 0.150011, 0.476874, 0.275332, 0.311652,
+# 0.6573). Same search as Hartmann 3-D.
+HARTMANN_6 = KnownMinimum(
+    -3.322368011415515,
+    (
+        (
+            0.2016895110259998,
+            0.15001069182070456,
+            0.4768739741457662,
+            0.2753324304886124,
+            0.3116516166096781,
+            0.6573005340675282,
+        ),
+    ),
+    "random search and Newton refinement (SFU: -3.32237)",
+    1e-12,
+)
