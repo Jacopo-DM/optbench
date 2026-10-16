@@ -4,7 +4,7 @@ Run with ``uv run python -m scripts.timing``. Each problem evaluates 100,000
 uniform random points in its domain (free dimensions at 10, Powell at 8);
 the time is CPU seconds, the minimum of 5 repeats. Prints a table, writes
 ``__data__/timing.csv`` and exits with status 1 if any problem is over the
-0.1 s budget.
+0.1 s budget, except the stated exceptions in ``EXCEPTIONS``.
 """
 
 from __future__ import annotations
@@ -28,6 +28,10 @@ if TYPE_CHECKING:
 POINTS = 100_000
 REPEATS = 5
 BUDGET = 0.1
+
+# Problems allowed over the budget (the user, 2026-10-17): Whitley has d^2
+# terms per point, and their cosines alone take most of the budget at d = 10.
+EXCEPTIONS = frozenset({"whitley"})
 
 
 def time_problem(problem: Problem, points: int, repeats: int) -> float:
@@ -75,7 +79,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     ]
     rows.sort(key=operator.itemgetter(2))
     for name, d, seconds in rows:
-        flag = "  OVER BUDGET" if seconds > BUDGET else ""
+        flag = ""
+        if seconds > BUDGET:
+            excused = name in EXCEPTIONS
+            flag = "  over budget, stated exception" if excused else "  OVER"
         print(f"{name:26} d={d:<3} {1000 * seconds:7.1f} ms{flag}")  # ruff: ignore[print]
 
     # Save them for plotting.
@@ -85,7 +92,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         writer = csv.writer(handle)
         writer.writerow(["name", "d", "seconds"])
         writer.writerows(rows)
-    over = sum(seconds > BUDGET for _, _, seconds in rows)
+    over = sum(
+        seconds > BUDGET and name not in EXCEPTIONS for name, _, seconds in rows
+    )
     print(f"{over} of {len(rows)} over {1000 * BUDGET:.0f} ms; saved {out}")  # ruff: ignore[print]
     return 1 if over else 0
 

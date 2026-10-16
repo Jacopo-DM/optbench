@@ -52,6 +52,16 @@ def test_timing_fails_when_over_budget(
     assert (data / "timing.csv").exists()
 
 
+def test_timing_excuses_the_stated_exceptions(
+    data: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(timing, "BUDGET", -1.0)
+    monkeypatch.setattr(timing, "EXCEPTIONS", frozenset(optbench.names()))
+    assert timing.main(["--points", "10", "--repeats", "1"]) == 0
+    assert (data / "timing.csv").exists()
+
+
 def test_baseline_writes_one_curve_per_seed(data: Path) -> None:
     baseline.main(["--budget", "50", "--seeds", "2"])
     curves = sorted((data / "baseline").glob("*.csv"))

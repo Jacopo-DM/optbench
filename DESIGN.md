@@ -357,6 +357,13 @@ fits it. One commit; the minima are checked numerically as for SFU.
   package states it, alpha = 1/8; its domain [-100, 100]^d is the CEC 2014
   one (the paper sets none). Himmelblau's domain is Wikipedia's [-5, 5]^2
   (Gavana uses [-6, 6] and gives a wrong minimiser, [0, 0], where f = 170).
+- Whitley is a stated exception to spec criterion 2 (the user, 2026-10-17):
+  it has d^2 terms per point, so at d = 10 a batch of 100,000 points needs
+  10 million cosines, which alone take 70 to 90 ms; it measures about 125
+  ms. `scripts/timing.py` lists it in `EXCEPTIONS`, marks it "over budget,
+  stated exception" and still exits 0. Changing the budget to scale with
+  the terms per point, or leaving the script failing, were the rejected
+  options.
 - Bird's minimum, -106.7645367492647 (Newton on the exact gradient), is
   3e-8 below Gavana's published -106.7645367198034.
 

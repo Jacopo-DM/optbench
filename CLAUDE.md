@@ -17,7 +17,7 @@ All commands run from the repo root with uv (Python 3.13).
 | Type check (strict) | `uv run pyright` |
 | Tests (about 1 s) | `uv run pytest` |
 | Test coverage (`if __name__` guards are excluded in `pyproject.toml`) | `uv run pytest --cov=src/optbench --cov=scripts --cov-report=term-missing:skip-covered` |
-| Time every function on 100,000 points, spec criterion 2 (about 5 s; table, `__data__/timing.csv`, exit status 1 if any is over 0.1 s) | `uv run python -m scripts.timing [--points N] [--repeats K]` |
+| Time every function on 100,000 points, spec criterion 2 (about 5 s; table, `__data__/timing.csv`, exit status 1 if any is over 0.1 s, except the stated exceptions in `scripts/timing.py`) | `uv run python -m scripts.timing [--points N] [--repeats K]` |
 | Run the random-search baseline on every function, 10 seeds of 10,000 points (about 1 s; table, curves in `__data__/baseline/`) | `uv run python -m scripts.baseline [--budget N] [--seeds K]` |
 
 Always pass the paths to ruff: a bare `uv run ruff check` also auto-fixes

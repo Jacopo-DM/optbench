@@ -79,16 +79,17 @@ constants), `references.py`
 those; `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `scripts` (200 lines, 4 files)
+## `scripts` (209 lines, 4 files)
 
 Command-line tools, run as `python -m scripts.<name>`; not part of the
 package. `common.py` (`D = 10`, `DATA = __data__`, `every_problem(d)`: every
 registered problem with free dimensions at `d`, Powell at the largest
 multiple of 4 up to it), `timing.py` (`time_problem(problem, points,
-repeats)`, `main` returning the exit status), `baseline.py` (`main`).
+repeats)`, `BUDGET`, `EXCEPTIONS` (problems allowed over it), `main`
+returning the exit status), `baseline.py` (`main`).
 Depends on: `optbench`, numpy.
 
-## `tests` (1280 lines, 12 files)
+## `tests` (1290 lines, 12 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,

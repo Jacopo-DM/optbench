@@ -24,7 +24,7 @@ other). The approved spec and task list are in DESIGN.md.
   (2026-10-17); the branch `tier2-baseline` was deleted.
 - `classics` done (2026-10-17, branch `classics`): ten functions, 605
   tests, coverage 100%, ruff and pyright clean. Whitley is over the speed
-  budget (Known problems, open question 1).
+  budget at d = 10, a stated exception (the user, 2026-10-17; DESIGN.md).
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
@@ -36,8 +36,7 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-`bbob` Tier 1, after the open question on Whitley's budget. The full order
-is below.
+`bbob` Tier 1. The full order is below.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -54,15 +53,10 @@ COCO's Python package as a dev-only dependency are approved too.
 
 ## Open questions for the user
 
-1. Whitley (d = 10) takes about 125 ms per 100,000 points, over the 0.1 s
-   budget of spec criterion 2, because its d^2 cosines alone take 70 to 90
-   ms. Accept it as a stated exception (the timing script would then allow
-   it), or leave it failing.
+None.
 
 ## Known problems
 
-- `python -m scripts.timing` exits with status 1: Whitley at d = 10 is over
-  the 100 ms budget (open question 1).
 
 - Power Sum's recommended b vector is given for d = 4 only (other b give
   other dimensions, with an unknown minimum). Langermann's constants are for
