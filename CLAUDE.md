@@ -12,11 +12,13 @@ All commands run from the repo root with uv (Python 3.13).
 | Purpose | Command |
 |---------|---------|
 | Install or rebuild the environment (numpy; dev group: pytest, pytest-cov, pyright, ruff) | `uv sync` |
-| Lint (auto-fixes) | `uv run ruff check src tests` |
-| Format | `uv run ruff format src tests` |
+| Lint (auto-fixes) | `uv run ruff check src tests scripts` |
+| Format | `uv run ruff format src tests scripts` |
 | Type check (strict) | `uv run pyright` |
 | Tests (about 1 s) | `uv run pytest` |
-| Test coverage | `uv run pytest --cov=src/optbench --cov-report=term-missing:skip-covered` |
+| Test coverage (`if __name__` guards are excluded in `pyproject.toml`) | `uv run pytest --cov=src/optbench --cov=scripts --cov-report=term-missing:skip-covered` |
+| Time every function on 100,000 points, spec criterion 2 (about 5 s; table, `__data__/timing.csv`, exit status 1 if any is over 0.1 s) | `uv run python -m scripts.timing [--points N] [--repeats K]` |
+| Run the random-search baseline on every function, 10 seeds of 10,000 points (about 1 s; table, curves in `__data__/baseline/`) | `uv run python -m scripts.baseline [--budget N] [--seeds K]` |
 
 Always pass the paths to ruff: a bare `uv run ruff check` also auto-fixes
 `ruff.toml` itself, because `fix` and `unsafe-fixes` are on.
@@ -70,7 +72,7 @@ Before every commit run lint, type check and the tests above.
   outright: no shims or old and new versions side by side.
 - Indentation in Python files, docstrings and comments included, is always a
   multiple of 4 spaces. Check with
-  `grep -rnE '^( {4})* {1,3}[^ ]' --include='*.py' src tests`.
+  `grep -rnE '^( {4})* {1,3}[^ ]' --include='*.py' src tests scripts`.
 - Put one blank line before every comment that introduces a block of code.
 - Docstrings follow the numpy convention (see ruff.toml); line length is 80.
 - Typed Python, pyright strict, numpy for data, one seeded
@@ -83,6 +85,7 @@ Before every commit run lint, type check and the tests above.
 | `.venv/` | generated | `uv sync` / `uv run` |
 | `uv.lock` | generated | `uv add`, `uv lock`; never edit by hand |
 | `.pytest_cache/`, `.ruff_cache/`, `__pycache__/`, `.coverage` | generated | pytest, ruff, the interpreter, pytest-cov |
+| `__data__/` | generated, git-ignored (`timing.csv`, `baseline/` curves, `plots/`) | `scripts.timing`, `scripts.baseline` |
 | `src/optbench/py.typed` | hand-written, empty marker | n/a |
 
 ## Things that bite
@@ -95,3 +98,8 @@ Before every commit run lint, type check and the tests above.
 - Ruff's auto-fix (ISC004) wraps implicitly joined strings in a tuple in
   parentheses, which pushes lines past 80 characters; rewrap the strings by
   hand afterwards.
+- `ruff format` can wrap a long `print(...)  # ruff: ignore[print]` so the
+  comment no longer sits on the `print` line; the next `ruff check` then
+  deletes the whole call (T201 is an unsafe fix). It removed the baseline
+  table's header on 2026-10-17. Keep such lines under 80 characters, and read
+  the diff after ruff.

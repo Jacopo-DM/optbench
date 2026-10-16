@@ -258,6 +258,13 @@ Task list (approved 2026-10-16 with the spec):
   function, uniform points through `Tracked`, so `Tracked` stays the only
   state. Points come in batches of 1,000 (one `Tracked` curve row each) and
   the last batch is cut so the budget is exact.
+- The timing and baseline runners are scripts in `scripts/` (a package run
+  with `python -m`, checked by pyright and ruff, tested by
+  `tests/test_scripts.py` through `pythonpath = ["."]`), not part of
+  `optbench`: nobody imports them. They write to `__data__/` (git-ignored),
+  as in `ailigment`. The scripts draw no plots, because matplotlib would be a
+  new dependency; the charts so far were drawn with `ailigment`'s
+  environment from the CSVs.
 
 ## Rejected approaches
 
@@ -282,3 +289,5 @@ Task list (approved 2026-10-16 with the spec):
 | Batch speed, plate-shaped group (100,000 points, d = 10 where free, CPU time, min of 5, load average 11 to 20, 2026-10-16) | ms per call | Booth 0.3; Matyas 0.2; McCormick 1.0; Power Sum (d = 4) 8.9; Zakharov 2.8 | all under the 100 ms budget |
 | Batch speed, steep group (100,000 points, d = 10 where free, CPU time, min of 5, load average 3 to 9, 2026-10-16) | ms per call | De Jong N. 5 53.5; Easom 2.0; Michalewicz 25.2 | all under the 100 ms budget; De Jong pays for a float power over 25 drops |
 | Batch speed, "other" group (100,000 points, d = 10 where free, Powell d = 8, CPU time, min of 5, load average 3 to 7, 2026-10-17) | ms per call | Beale 1.7; Branin 1.0; Colville 0.7; Forrester 0.9; Goldstein-Price 0.7; Hartmann 3-D 8.5, 4-D 10.7, 6-D 9.9; Perm d, beta 42.3; Powell 6.3; Shekel 6.8; Styblinski-Tang 13.1 | all under the 100 ms budget; every one of the 49 functions now meets spec criterion 2 |
+| Batch speed, all 49 by `scripts.timing` (100,000 points, d = 10 where free, Powell d = 8, CPU time, min of 5, load average 6 to 13, 2026-10-17) | ms per call | fastest Matyas 0.2; median 2.7 (Zakharov); slowest Michalewicz 26.1, Perm d, beta 42.5, Perm 0 43.0, De Jong N. 5 54.5 | 0 of 49 over the 100 ms budget; the per-group rows above agree within 1 ms |
+| Random-search baseline, all 49 by `scripts.baseline` (10 seeds of 10,000 points, d = 10 where free, Powell d = 8, 2026-10-17) | median final value minus the minimum | 1-D: about 1e-6 (Forrester, Gramacy and Lee); 2-D: 1e-4 to 10 (Cross-in-Tray 3e-4, Branin 4e-3, Eggholder 16); d = 10: Sphere 13, Rastrigin 72, Rosenbrock 1.1e4, Perm 0 2e14, Perm d, beta 2e15 | the reference an optimiser must beat at the same budget; Michalewicz d = 10 reaches -4.8 of -9.66, Shekel -3.2 of -10.54 |

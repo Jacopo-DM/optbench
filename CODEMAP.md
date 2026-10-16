@@ -72,7 +72,16 @@ constants), `references.py`
 those; `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (1071 lines, 10 files)
+## `scripts` (200 lines, 4 files)
+
+Command-line tools, run as `python -m scripts.<name>`; not part of the
+package. `common.py` (`D = 10`, `DATA = __data__`, `every_problem(d)`: every
+registered problem with free dimensions at `d`, Powell at the largest
+multiple of 4 up to it), `timing.py` (`time_problem(problem, points,
+repeats)`, `main` returning the exit status), `baseline.py` (`main`).
+Depends on: `optbench`, numpy.
+
+## `tests` (1136 lines, 11 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
@@ -80,7 +89,8 @@ Branin, Shekel: published constants and minima, parameter and domain
 handling), `test_bowl.py`, `test_plate.py`, `test_steep.py` and
 `test_valley.py` and `test_other.py` (those groups), `test_many_local_minima.py` (the group's published values,
 constants, minima that follow parameters, refusals),
-`test_registry_and_tracking.py`, `test_baseline.py`. Depends on: `optbench`, numpy, pytest.
+`test_registry_and_tracking.py`, `test_baseline.py`, `test_scripts.py`
+(both scripts on small budgets in a temporary folder). Depends on: `optbench`, `scripts`, numpy, pytest.
 
 ## Size checks (400 lines per file)
 
