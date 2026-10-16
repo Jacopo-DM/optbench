@@ -1,5 +1,12 @@
 """The test functions: one module per SFU group, split before 400 lines."""
 
+from .bbob_separable import (
+    BbobBucheRastrigin,
+    BbobEllipsoid,
+    BbobLinearSlope,
+    BbobRastrigin,
+    BbobSphere,
+)
 from .bowl import (
     Bohachevsky1,
     Bohachevsky2,
@@ -68,6 +75,11 @@ from .valley import DixonPrice, Rosenbrock, SixHumpCamel, ThreeHumpCamel
 __all__ = [
     "Ackley",
     "AlpineN2",
+    "BbobBucheRastrigin",
+    "BbobEllipsoid",
+    "BbobLinearSlope",
+    "BbobRastrigin",
+    "BbobSphere",
     "Beale",
     "Bird",
     "Bohachevsky1",

@@ -3,6 +3,15 @@ revision = 5
 requires-python = ">=3.13"
 
 [[package]]
+name = "coco-experiment"
+version = "2.8.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a4/67/53fe6d644b34f6b84d644132d2961106b2acd4c14aa41f847f608c82892c/coco_experiment-2.8.2.tar.gz", hash = "sha256:df044be950027d20e30e4d7edf187ed991f96eeb4242e8d5c89ea2719f0a50f2", size = 3919117, upload-time = "2025-11-27T15:05:28.479Z" }
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -185,6 +194,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "coco-experiment" },
     { name = "pyright" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -196,6 +206,7 @@ requires-dist = [{ name = "numpy", specifier = ">=2.5.4" }]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "coco-experiment", specifier = ">=2.8.2" },
     { name = "pyright", specifier = ">=1.1.414" },
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "pytest-cov", specifier = ">=7.1.0" },

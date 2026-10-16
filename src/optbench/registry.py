@@ -23,8 +23,9 @@ def names(group: Group | None = None, suite: str | None = None) -> list[str]:
     group
         Only the problems of this shape group; all of them by default.
     suite
-        Only the problems of this collection: ``"sfu"`` (the SFU pages) or
-        ``"classic"`` (well-known functions not on them); all by default.
+        Only the problems of this collection: ``"sfu"`` (the SFU pages),
+        ``"classic"`` (well-known functions not on them) or ``"bbob"`` (the
+        COCO noiseless suite); all by default.
 
     Returns
     -------

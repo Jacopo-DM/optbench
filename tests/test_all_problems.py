@@ -81,7 +81,7 @@ def test_the_metadata_is_complete(problem: Problem) -> None:
     if problem.suite == "sfu":
         assert problem.url.startswith("https://www.sfu.ca/~ssurjano/")
     else:
-        assert problem.suite == "classic"
+        assert problem.suite in {"classic", "bbob"}
         assert problem.url.startswith("https://")
     assert problem.references
     assert problem.group in optbench.Group

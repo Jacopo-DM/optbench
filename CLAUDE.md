@@ -11,7 +11,7 @@ All commands run from the repo root with uv (Python 3.13).
 
 | Purpose | Command |
 |---------|---------|
-| Install or rebuild the environment (numpy; dev group: pytest, pytest-cov, pyright, ruff) | `uv sync` |
+| Install or rebuild the environment (numpy; dev group: pytest, pytest-cov, pyright, ruff, coco-experiment, which has no Python 3.13 wheel and is compiled from its source archive with Xcode's compiler) | `uv sync` |
 | Lint (auto-fixes) | `uv run ruff check src tests scripts` |
 | Format | `uv run ruff format src tests scripts` |
 | Type check (strict) | `uv run pyright` |
@@ -38,6 +38,13 @@ Before every commit run lint, type check and the tests above.
 - Every function is written from its published formula, never from the
   SFU site's MATLAB or R code (GPL-2.0). Read the formula image on the
   function's SFU page (`<page>2.png` and so on) and the cited paper.
+- BBOB functions are written from RR-6829's formulas, and their instances
+  (the random generator, `x_opt`, `f_opt`, rotations) from COCO's BSD code;
+  where COCO's code and the report differ, follow the code, say so in the
+  class docstring, and add the function to the `cocoex` comparison in
+  `tests/test_bbob.py` (every function, d = 2 to 40, instances 1, 2, 7, 15,
+  100, to 1e-12). `cocoex` is a test reference only; never import it in
+  `src`.
 - Adding a function (spec criteria 1 to 7): a frozen, keyword-only dataclass
   subclass of `Problem` (or of `AnyDimension` when any `d` works, which
   supplies the `d` field) in the module of its SFU group under

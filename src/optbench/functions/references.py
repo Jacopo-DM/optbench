@@ -21,6 +21,11 @@ GAVANA = (
     "Gavana, A. Global Optimization Test Functions Index, "
     "http://infinity77.net/global_optimization/test_functions.html."
 )
+HANSEN_BBOB = (
+    "Hansen, N., Finck, S., Ros, R., & Auger, A. (2009). Real-Parameter "
+    "Black-Box Optimization Benchmarking 2009: Noiseless Functions "
+    "Definitions. INRIA Research Report RR-6829 (revised 2019)."
+)
 HEDAR = "Hedar, A. Global Optimization Test Problems (retrieved June 2013)."
 JAMIL_YANG = (
     "Jamil, M., & Yang, X.-S. (2013). A literature survey of benchmark "

@@ -364,6 +364,34 @@ fits it. One commit; the minima are checked numerically as for SFU.
   stated exception" and still exits 0. Changing the budget to scale with
   the terms per point, or leaving the script failing, were the rejected
   options.
+- BBOB Tier 1 (2026-10-17): f1 to f5 in `functions/bbob_separable.py`,
+  the generator and transforms in `functions/bbob_transforms.py`. Each
+  problem takes `d` (at least 2: the formulas divide by d - 1) and
+  `instance`; `x_opt` and `f_opt` are derived from them, cached per (seed,
+  d), and are not fields. Instance k uses COCO's seed function + 10000 k,
+  so every instance number gives COCO's instance, the workshop's 1 to 15
+  and beyond. COCO's generator is ported line for line (a Park-Miller
+  sequence through a 32-entry shuffle table, 40 warm-up steps, Box-Muller
+  for normals), in a Python loop: at most 2 d^2 numbers per instance, made
+  once.
+- Where COCO's code and RR-6829 differ, optbench follows the code, so
+  values match published COCO data: f4's `x_opt` takes the absolute value
+  in every even coordinate (0-based) and comes from f3's seed (so f3 and f4
+  share `f_opt` and the odd coordinates of `x_opt`); f_opt of f4 and f18 use
+  the seeds of f3 and f17. f5's `x_opt` is the corner 5 sign(u) of COCO's
+  random point u, and z_i stays at x_opt_i once x_i x_opt_i >= 25.
+- COCO's constants are fields: f2 `conditioning` 1e6; f3 `conditioning` 10,
+  `beta` 0.2, `a` 10; f4 `conditioning` 10, `skew` 10, `a` 10, `penalty`
+  100; f5 `conditioning` 100 (slopes 1 to 10). The 0.049, 10, 7.9, 5.5 and
+  3.1 inside T_osz are fixed, being part of the transform's definition, as
+  is f5's boundary at 5^2.
+- `coco-experiment` 2.8.2 (BSD-3-Clause) is a dev dependency, used only by
+  `tests/test_bbob.py` (the user approved it and the 3.9 MB source
+  download, 2026-10-17). PyPI has no Python 3.13 wheel for it, so `uv sync`
+  compiles it. Its suite object serves only the instances it is built with,
+  so the test builds it with `instances: 1,2,7,15,100` (the default
+  `instance_indices` are indices into the current year's list, not
+  instance numbers).
 - Bird's minimum, -106.7645367492647 (Newton on the exact gradient), is
   3e-8 below Gavana's published -106.7645367198034.
 
@@ -422,5 +450,8 @@ optbench, and what was decided:
 | Batch speed, "other" group (100,000 points, d = 10 where free, Powell d = 8, CPU time, min of 5, load average 3 to 7, 2026-10-17) | ms per call | Beale 1.7; Branin 1.0; Colville 0.7; Forrester 0.9; Goldstein-Price 0.7; Hartmann 3-D 8.5, 4-D 10.7, 6-D 9.9; Perm d, beta 42.3; Powell 6.3; Shekel 6.8; Styblinski-Tang 13.1 | all under the 100 ms budget; every one of the 49 functions now meets spec criterion 2 |
 | Batch speed, all 49 by `scripts.timing` (100,000 points, d = 10 where free, Powell d = 8, CPU time, min of 5, load average 6 to 13, 2026-10-17) | ms per call | fastest Matyas 0.2; median 2.7 (Zakharov); slowest Michalewicz 26.1, Perm d, beta 42.5, Perm 0 43.0, De Jong N. 5 54.5 | 0 of 49 over the 100 ms budget; the per-group rows above agree within 1 ms |
 | Batch speed, the ten classics by `scripts.timing` (100,000 points, d = 10 where free, CPU time, min of 5, load average about 7, 2026-10-17) | ms per call | Himmelblau 0.3; Salomon 1.3; Schwefel 2.21 1.4; Qing 1.7; Schwefel 2.22 1.8; Happy Cat 2.1; Bird 4.7; Alpine N. 2 10.8; Deceptive 20.8; Whitley 128.4 | Whitley is over the 100 ms budget: it has d^2 = 100 terms per point, and the 10 million cosines alone take 70 to 90 ms; an in-place rewrite saved 3% (noise), so it was not kept |
+| BBOB f1 to f5 against `cocoex` 2.8.2 (2026-10-17) | max relative difference | at most 1e-12 at 26 points each (20 in the domain, 5 outside, `x_opt`) for d = 2, 3, 5, 10, 20, 40 and instances 1, 2, 7, 15, 100 | 150 combinations, all pass |
+| Batch speed, BBOB f1 to f5 by `scripts.timing` (100,000 points, d = 10, CPU time, min of 5, load average about 7, 2026-10-17) | ms per call | f1 0.9; f5 4.0; f2 34.4; f4 45.3; f3 51.4 | all under the 100 ms budget; T_osz (a log, an exp and two sines per coordinate) is most of f2 to f4 |
+| Random-search baseline, BBOB f1 to f5 by `scripts.baseline` (instance 1, d = 10, 10 seeds of 10,000 points) | median final value (f_opt) | f1 92.29 (79.48); f2 62435 (-209.88); f3 -339.4 (-462.09); f4 -290.2 (-462.09); f5 47.19 (-9.21) | |
 | Random-search baseline, the ten classics by `scripts.baseline` (as the row below) | median final value (minimum) | Alpine N. 2 -1563 (-30491); Bird -106.59 (-106.76); Deceptive -0.494 (-1); Happy Cat 250 (0); Himmelblau 0.026 (0); Qing 3.3e9 (0); Salomon 7.8 (0); Schwefel 2.21 37 (0); Schwefel 2.22 1.7e8 (0); Whitley 2.6e6 (0) | |
 | Random-search baseline, all 49 by `scripts.baseline` (10 seeds of 10,000 points, d = 10 where free, Powell d = 8, 2026-10-17) | median final value minus the minimum | 1-D: about 1e-6 (Forrester, Gramacy and Lee); 2-D: 1e-4 to 10 (Cross-in-Tray 3e-4, Branin 4e-3, Eggholder 16); d = 10: Sphere 13, Rastrigin 72, Rosenbrock 1.1e4, Perm 0 2e14, Perm d, beta 2e15 | the reference an optimiser must beat at the same budget; Michalewicz d = 10 reaches -4.8 of -9.66, Shekel -3.2 of -10.54 |

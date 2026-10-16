@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class Group(StrEnum):
-    """The six groups of the SFU optimisation page."""
+    """Shape groups: the six of the SFU page, then the five of BBOB."""
 
     MANY_LOCAL_MINIMA = "many_local_minima"
     BOWL = "bowl"
@@ -22,6 +22,11 @@ class Group(StrEnum):
     VALLEY = "valley"
     STEEP = "steep"
     OTHER = "other"
+    BBOB_SEPARABLE = "bbob_separable"
+    BBOB_MODERATE_CONDITIONING = "bbob_moderate_conditioning"
+    BBOB_HIGH_CONDITIONING = "bbob_high_conditioning"
+    BBOB_MULTIMODAL_ADEQUATE = "bbob_multimodal_adequate"
+    BBOB_MULTIMODAL_WEAK = "bbob_multimodal_weak"
 
 
 @dataclass(frozen=True, eq=False)

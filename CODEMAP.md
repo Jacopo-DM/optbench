@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (4085 lines, 20 files)
+## `src/optbench` (4569 lines, 22 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -22,8 +22,10 @@ Public interface (`optbench/__init__.py`):
   defined for any number of variables.
 - `Minimum`: `value`, `points` (`(k, d)`), `source`, `tolerance`.
 - `Group`: the six SFU groups (`many_local_minima`, `bowl`, `plate`,
-  `valley`, `steep`, `other`).
-- Functions (49 SFU and 10 classic), by group:
+  `valley`, `steep`, `other`) and the five BBOB ones (`bbob_separable`,
+  `bbob_moderate_conditioning`, `bbob_high_conditioning`,
+  `bbob_multimodal_adequate`, `bbob_multimodal_weak`).
+- Functions (49 SFU, 10 classic, 5 BBOB so far), by group:
   - many local minima: `Ackley(d, a, b, c)`, `Griewank(d, divisor)`,
     `Langermann(m, c, a)`, `Levy(d, shift, scale, weight)`,
     `Rastrigin(d, a)`, `Schwefel(d, offset)`, `Bukin6(scale, curvature,
@@ -51,6 +53,12 @@ Public interface (`optbench/__init__.py`):
     `Deceptive(d, alpha, beta)`, `HappyCat(d, alpha)`, `Himmelblau(a, b)`,
     `Qing(d)`, `Salomon(d, frequency, a)`, `Schwefel221(d)`,
     `Schwefel222(d)`, `Whitley(d, a, divisor)`.
+  - BBOB separable (`suite = "bbob"`, d >= 2, each with `instance` and the
+    properties `x_opt`, `f_opt`, `seed` and class variable `function`):
+    `BbobSphere(d, instance)`, `BbobEllipsoid(d, instance, conditioning)`,
+    `BbobRastrigin(d, instance, conditioning, beta, a)`,
+    `BbobBucheRastrigin(d, instance, conditioning, skew, a, penalty)`,
+    `BbobLinearSlope(d, instance, conditioning)`.
 - `names(group=None, suite=None)`, `make(name, **params)`: the registry.
 - `Tracked(problem)`: counts evaluations, keeps `best_value` and
   `best_point`, and `curve` (rows of evaluations, best so far).
@@ -69,14 +77,18 @@ domain);
 `many_local_minima_bukin_to_gramacy.py`,
 `many_local_minima_holder_to_shubert.py`,
 `classics_alpine_to_himmelblau.py`, `classics_qing_to_whitley.py`,
-`known_minima.py`
+`bbob_transforms.py` (COCO's legacy generator `uniform`, `gauss`, the
+cached `x_opt(seed, d)` and `f_opt(function, instance)`, and the
+transforms `oscillate` (T_osz), `asymmetric` (T_asy), `scaling` (the
+diagonal of Lambda^alpha), `penalty` (f_pen)), `bbob_separable.py` (the
+base `_Bbob` and f1 to f5), `known_minima.py`
 (`KnownMinimum`, `at_defaults` and the minima known only for the published
 constants), `references.py`
 (shared citations), `__init__.py` (the list the registry reads);
 `registry.py`; `tracking.py`; `baseline.py` (`random_search`);
 `__init__.py`. Order: `problem` is the leaf;
 `references` and `known_minima` use only `problem`; the group modules use
-those; `registry` reads `functions.__all__`; `tracking` uses only the
+those (the BBOB modules use `bbob_transforms`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
 ## `scripts` (209 lines, 4 files)
@@ -89,16 +101,17 @@ repeats)`, `BUDGET`, `EXCEPTIONS` (problems allowed over it), `main`
 returning the exit status), `baseline.py` (`main`).
 Depends on: `optbench`, numpy.
 
-## `tests` (1290 lines, 12 files)
+## `tests` (1405 lines, 13 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
 Branin, Shekel: published constants and minima, parameter and domain
 handling), `test_bowl.py`, `test_plate.py`, `test_steep.py` and
-`test_valley.py` and `test_other.py` (those groups), `test_classics.py`, `test_many_local_minima.py` (the group's published values,
+`test_valley.py` and `test_other.py` (those groups), `test_classics.py`,
+`test_bbob.py` (every BBOB function against `cocoex`), `test_many_local_minima.py` (the group's published values,
 constants, minima that follow parameters, refusals),
 `test_registry_and_tracking.py`, `test_baseline.py`, `test_scripts.py`
-(both scripts on small budgets in a temporary folder). Depends on: `optbench`, `scripts`, numpy, pytest.
+(both scripts on small budgets in a temporary folder). Depends on: `optbench`, `scripts`, numpy, pytest, `cocoex` (dev only).
 
 ## Size checks (400 lines per file)
 
