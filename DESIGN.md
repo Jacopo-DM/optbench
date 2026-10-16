@@ -1,0 +1,158 @@
+# DESIGN.md
+
+Reasoning and reference that stays true after a task is done: the approved
+spec, decisions with their reasons, rejected approaches, and results.
+
+## Approved spec (the user, 2026-10-16)
+
+The user's request, made in the `ailigment` repo on 2026-10-16: "a separate
+benchmarking library which lets me test optimisation algorithms like the
+CGP", based on the optimisation pages of the Virtual Library of Simulation
+Experiments (https://www.sfu.ca/~ssurjano/, Surjanovic and Bingham, Simon
+Fraser University), "totally distinct from the library we are working on,
+but we should use this benchmark lib for CGP". The user approved the spec and
+task list below on 2026-10-16 and chose the MIT license. The user's own words
+on parameters: every constant in a formula must be editable, "for example
+y = 2*x*x where x is the input to the function, 2 should be a parameter".
+
+Users and use case: the user, testing optimisation algorithms (CGP-based ones
+from `ailigment`, and any other) on standard test functions with known
+answers, and changing the functions' constants to make variants.
+
+Acceptance criteria, each testable:
+1. All 49 functions of the SFU optimisation pages exist, each written from
+   its published formula (not the site's GPL code), each citing the SFU page
+   and its primary reference in its docstring.
+2. One call evaluates a batch: `problem(x)` takes an `(n, d)` float array and
+   returns an `(n,)` float64 array, with no Python loop over points. Budget:
+   100,000 points (d = 10 where d is free) in under 0.1 s on this machine
+   (CPU time, min of 5), checked by a timing script, not a test.
+3. Every constant in a formula is a keyword argument with the published
+   value as default, and the defaults are tested against the published
+   values. Example: `Ackley(d=10, a=20.0, b=0.2, c=2*pi)`; Shekel's `beta`
+   vector and `C` matrix and Langermann's `m`, `c` and `A` are arrays.
+   Arguments are checked on construction (shapes that do not fit `d` raise
+   `ValueError`).
+4. Each problem knows its domain (`bounds`, an `(d, 2)` array; the usual
+   domain by default, overridable) and its global minimum: the value and
+   every known minimiser (Branin has three, Holder Table four, Shubert 18).
+   Where the minimum depends on the parameters, it is given as a formula of
+   them when one is known; otherwise it is known only at the defaults, and
+   `minimum` is `None` for other values.
+5. Seven pages state no global minimum (Gramacy and Lee 2012, Langermann,
+   Schaffer N. 4, Power Sum, De Jong N. 5, Forrester et al. 2008, Hartmann
+   4-D). Their minimum is taken from the literature where it gives one, else
+   found by a dense search, and marked with its source and accuracy.
+6. Tests for every function: the value at each listed minimiser equals the
+   minimum (to 1e-6 relative, or the stated accuracy); 10,000 random points
+   in the domain are never below it; the batch result equals evaluating the
+   points one at a time; a wrong shape raises `ValueError`.
+7. Metadata on each problem: name, SFU group, dimension (fixed, or free with
+   a smallest d), references, and the page URL. A registry lists and builds
+   them: `optbench.names(group=None)`, `optbench.make(name, **params)`.
+8. An evaluation counter for running optimisers: `Tracked(problem)` counts
+   evaluated points, keeps the best value and point so far, and records the
+   best-so-far curve (evaluations, best) that a caller can save as CSV. It is
+   the only state in the library; problems themselves are pure.
+9. It never imports `ailigment`, and depends on numpy only at run time.
+
+Non-goals for the first version: the emulation, integration and uncertainty
+pages; shifted, rotated or noisy variants (CEC style); constrained or
+multi-objective problems; plotting; GPU arrays; the optimisers themselves
+(beyond a random-search baseline); and the `ailigment` adapters, which live
+in `ailigment/benchmarks/` and get their own specs.
+
+Constraints: a separate uv project at
+`/Users/jmdm/Documents/projects/code/1xx_projects/optbench`, private GitHub
+repo `Jacopo-DM/optbench`; Python >=3.13 (same
+interpreter as `ailigment`, which pulls it in); numpy; dev tools as in
+`ailigment` (ruff, pyright strict, pytest); its own four state files and
+module READMEs; feature branches and the user-level git rules.
+
+Architecture:
+- `src/optbench/problem.py`: `Problem`, the base class. Subclasses are frozen
+  dataclasses whose fields are the parameters, so `Rastrigin(d=5, a=12.0)`
+  needs no hand-written constructor and `dataclasses.replace` makes variants.
+  It provides `__call__` (shape check, then the subclass's `_evaluate`),
+  `bounds`, `minimum` (a `Minimum`: value, minimisers, source) and metadata.
+- `src/optbench/functions/`: one file per SFU group (`many_local_minima.py`,
+  `bowl.py`, `plate.py`, `valley.py`, `steep.py`, `other.py`), each under
+  400 lines.
+- `src/optbench/registry.py`: `names`, `make`.
+- `src/optbench/tracking.py`: `Tracked`.
+- Rejected: porting the GPL-2.0 R code (ties the license; the user chose
+  formulas); one plain function per problem plus a metadata table (the
+  parameters, bounds and minimum would live in three places); depending on an
+  existing Python collection of test functions (the user asked for an
+  own library with every constant editable, and their licences and accuracy
+  would need checking function by function).
+
+Task list (approved 2026-10-16 with the spec):
+- Tier 1, walking skeleton: create the repo and toolchain, the four state
+  files, `Problem`, `Minimum`, the registry, `Tracked`, and three functions
+  that span the cases (Sphere: free d, closed-form minimum; Branin: fixed
+  d, three minimisers, six parameters; Shekel: array parameters), with the
+  tests of criterion 6. Then the private GitHub repo (needs the user's
+  say-so to create and push).
+- Tier 2, one commit per group, largest value first: many local minima (16),
+  bowl-shaped (9 with the three Bohachevsky functions), valley-shaped (4),
+  plate-shaped (5), steep ridges (3), other (12). Then a random-search
+  baseline and a timing script for criterion 2.
+- Tier 3, not built: the non-goals above.
+
+## Decisions and reasons
+
+- Written from the published formulas, not ported: the site's MATLAB and R
+  code is GPL-2.0 (each file header says "version 2.0 of the License"), and
+  a port would tie this library to that license. The formulas are images on
+  each page; they were read from the images and the cited papers.
+- MIT license (the user, 2026-10-16): short and permissive, fits a benchmark
+  library others may copy or cite.
+- Python >=3.13 and numpy only at run time: `ailigment` (Python 3.13, see its
+  CLAUDE.md for why) pulls this library in, so the floors must not exceed its
+  own.
+- Problems are frozen dataclasses: their fields are the constants with the
+  published defaults, so `Branin(s=5.0)` and `dataclasses.replace` give
+  variants without hand-written constructors, and a problem is immutable and
+  pure. Metadata (`name`, `group`, `url`, `references`) are class variables.
+  Array constants (Shekel's `beta` and `c`) are tuples so the dataclass stays
+  hashable and frozen; they are turned into arrays when evaluating.
+- One shape for input: `(n, d)` in, `(n,)` out. A single point is
+  `x[None]`; refusing `(d,)` avoids silently treating a batch of 1-D points
+  as one point.
+- The minimum follows the parameters where a formula gives it (Sphere at the
+  origin for every d; Branin `s t` at odd multiples of pi), and is otherwise
+  known only at the published constants and the default domain (Shekel).
+  `Problem.uses_default_domain` says whether a published minimum still
+  applies. A minimiser outside a narrowed domain is dropped, and with none
+  left the minimum is `None`.
+- Shekel's published minimiser (4, 4, 4, 4) is rounded: the true minimisers
+  were found by Newton steps from it (gradient below 1e-13) and are stored to
+  full precision with their source; the values agree with the published
+  -10.1532, -10.4029 and -10.5364 (m = 5, 7, 10) to their four decimals.
+  Shekel's `m` selects the first `m` wells, so the three published variants
+  are one class.
+- Shekel computes distances from differences, not from the expansion
+  `|x|^2 - 2 x.c + |c|^2`, which cancels and loses about 1e-13 near the
+  minimum.
+- `Tracked` is the only stateful object: it wraps a problem to count
+  evaluations and record the best-so-far curve, so problems stay pure and an
+  optimiser needs no changes to be measured.
+
+## Rejected approaches
+
+- Porting the GPL-2.0 R code: see Decisions.
+- One plain function per problem plus a metadata table: the parameters,
+  bounds and minimum would live in three places.
+- Depending on an existing Python collection of test functions: the user
+  asked for an own library with every constant editable, and the licences
+  and accuracy of those collections would need checking function by function.
+- A `check_dimension` helper and an `as_array` helper in `problem.py`
+  (Tier 1): each had one real call site, so the checks stay inline until a
+  second one exists.
+
+## Results
+
+| What | Measure | Result | Notes |
+|------|---------|--------|-------|
+| Batch speed, Tier 1 functions (100,000 points, CPU time, min of 5, Apple silicon under load, 2026-10-16) | ms per call | Sphere (d = 10) 0.5; Branin 1.6; Shekel (m = 10) 7.3 | spec criterion 2 asks for under 100 ms |
