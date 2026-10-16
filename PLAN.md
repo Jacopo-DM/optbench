@@ -9,7 +9,8 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Current state (2026-10-16)
 
-- Tier 1 (walking skeleton) done on branch `tier1-skeleton`: `Problem`,
+- Tier 1 (walking skeleton) done and on `main` (4133d55; `main` had no
+  commits, so the branch `tier1-skeleton` simply became `main`): `Problem`,
   `Minimum`, `Group`, the registry, `Tracked`, and Sphere, Branin and Shekel,
   with the tests of spec criterion 6. 36 tests pass, coverage 100%, ruff and
   pyright clean.
