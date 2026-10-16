@@ -35,6 +35,7 @@ from .many_local_minima_holder_to_shubert import (
 )
 from .other import Branin, Shekel
 from .plate import Booth, Matyas, McCormick, PowerSum, Zakharov
+from .steep import DeJong5, Easom, Michalewicz
 from .valley import DixonPrice, Rosenbrock, SixHumpCamel, ThreeHumpCamel
 
 __all__ = [
@@ -46,8 +47,10 @@ __all__ = [
     "Branin",
     "Bukin6",
     "CrossInTray",
+    "DeJong5",
     "DixonPrice",
     "DropWave",
+    "Easom",
     "Eggholder",
     "GramacyLee2012",
     "Griewank",
@@ -57,6 +60,7 @@ __all__ = [
     "LevyN13",
     "Matyas",
     "McCormick",
+    "Michalewicz",
     "Perm0",
     "PowerSum",
     "Rastrigin",

@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (2562 lines, 14 files)
+## `src/optbench` (2816 lines, 15 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -22,7 +22,7 @@ Public interface (`optbench/__init__.py`):
 - `Minimum`: `value`, `points` (`(k, d)`), `source`, `tolerance`.
 - `Group`: the six SFU groups (`many_local_minima`, `bowl`, `plate`,
   `valley`, `steep`, `other`).
-- Functions (36), by group:
+- Functions (39), by group:
   - many local minima: `Ackley(d, a, b, c)`, `Griewank(d, divisor)`,
     `Langermann(m, c, a)`, `Levy(d, shift, scale, weight)`,
     `Rastrigin(d, a)`, `Schwefel(d, offset)`, `Bukin6(scale, curvature,
@@ -36,6 +36,8 @@ Public interface (`optbench/__init__.py`):
     `SumOfDifferentPowers(d, power_shift)`, `SumSquares(d)`, `Trid(d, shift)`;
   - plate: `Booth(weight, a, b)`, `Matyas(a, b)`, `McCormick(a, b, offset)`,
     `PowerSum(b)`, `Zakharov(d, coefficient)`;
+  - steep: `DeJong5(offset, power, a)`, `Easom(centre)`,
+    `Michalewicz(d, m)`;
   - valley: `ThreeHumpCamel(a, b, c)`, `SixHumpCamel(a, b, c, e, g)`,
     `DixonPrice(d, shift, weight)`, `Rosenbrock(d, a, b)` (d >= 2);
   - other: `Branin(a, b, c, r, s, t)`, `Shekel(m, beta, c)`.
@@ -48,7 +50,7 @@ Depends on: numpy.
 Files: `problem.py` (`Problem`, `AnyDimension`, `Minimum`, `Group`, `box`,
 `formula_minimum`: a minimum from a formula if its minimisers lie in the
 domain);
-`functions/`: `bowl.py`, `plate.py`, `valley.py`, `other.py`, `many_local_minima_any_d.py`,
+`functions/`: `bowl.py`, `plate.py`, `steep.py`, `valley.py`, `other.py`, `many_local_minima_any_d.py`,
 `many_local_minima_bukin_to_gramacy.py`,
 `many_local_minima_holder_to_shubert.py`, `known_minima.py`
 (`KnownMinimum`, `at_defaults` and the minima known only for the published
@@ -59,13 +61,13 @@ constants), `references.py`
 those; `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type.
 
-## `tests` (751 lines, 7 files)
+## `tests` (857 lines, 8 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 5), `test_functions.py` (Sphere,
 Branin, Shekel: published constants and minima, parameter and domain
-handling), `test_bowl.py`, `test_plate.py` and `test_valley.py` (those
-groups), `test_many_local_minima.py` (the group's published values,
+handling), `test_bowl.py`, `test_plate.py`, `test_steep.py` and
+`test_valley.py` (those groups), `test_many_local_minima.py` (the group's published values,
 constants, minima that follow parameters, refusals),
 `test_registry_and_tracking.py`. Depends on: `optbench`, numpy, pytest.
 

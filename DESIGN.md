@@ -217,6 +217,20 @@ Task list (approved 2026-10-16 with the spec):
   lower). Power Sum takes its dimension from `b` and builds its powers with
   `cumprod`, like Perm 0.
 
+- Steep group (2026-10-16): Easom's minimum is -1 at `(centre, centre)`
+  whenever `centre` is a multiple of pi, because `f >= -exp(-r^2) >= -1`.
+  Michalewicz is a sum of independent one-variable terms, so its minimum is
+  computed when asked, for any `d`, `m` and domain, by minimising each term
+  on its own interval (a grid of 20,000 points per unit length, then Newton
+  steps that must stay in the best grid cell); it reproduces the SFU
+  values -1.8013, -4.687658 and -9.66015 for d = 2, 5 and 10 and takes about
+  13 ms for d = 10. Its power `sin(...)^(2 m)` is computed as
+  `(sin(...)^2)^m`, equal wherever the first is defined, so a non-integer
+  `m` does not give NaN. De Jong N. 5 has no published minimum; a grid over
+  the whole domain puts it at 0.998003837794 near (-32, -32) (the drops are
+  weighted by their index, so the two coordinates differ slightly). Its
+  drop centres `a` are a parameter, defaulting to the published 5 by 5 grid.
+
 ## Rejected approaches
 
 - Porting the GPL-2.0 R code: see Decisions.
@@ -238,3 +252,4 @@ Task list (approved 2026-10-16 with the spec):
 | Batch speed, bowl-shaped group (100,000 points, d = 10 where free, CPU time, min of 5, load average 7 to 10, 2026-10-16) | ms per call | Bohachevsky 1 1.9, 2 2.0, 3 1.1; Perm 0, d, beta 43.1 (126.3 with `x ** i`); Rotated Hyper-Ellipsoid 1.6; Sphere 0.4; Sum of Different Powers 9.4; Sum Squares 1.7; Trid 2.8 | all under the 100 ms budget |
 | Batch speed, valley-shaped group (100,000 points, d = 10 where free, CPU time, min of 5, load average 4 to 9, 2026-10-16) | ms per call | Dixon-Price 2.9; Rosenbrock 2.9; Six-Hump Camel 1.5; Three-Hump Camel 0.3 | all under the 100 ms budget |
 | Batch speed, plate-shaped group (100,000 points, d = 10 where free, CPU time, min of 5, load average 11 to 20, 2026-10-16) | ms per call | Booth 0.3; Matyas 0.2; McCormick 1.0; Power Sum (d = 4) 8.9; Zakharov 2.8 | all under the 100 ms budget |
+| Batch speed, steep group (100,000 points, d = 10 where free, CPU time, min of 5, load average 3 to 9, 2026-10-16) | ms per call | De Jong N. 5 53.5; Easom 2.0; Michalewicz 25.2 | all under the 100 ms budget; De Jong pays for a float power over 25 drops |

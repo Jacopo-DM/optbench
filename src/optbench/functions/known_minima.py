@@ -193,3 +193,14 @@ POWER_SUM = KnownMinimum(
     "exact: the power sums of (1, 2, 2, 3) (the SFU page states none)",
     0.0,
 )
+
+# The SFU page states no minimum. Grid step 0.02 over the whole domain; the
+# drop at (-32, -32) is the deepest (the next, at (-16, -32), is near 1.99).
+# The two coordinates differ slightly: the drops are weighted by their
+# index, which is not symmetric in x1 and x2.
+DE_JONG_5 = KnownMinimum(
+    0.99800383779445,
+    ((-31.978334183274413, -31.97833392314706),),
+    _SEARCH + " (the SFU page states no minimum)",
+    1e-12,
+)
