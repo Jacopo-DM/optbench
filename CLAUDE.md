@@ -87,6 +87,11 @@ Before every commit run lint, type check and the tests above.
 
 ## Things that bite
 
+- Editing a state file with a Python `str.replace` script does nothing when
+  the old text does not match exactly (a reflowed line, a word changed by an
+  earlier edit), and raises no error. Put `assert old in text` before every
+  replacement. Twice on 2026-10-16/17 a PLAN.md task list stayed stale this
+  way until a later read caught it.
 - Ruff's auto-fix (ISC004) wraps implicitly joined strings in a tuple in
   parentheses, which pushes lines past 80 characters; rewrap the strings by
   hand afterwards.
