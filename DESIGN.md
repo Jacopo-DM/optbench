@@ -266,6 +266,22 @@ Task list (approved 2026-10-16 with the spec):
   new dependency; the charts so far were drawn with `ailigment`'s
   environment from the CSVs.
 
+## Other sources of test functions (reviewed 2026-10-17)
+
+The user shared a list of other collections on 2026-10-17. What each offers
+optbench, and what was decided:
+
+| Source | What it is | Decision |
+|--------|------------|----------|
+| COCO / BBOB (Hansen, Finck, Ros and Auger, 2009, INRIA RR-6829; https://github.com/numbbo/coco, BSD-3-Clause) | 24 noiseless functions in 5 groups, each a base function with seeded shifts, rotations and conditioning (no data files); the standard for comparing continuous optimisers, with published results for hundreds of algorithms | proposed as a new spec module (PLAN.md); it changes the non-goal "shifted, rotated or noisy variants", so it needs approval |
+| AMPGO test functions (Gavana, https://infinity77.net/global_optimization/test_functions.html; already cited as `GAVANA`) | 18 one-dimensional and about 184 multivariate functions with difficulty ratings | source for a short list of missing classics (PLAN.md); not imported wholesale, most add little beyond the 49 |
+| Wikipedia, "Test functions for optimization" (already cited as `WIKIPEDIA`) | formulas, domains and plots of about 25 single-objective functions, plus constrained and multi-objective ones | every single-objective one is in optbench except Himmelblau; the constrained and multi-objective ones are non-goals |
+| Jamil and Yang (2013), "A literature survey of benchmark functions for global optimisation problems", Int. J. Math. Modelling and Numerical Optimisation 4(2) | 175 functions with formulas, domains and minima | primary reference for the missing classics |
+| Opfunu (Python, numpy) and the CEC competition suites | about 200 functions including every CEC suite | not used: CEC needs per-suite shift and rotation data files (a download each, licences vary); a non-goal unless CEC comparisons are wanted |
+| TestFunctions (R package, Collin Erickson) | mostly emulation functions (borehole and others) from SFU's non-optimisation pages | not used: emulation pages are a non-goal |
+| Arnold Neumaier, Global Optimization test problems (https://arnold-neumaier.at/glopt/test.html) | an index of links to constrained and unconstrained suites | reference only |
+| PLATO benchmarks (Mittelmann, https://plato.asu.edu/bench.html) | timings of optimisation software, not test functions | reference only |
+
 ## Rejected approaches
 
 - Porting the GPL-2.0 R code: see Decisions.
