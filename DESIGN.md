@@ -203,6 +203,20 @@ Task list (approved 2026-10-16 with the spec):
   or 1 unless d = 2. The SFU page's rescaled Rosenbrock (Picheny et al.) is
   a variant and is not included.
 
+- Plate-shaped group (2026-10-16): no search was needed. Booth's minimum
+  solves its two linear equations for any `weight` other than +-1 (then the
+  equations are dependent). Matyas is bounded below only while
+  `a >= |b| / 2`. McCormick separates in `u = x1 + x2` and `v = x1 - x2`
+  into `sin(u) + u / 2 + (v - 1)^2 + offset - 1`, so its minimum is
+  `offset - 1 - sqrt(3) / 2 - pi / 3` at `u = -2 pi / 3`, `v = 1` (checked
+  by a grid with step 0.001); other `a` and `b` are not covered because the
+  minimum can move onto the domain's edge. The SFU page gives no minimum for
+  Power Sum, but its published `b` holds the power sums of (1, 2, 2, 3), so
+  the minimum is 0, and by Newton's identities the minimisers are exactly
+  the 12 orderings of that vector (2,000,000 random points found nothing
+  lower). Power Sum takes its dimension from `b` and builds its powers with
+  `cumprod`, like Perm 0.
+
 ## Rejected approaches
 
 - Porting the GPL-2.0 R code: see Decisions.
@@ -223,3 +237,4 @@ Task list (approved 2026-10-16 with the spec):
 | Batch speed, "many local minima" group (100,000 points, d = 10 where free, CPU time, min of 5, load average 5 to 9, 2026-10-16) | ms per call | Ackley 11.0; Bukin N. 6 0.3; Cross-in-Tray 2.9; Drop-Wave 1.5; Eggholder 2.0; Gramacy and Lee 1.8; Griewank 10.4; Holder Table 2.1; Langermann 13.2; Levy 13.0; Levy N. 13 2.8; Rastrigin 9.8; Schaffer N. 2 1.1; Schaffer N. 4 1.7; Schwefel 9.6; Shubert 14.5 | all under the 100 ms budget |
 | Batch speed, bowl-shaped group (100,000 points, d = 10 where free, CPU time, min of 5, load average 7 to 10, 2026-10-16) | ms per call | Bohachevsky 1 1.9, 2 2.0, 3 1.1; Perm 0, d, beta 43.1 (126.3 with `x ** i`); Rotated Hyper-Ellipsoid 1.6; Sphere 0.4; Sum of Different Powers 9.4; Sum Squares 1.7; Trid 2.8 | all under the 100 ms budget |
 | Batch speed, valley-shaped group (100,000 points, d = 10 where free, CPU time, min of 5, load average 4 to 9, 2026-10-16) | ms per call | Dixon-Price 2.9; Rosenbrock 2.9; Six-Hump Camel 1.5; Three-Hump Camel 0.3 | all under the 100 ms budget |
+| Batch speed, plate-shaped group (100,000 points, d = 10 where free, CPU time, min of 5, load average 11 to 20, 2026-10-16) | ms per call | Booth 0.3; Matyas 0.2; McCormick 1.0; Power Sum (d = 4) 8.9; Zakharov 2.8 | all under the 100 ms budget |

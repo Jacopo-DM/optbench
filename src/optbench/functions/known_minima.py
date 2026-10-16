@@ -10,6 +10,7 @@ Every one holds for the default constants and default domain only.
 from __future__ import annotations
 
 import dataclasses
+import itertools
 from dataclasses import dataclass
 
 import numpy as np
@@ -180,4 +181,15 @@ SIX_HUMP_CAMEL = KnownMinimum(
     ((_CAMEL_1, _CAMEL_2), (-_CAMEL_1, -_CAMEL_2)),
     _SEARCH + " (SFU: -1.0316 at (0.0898, -0.7126) and its opposite)",
     1e-12,
+)
+
+# The SFU page states no minimum. The published b = (8, 18, 44, 114) holds
+# the power sums of (1, 2, 2, 3), so f is 0 there; by Newton's identities
+# the power sums 1 to 4 fix the four numbers up to order, so the minimisers
+# are exactly the 12 distinct orderings.
+POWER_SUM = KnownMinimum(
+    0.0,
+    tuple(sorted(set(itertools.permutations((1.0, 2.0, 2.0, 3.0))))),
+    "exact: the power sums of (1, 2, 2, 3) (the SFU page states none)",
+    0.0,
 )
