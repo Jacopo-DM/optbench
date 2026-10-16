@@ -252,6 +252,13 @@ Task list (approved 2026-10-16 with the spec):
   Powell needs `d` to be a multiple of 4, so `tests/test_all_problems.py`
   checks free-dimension functions at d = 8 (it was 5).
 
+- The random-search baseline (2026-10-17) is `optbench.random_search`, in the
+  package rather than in a script, because the `ailigment` adapters will
+  import it as the result to beat. It is not an optimiser library: one
+  function, uniform points through `Tracked`, so `Tracked` stays the only
+  state. Points come in batches of 1,000 (one `Tracked` curve row each) and
+  the last batch is cut so the budget is exact.
+
 ## Rejected approaches
 
 - Porting the GPL-2.0 R code: see Decisions.

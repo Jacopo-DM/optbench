@@ -1,6 +1,7 @@
 # optbench (package)
 
-The test functions, the `Problem` base class, the registry and `Tracked`.
+The test functions, the `Problem` base class, the registry, `Tracked` and
+the random-search baseline.
 
 Interface: see [CODEMAP.md](../../CODEMAP.md). Spec and reasons: see
 [DESIGN.md](../../DESIGN.md).

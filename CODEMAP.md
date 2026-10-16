@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (3480 lines, 17 files)
+## `src/optbench` (3539 lines, 18 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -49,6 +49,9 @@ Public interface (`optbench/__init__.py`):
 - `names(group=None)`, `make(name, **params)`: the registry.
 - `Tracked(problem)`: counts evaluations, keeps `best_value` and
   `best_point`, and `curve` (rows of evaluations, best so far).
+- `random_search(problem, budget, rng, batch=1000)`: uniform random points in
+  `problem.bounds`, exactly `budget` of them, in batches; returns the
+  `Tracked` record of the run.
 
 Depends on: numpy.
 
@@ -63,12 +66,13 @@ domain);
 (`KnownMinimum`, `at_defaults` and the minima known only for the published
 constants), `references.py`
 (shared citations), `__init__.py` (the list the registry reads);
-`registry.py`; `tracking.py`; `__init__.py`. Order: `problem` is the leaf;
+`registry.py`; `tracking.py`; `baseline.py` (`random_search`);
+`__init__.py`. Order: `problem` is the leaf;
 `references` and `known_minima` use only `problem`; the group modules use
 those; `registry` reads `functions.__all__`; `tracking` uses only the
-`Problem` type.
+`Problem` type; `baseline` uses `tracking`.
 
-## `tests` (1025 lines, 9 files)
+## `tests` (1071 lines, 10 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
@@ -76,7 +80,7 @@ Branin, Shekel: published constants and minima, parameter and domain
 handling), `test_bowl.py`, `test_plate.py`, `test_steep.py` and
 `test_valley.py` and `test_other.py` (those groups), `test_many_local_minima.py` (the group's published values,
 constants, minima that follow parameters, refusals),
-`test_registry_and_tracking.py`. Depends on: `optbench`, numpy, pytest.
+`test_registry_and_tracking.py`, `test_baseline.py`. Depends on: `optbench`, numpy, pytest.
 
 ## Size checks (400 lines per file)
 

@@ -6,6 +6,7 @@ from the published formulas. Every function evaluates a batch of points,
 takes its constants as keyword arguments and knows its global minimum.
 """
 
+from .baseline import random_search
 from .functions import (
     Ackley,
     Beale,
@@ -118,4 +119,5 @@ __all__ = [
     "Zakharov",
     "make",
     "names",
+    "random_search",
 ]

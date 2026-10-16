@@ -20,6 +20,10 @@ optbench.Branin(s=5.0, t=0.2).minimum.value # 1.0: the minimum follows s and t
 tracked = optbench.Tracked(optbench.Sphere(d=10))
 tracked(np.random.default_rng(0).uniform(-5.12, 5.12, size=(100, 10)))
 tracked.evaluations, tracked.best_value, tracked.curve
+
+# The baseline any optimiser should beat: 10,000 uniform random points.
+run = optbench.random_search(branin, 10_000, np.random.default_rng(0))
+run.best_value, run.best_point, run.curve
 ```
 
 `optbench.names()` lists the 49 functions, `optbench.names(group)` those of
