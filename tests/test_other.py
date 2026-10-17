@@ -21,6 +21,8 @@ from optbench import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from optbench import Problem
 
 # SFU's published minimum value and minimiser, rounded as printed there.
@@ -163,6 +165,9 @@ def test_minimum_is_unknown_where_nothing_covers_it(problem: Problem) -> None:
         (lambda: Hartmann3(p=((0.5,) * 2,) * 4), "one row per alpha"),
     ],
 )
-def test_bad_parameters_are_refused(make: object, message: str) -> None:
+def test_bad_parameters_are_refused(
+    make: Callable[[], object],
+    message: str,
+) -> None:
     with pytest.raises(ValueError, match=message):
-        make()  # pyright: ignore[reportCallIssue]
+        make()

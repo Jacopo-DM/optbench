@@ -1,14 +1,12 @@
 """The BBOB functions against COCO's own implementation (``cocoex``).
 
-``cocoex`` has no type stubs, so pyright's unknown-type checks are off here.
+``cocoex`` has no type stubs; the tests reach it through two ``Protocol``
+views and one ``cast`` of its ``Suite`` class.
 """
-
-# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false
-# pyright: reportUnknownArgumentType=false, reportMissingTypeStubs=false
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Protocol, cast
 
 import cocoex
 import numpy as np
@@ -43,7 +41,35 @@ from optbench import (
 )
 from optbench.functions import bbob_common as bbob
 
-FUNCTIONS = {
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from numpy.typing import NDArray
+
+
+class _CocoProblem(Protocol):
+    """The part of a ``cocoex`` problem the tests use."""
+
+    def __call__(self, x: NDArray[np.float64], /) -> float:
+        """Return the value at one point."""
+        ...
+
+
+class _CocoSuite(Protocol):
+    """The part of a ``cocoex.Suite`` the tests use."""
+
+    def get_problem_by_function_dimension_instance(
+        self,
+        function: int,
+        dimension: int,
+        instance: int,
+        /,
+    ) -> _CocoProblem:
+        """Return one problem of the suite."""
+        ...
+
+
+FUNCTIONS: dict[int, type[bbob.BbobProblem]] = {
     1: BbobSphere,
     2: BbobEllipsoid,
     3: BbobRastrigin,
@@ -83,19 +109,20 @@ RTOL = (
 )
 INSTANCES = (1, 2, 7, 15, 100)
 
-SUITE = cocoex.Suite(
+_make_suite = cast("Callable[[str, str, str], _CocoSuite]", cocoex.Suite)
+SUITE = _make_suite(
     "bbob",
     "instances: " + ",".join(str(i) for i in INSTANCES),
     "dimensions: " + ",".join(str(d) for d in DIMENSIONS),
 )
 
 
-def _coco(function: int, d: int, instance: int) -> Any:  # ruff: ignore[any-type]
+def _coco(function: int, d: int, instance: int) -> _CocoProblem:
     """Return COCO's problem for a function, dimension and instance.
 
     Returns
     -------
-    Any
+    _CocoProblem
         A ``cocoex`` problem; call it with one point.
     """
     return SUITE.get_problem_by_function_dimension_instance(

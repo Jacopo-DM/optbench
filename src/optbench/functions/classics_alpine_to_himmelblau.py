@@ -121,11 +121,12 @@ class Bird(Problem):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
-        return (
+        result: NDArray[np.float64] = (
             np.sin(x1) * np.exp((1 - np.cos(x2)) ** 2)
             + np.cos(x2) * np.exp((1 - np.sin(x1)) ** 2)
             + (x1 - x2) ** 2
         )
+        return result
 
 
 class Deceptive(AnyDimension):
@@ -242,7 +243,10 @@ class HappyCat(AnyDimension):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         squares = np.einsum("ij,ij->i", x, x)
         groove = ((squares - self.d) ** 2) ** self.alpha
-        return groove + (squares / 2 + np.sum(x, axis=1)) / self.d + 0.5
+        result: NDArray[np.float64] = (
+            groove + (squares / 2 + np.sum(x, axis=1)) / self.d + 0.5
+        )
+        return result
 
 
 class Himmelblau(Problem):

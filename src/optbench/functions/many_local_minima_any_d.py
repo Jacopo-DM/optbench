@@ -141,7 +141,10 @@ class Griewank(AnyDimension):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         roots = np.sqrt(np.arange(1, self.d + 1))
         product = np.prod(np.cos(x / roots), axis=1)
-        return np.sum(x**2, axis=1) / self.divisor - product + 1
+        result: NDArray[np.float64] = (
+            np.sum(x**2, axis=1) / self.divisor - product + 1
+        )
+        return result
 
 
 # Langermann's published constants (Molga and Smutnicki, for d = 2).
@@ -277,7 +280,8 @@ class Levy(AnyDimension):
         )
         last = w[:, -1]
         end = (last - 1) ** 2 * (1 + np.sin(2 * math.pi * last) ** 2)
-        return first + middle + end
+        result: NDArray[np.float64] = first + middle + end
+        return result
 
 
 class Rastrigin(AnyDimension):

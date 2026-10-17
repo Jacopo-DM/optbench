@@ -29,6 +29,8 @@ from optbench import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from optbench import Problem
 
 # SFU's published minimum values (rounded as printed there), where it gives
@@ -179,9 +181,12 @@ def test_minimum_is_unknown_where_no_formula_or_search_covers_it(
         (lambda: Rastrigin(d=0), "d must be at least 1"),
     ],
 )
-def test_bad_parameters_are_refused(make: object, message: str) -> None:
+def test_bad_parameters_are_refused(
+    make: Callable[[], object],
+    message: str,
+) -> None:
     with pytest.raises(ValueError, match=message):
-        make()  # pyright: ignore[reportCallIssue]
+        make()
 
 
 def test_langermann_takes_other_dimensions() -> None:

@@ -308,4 +308,5 @@ class GoldsteinPrice(Problem):
         terms = np.stack([np.ones(len(x)), x1, x1**2, x2, x1 * x2, x2**2])
         first = self.a + (x1 + x2 + 1) ** 2 * (np.asarray(self.p) @ terms)
         second = self.b + (2 * x1 - 3 * x2) ** 2 * (np.asarray(self.q) @ terms)
-        return first * second
+        result: NDArray[np.float64] = first * second
+        return result

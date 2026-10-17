@@ -51,7 +51,8 @@ class Sphere(AnyDimension):
 
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
-        return np.einsum("ij,ij->i", x, x)
+        result: NDArray[np.float64] = np.einsum("ij,ij->i", x, x)
+        return result
 
 
 class _Bohachevsky(Problem):

@@ -45,7 +45,7 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Task 6 of `python-standard` (below): the 30 mypy errors.
+Task 7 of `python-standard` (below): the 17 magic values.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -56,12 +56,12 @@ bytes, from https://inria.hal.science/inria-00362633/document) and adding
 COCO's Python package as a dev-only dependency are approved too.
 
 1. executing (approved by the user 2026-10-17): module `python-standard`
-   (kind: change). Tasks 1 to 5 and 8 are done. Task 1 took `KnownMinimum`
+   (kind: change). Tasks 1 to 6 and 8 are done. Task 1 took `KnownMinimum`
    from task 2 and the tests of task 4, which it needed to keep the checks
    green; coverage was already 100% of branches over `src` and `tests` once
-   `pytest.ini` arrived in task 5. Since task 5 the Stop hook's checks fail
-   on mypy (30 errors) and ruff (17 magic values, 2 `Any`) until tasks 6
-   and 7. Spec and task list below; the user's answers to its four
+   `pytest.ini` arrived in task 5. Since task 5 the Stop hook's ruff check
+   fails (17 magic values, one long line) until task 7; mypy passes since
+   task 6. Spec and task list below; the user's answers to its four
    design questions are in DESIGN.md (Decisions, "Python standard").
 
 2. later: the same migration for `ailigment`, then its adapters (its
@@ -147,13 +147,6 @@ Verification for every task:
 
 ### Task list: `python-standard` (one commit each, in this order)
 
-6. mypy fixes: the 33 errors. Numpy reductions returned as `float` get
-   `float(...)`; `cocoex` goes behind a typed `Protocol` in
-   `tests/test_bbob.py`, reached through one `cast`, as
-   `typing-and-pydantic.md` shows. If mypy still rejects the cocoex calls
-   (`disallow_untyped_calls`), the fix the standard names is a line in
-   `untyped_calls_exclude`, which is template config: stop and ask the
-   user. Risk: low.
 7. ruff fixes: the 17 magic values become named constants; whatever the
    template rules find after tasks 1 to 6. Risk: low.
 9. pre-commit and CI: `templates/pre-commit-config.yaml` to

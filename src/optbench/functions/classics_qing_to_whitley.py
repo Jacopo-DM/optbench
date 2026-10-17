@@ -94,7 +94,10 @@ class Salomon(AnyDimension):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         radius = np.sqrt(np.einsum("ij,ij->i", x, x))
-        return 1 - np.cos(self.frequency * radius) + self.a * radius
+        result: NDArray[np.float64] = (
+            1 - np.cos(self.frequency * radius) + self.a * radius
+        )
+        return result
 
 
 class Schwefel221(AnyDimension):
@@ -143,7 +146,10 @@ class Schwefel222(AnyDimension):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         size = np.abs(x)
-        return np.sum(size, axis=1) + np.prod(size, axis=1)
+        result: NDArray[np.float64] = np.sum(size, axis=1) + np.prod(
+            size, axis=1
+        )
+        return result
 
 
 class Whitley(AnyDimension):

@@ -93,7 +93,7 @@ def test_shekel_refuses_bad_parameters(
     message: str,
 ) -> None:
     with pytest.raises(ValueError, match=message):
-        Shekel(**params)  # pyright: ignore[reportArgumentType]
+        Shekel.model_validate(params)
 
 
 def test_a_domain_must_fit_the_dimension() -> None:

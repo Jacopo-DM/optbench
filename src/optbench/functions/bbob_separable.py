@@ -29,7 +29,8 @@ class BbobSphere(bbob.BbobProblem):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = x - self.x_opt
-        return np.einsum("ij,ij->i", z, z) + self.f_opt
+        result: NDArray[np.float64] = np.einsum("ij,ij->i", z, z) + self.f_opt
+        return result
 
 
 class BbobEllipsoid(bbob.BbobProblem):

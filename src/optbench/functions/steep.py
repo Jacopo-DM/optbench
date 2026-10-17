@@ -62,7 +62,8 @@ class DeJong5(Problem):
 
     @override
     def _check(self) -> None:
-        if len(self.a) != 2 or len(self.a[0]) != len(self.a[1]):  # ruff: ignore[magic-value-comparison]
+        # Exactly two rows is the field's type, so pydantic checks that.
+        if len(self.a[0]) != len(self.a[1]):
             msg = "a must have two rows of equal length"
             raise ValueError(msg)
 

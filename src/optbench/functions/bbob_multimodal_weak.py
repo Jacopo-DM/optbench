@@ -90,7 +90,10 @@ class BbobSchwefel(bbob.BbobProblem):
         outside = np.maximum(0.0, np.abs(z) - 500)
         boundary = np.einsum("ij,ij->i", outside, outside)
         waves = np.mean(z * np.sin(np.sqrt(np.abs(z))), axis=1)
-        return 0.01 * (boundary + self.offset - waves) + self.f_opt
+        result: NDArray[np.float64] = (
+            0.01 * (boundary + self.offset - waves) + self.f_opt
+        )
+        return result
 
 
 class _Peaks(Model):

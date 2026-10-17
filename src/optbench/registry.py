@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from . import functions
 
@@ -40,7 +40,7 @@ def names(group: Group | None = None, suite: str | None = None) -> list[str]:
     )
 
 
-def make(name: str, **params: Any) -> Problem:  # ruff: ignore[any-type]
+def make(name: str, **params: object) -> Problem:
     """Build a problem by name, with any parameters changed.
 
     Example: ``make("branin", s=5.0)``.
@@ -58,4 +58,4 @@ def make(name: str, **params: Any) -> Problem:  # ruff: ignore[any-type]
     if name not in _PROBLEMS:
         msg = f"no problem named {name!r}; see optbench.names()"
         raise KeyError(msg)
-    return _PROBLEMS[name](**params)
+    return _PROBLEMS[name].model_validate(params)

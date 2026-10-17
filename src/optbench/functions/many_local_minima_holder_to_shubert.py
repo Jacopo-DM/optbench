@@ -120,7 +120,8 @@ class LevyN13(Problem):
         first = np.sin(self.a * math.pi * x1) ** 2
         second = (x1 - 1) ** 2 * (1 + np.sin(self.b * math.pi * x2) ** 2)
         third = (x2 - 1) ** 2 * (1 + np.sin(self.c * math.pi * x2) ** 2)
-        return first + second + third
+        result: NDArray[np.float64] = first + second + third
+        return result
 
 
 class SchafferN2(Problem):

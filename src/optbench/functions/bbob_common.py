@@ -124,7 +124,7 @@ def f_opt(function: int, instance: int) -> float:
     """
     base = {4: 3, 18: 17}.get(function, function)
     seed = base + 10_000 * instance
-    ratio = gauss(1, seed)[0] / gauss(1, seed + 1)[0]
+    ratio = float(gauss(1, seed)[0] / gauss(1, seed + 1)[0])
     rounded = math.floor(100 * 100 * ratio + 0.5) / 100
     return min(1000.0, max(-1000.0, rounded))
 
@@ -143,7 +143,8 @@ def rotate(
     numpy.ndarray
         Shaped like ``x``.
     """
-    return np.einsum("nj,ij->ni", x, matrix)
+    result: NDArray[np.float64] = np.einsum("nj,ij->ni", x, matrix)
+    return result
 
 
 def weighted(
@@ -157,7 +158,8 @@ def weighted(
     numpy.ndarray
         ``values`` without its last axis.
     """
-    return np.einsum("...j,j->...", values, weights)
+    result: NDArray[np.float64] = np.einsum("...j,j->...", values, weights)
+    return result
 
 
 def oscillate(x: NDArray[np.float64]) -> NDArray[np.float64]:
@@ -220,7 +222,8 @@ def penalty(x: NDArray[np.float64]) -> NDArray[np.float64]:
         Shaped ``(n,)``.
     """
     outside = np.maximum(0.0, np.abs(x) - 5)
-    return np.einsum("ij,ij->i", outside, outside)
+    result: NDArray[np.float64] = np.einsum("ij,ij->i", outside, outside)
+    return result
 
 
 @functools.cache
@@ -265,7 +268,10 @@ def rastrigin(z: NDArray[np.float64], a: float) -> NDArray[np.float64]:
         Shaped ``(n,)``.
     """
     waves = np.sum(np.cos(2 * math.pi * z), axis=1)
-    return a * (z.shape[1] - waves) + np.einsum("ij,ij->i", z, z)
+    result: NDArray[np.float64] = a * (z.shape[1] - waves) + np.einsum(
+        "ij,ij->i", z, z
+    )
+    return result
 
 
 class BbobProblem(AnyDimension):

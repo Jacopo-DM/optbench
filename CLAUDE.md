@@ -104,6 +104,7 @@ Before every commit run format, lint, both type checks and the tests above.
 | `.pytest_cache/`, `.ruff_cache/`, `__pycache__/`, `.coverage` | generated | pytest, ruff, the interpreter, pytest-cov |
 | `__data__/` | generated, git-ignored (`timing.csv`, `baseline/` curves, `plots/`) | `optbench.scripts.timing`, `optbench.scripts.baseline` |
 | `src/optbench/py.typed` | hand-written, empty marker | n/a |
+| `.typings/cocoex/__init__.pyi` | hand-written stub (only `Suite`) so pyright finds `cocoex`; mypy does not read it (`tests/test_bbob.py` casts instead) | n/a |
 
 ## Things that bite
 
