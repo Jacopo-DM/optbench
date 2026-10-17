@@ -31,13 +31,13 @@ other). The approved spec and task list are in DESIGN.md.
   `cocoex` (1e-9 for f16 to f19 and f23, 1e-12 for the rest; DESIGN.md
   results); 83 functions in all, 1578 tests, 100% branch coverage over
   `src` and `tests`; ruff, mypy strict and pyright strict clean.
-- Git: `main` is pushed (f33326f, 2026-10-17, the user's say-so) and is
-  the only local branch; the first CI run on it passed every step (cocoex
-  2.8.2 built from source in 17 s, 1578 tests, 100% coverage). Dependabot's
-  PR #1 (setup-uv 9.0.0 to 10.3.0, CI passing) was merged by rebase on
+- Git: `main` is pushed (734abc3, 2026-10-17, the user's say-so) and is
+  the only local branch. CI passed on the `python-standard` branch before
+  its rebase (run on 89c9929: cocoex 2.8.2 built from source in 17 s), but
+  every push to `main` since f33326f has failed one test (Known problems).
+  Dependabot's PR #1 (setup-uv 9.0.0 to 10.3.0) was merged by rebase on
   2026-10-17 (2aea30c, the user's say-so), so `ci.yml` now pins a newer
-  setup-uv than the user's template. This notes commit is on `main`, not
-  pushed, and its branch `notes-before-compact` still exists.
+  setup-uv than the user's template.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
@@ -61,7 +61,7 @@ then BBOB, then the `ailigment` adapters. Downloading RR-6829 (573,076
 bytes, from https://inria.hal.science/inria-00362633/document) and adding
 COCO's Python package as a dev-only dependency are approved too.
 
-1. done, CI green (2026-10-17): module `python-standard` (approved
+1. done, CI red on one test (2026-10-17): module `python-standard` (approved
    2026-10-17, commits ae6f494 to the pre-commit and CI commit on branch
    `python-standard`, merged into `main`). The spec, the user's four
    answers and what the work found are in DESIGN.md ("Python standard"
@@ -75,6 +75,14 @@ COCO's Python package as a dev-only dependency are approved too.
 None.
 
 ## Known problems
+
+- CI fails on Linux: `tests/test_bbob.py::test_values_match_coco[100-20-23]`
+  (f23 Katsuura, d = 100) differs from cocoex by 3.3e-9 relative, above
+  the 1e-9 tolerance (-0.15903416366096934 against -0.1590341641810955).
+  It passes on macOS and passed once on the Linux runner (89c9929), so the
+  last digits depend on the platform or the runner's CPU. Same failure on
+  every push to `main` since f33326f. Needs the user's decision: loosening
+  the tolerance is a config-like change.
 
 - BBOB f16 takes about 93 ms per 100,000 points at d = 10, close to the
   0.1 s budget; under heavier load it may cross it. T_osz (shared by seven
