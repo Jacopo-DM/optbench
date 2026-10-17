@@ -1,0 +1,111 @@
+"""Every formula equals its problem's numpy values (module formula)."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+import numpy as np
+import pytest
+
+import optbench
+from optbench import AnyDimension, Group, Problem
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
+# The (suite, group) pairs whose problems have a formula so far; each task
+# of module formula adds its own.
+COVERED = (("sfu", Group.BOWL),)
+DIMENSIONS = range(1, 7)
+RTOL = 1e-12
+ATOL = 1e-10
+INSIDE = 20
+OUTSIDE = 5
+# Points outside the domain reach this far past its edges, as a share of
+# each side's width.
+REACH = 0.3
+
+
+def _problems() -> list[Problem]:
+    """Every problem of ``COVERED``, any-d ones at each allowed d up to 6.
+
+    Returns
+    -------
+    list of Problem
+        The problems to check, at their default constants.
+    """
+    names = [
+        name
+        for suite, group in COVERED
+        for name in optbench.names(group=group, suite=suite)
+    ]
+    problems: list[Problem] = []
+    for name in names:
+        problem = optbench.make(name)
+        if isinstance(problem, AnyDimension):
+            smallest = type(problem).smallest_dimension
+            problems += [
+                problem.replace(d=d) for d in DIMENSIONS if d >= smallest
+            ]
+        else:
+            problems.append(problem)
+    return problems
+
+
+def _points(problem: Problem) -> NDArray[np.float64]:
+    """Points in the domain, a few outside it, and the optimum.
+
+    Returns
+    -------
+    numpy.ndarray
+        Shaped ``(n, d)``.
+    """
+    bounds = problem.bounds
+    low, high = bounds[:, 0], bounds[:, 1]
+    margin = REACH * (high - low)
+    rng = np.random.default_rng(len(problem.name) * 100 + problem.dimension)
+    inside = rng.uniform(low, high, size=(INSIDE, problem.dimension))
+    outside = rng.uniform(
+        low - margin,
+        high + margin,
+        size=(OUTSIDE, problem.dimension),
+    )
+    minimum = problem.minimum
+    optimum = (
+        minimum.points
+        if minimum is not None
+        else np.empty((0, problem.dimension))
+    )
+    return np.vstack([inside, outside, optimum])
+
+
+PROBLEMS = _problems()
+IDS = [f"{p.name}-d{p.dimension}" for p in PROBLEMS]
+
+
+@pytest.mark.parametrize("problem", PROBLEMS, ids=IDS)
+def test_the_formula_equals_the_numpy_values(problem: Problem) -> None:
+    x = _points(problem)
+    np.testing.assert_allclose(
+        optbench.evaluate_formula(problem.formula(), x),
+        problem(x),
+        rtol=RTOL,
+        atol=ATOL,
+    )
+
+
+def test_the_variables_are_x1_to_xd() -> None:
+    assert [str(v) for v in optbench.variables(3)] == ["x1", "x2", "x3"]
+    assert [str(v) for v in optbench.variables(1)] == ["x1"]
+
+
+def test_a_constant_formula_gives_one_value_per_point() -> None:
+    # A formula with no variable left (here 0 * x1) still gives (n,) values.
+    (x1,) = optbench.variables(1)
+    values = optbench.evaluate_formula(0 * x1 + 2.5, np.zeros((4, 1)))
+    np.testing.assert_array_equal(values, [2.5] * 4)
+
+
+def test_a_problem_without_a_formula_yet_says_so() -> None:
+    with pytest.raises(NotImplementedError, match="no formula yet"):
+        optbench.make("booth").formula()

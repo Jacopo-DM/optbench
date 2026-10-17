@@ -243,6 +243,25 @@ tests; the BBOB transforms are the largest part.
 
 ## Decisions and reasons
 
+- Module `formula` (2026-10-17): sympy is reached only through
+  `symbolic.py`, typed as Protocols behind one `cast` of the imported
+  module, because sympy 1.14 has no type information and `mypy.ini` is a
+  template copy that cannot list it in `untyped_calls_exclude`. The facade
+  imports sympy on first use (`import optbench` stays at about 0.3 s; the
+  first formula pays about 1 s). `Expr` is a Protocol with only the
+  arithmetic the formulas use, and the facade grows a function only when a
+  formula needs it (F1 needed `cos` and `absolute`, not `sin`). sympy's
+  `pi` is used where the numpy code uses `math.pi`, so the formula is
+  exact; `lambdify` turns it back into the same float. A function that
+  takes any arguments is typed as a Protocol with `*columns`, since
+  `Callable[..., object]` counts as an explicit `Any` under
+  `disallow_any_explicit`. Formula tests select problems by (suite, group),
+  since the classics share the SFU shape groups.
+- Group files over 400 lines are split by name range, as the larger groups
+  already were: adding the formulas took `bowl.py` to 426 lines, so it is
+  now `bowl_sphere_to_bohachevsky.py` and `bowl_perm_to_trid.py`. Later
+  formula tasks split the same way when a file crosses 400.
+
 - Written from the published formulas, not ported: the site's MATLAB and R
   code is GPL-2.0 (each file header says "version 2.0 of the License"), and
   a port would tie this library to that license. The formulas are images on
@@ -665,6 +684,7 @@ optbench, and what was decided:
 
 | What | Measure | Result | Notes |
 |------|---------|--------|-------|
+| Formulas F1: the 9 bowl functions (`tests/test_formula.py`, d = 1 to 6, 26 points each, 2026-10-17) | formula against numpy | all 42 problem variants equal to rtol 1e-12, atol 1e-10 | suite 1578 to 1620 tests, about 5 s either way |
 | Python standard (`python-standard`, template configs, 2026-10-17) | errors before, after | mypy strict 33 to 0; ruff with the template rules 70 to 0 (30 no-self-use, 23 banned-api, 17 magic values); pyright 0 to 0; coverage 100% of `src` and `scripts` to 100% of branches over `src` and `tests` | every value, bound and minimum of 254 problem variants bit-identical before and after (scratch pin); timing 1261 ms in all before, 1270 after (three runs each, minimum per function), median ratio 1.000 |
 | Batch speed, Tier 1 functions (100,000 points, CPU time, min of 5, Apple silicon under load, 2026-10-16) | ms per call | Sphere (d = 10) 0.5; Branin 1.6; Shekel (m = 10) 7.3 | spec criterion 2 asks for under 100 ms |
 | Batch speed, "many local minima" group (100,000 points, d = 10 where free, CPU time, min of 5, load average 5 to 9, 2026-10-16) | ms per call | Ackley 11.0; Bukin N. 6 0.3; Cross-in-Tray 2.9; Drop-Wave 1.5; Eggholder 2.0; Gramacy and Lee 1.8; Griewank 10.4; Holder Table 2.1; Langermann 13.2; Levy 13.0; Levy N. 13 2.8; Rastrigin 9.8; Schaffer N. 2 1.1; Schaffer N. 4 1.7; Schwefel 9.6; Shubert 14.5 | all under the 100 ms budget |

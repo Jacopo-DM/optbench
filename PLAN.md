@@ -51,7 +51,7 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Module `formula`, task F1 (below); `ailigment`'s goal `optbench-symreg`
+Module `formula`, task F2 (below); `ailigment`'s goal `optbench-symreg`
 waits on the module.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
@@ -83,19 +83,7 @@ characterisation tests are needed first.
 
 Tier 1 (walking skeleton):
 
-- F1. sympy as a dependency, the facade and the first group. `uv add
-  sympy` (1.14.0, PyPI, with mpmath; about 6.8 MB); `symbolic.py` with the
-  typed Protocols, `variables(d)` and `lambdify`; `Problem.formula()` on
-  the base class raising NotImplementedError until F9; formulas for the
-  9 bowl functions; `tests/test_formula.py` with criterion 2's check and
-  the NotImplementedError path. Files: `pyproject.toml`, `uv.lock`,
-  `src/optbench/symbolic.py`, `problem.py`, `__init__.py`,
-  `functions/bowl.py`, `tests/test_formula.py`, CODEMAP.md. Criteria 1,
-  2, 4, 5 for one group. Risk: medium (first contact between strict mypy
-  and an untyped library; the facade's Protocols must cover every
-  operation the later groups need). Cost: about 250 lines, one new
-  dependency, one new concept (the facade). Verify: the new test, mypy
-  and pyright strict, the full suite.
+- F1: done (see DESIGN.md results and decisions).
 
 Tier 2 (by value over risk plus cost; plain formulas first, BBOB last):
 

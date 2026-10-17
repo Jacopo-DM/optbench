@@ -94,6 +94,7 @@ from .functions import (
 )
 from .problem import AnyDimension, Group, Minimum, Problem
 from .registry import make, names
+from .symbolic import Expr, evaluate_formula, variables
 from .tracking import Tracked
 
 __all__ = [
@@ -140,6 +141,7 @@ __all__ = [
     "DropWave",
     "Easom",
     "Eggholder",
+    "Expr",
     "Forrester2008",
     "GoldsteinPrice",
     "GramacyLee2012",
@@ -185,7 +187,9 @@ __all__ = [
     "Trid",
     "Whitley",
     "Zakharov",
+    "evaluate_formula",
     "make",
     "names",
     "random_search",
+    "variables",
 ]

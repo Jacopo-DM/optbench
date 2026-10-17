@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (6288 lines, 31 files)
+## `src/optbench` (6613 lines, 33 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -18,7 +18,12 @@ Public interface (`optbench/__init__.py`):
   `default_bounds()`), `uses_default_domain`, `contains(points)`, `minimum`
   (a `Minimum` or `None`), class variables `name`, `group`, `url`,
   `references`, `suite` (`"sfu"`, or `"classic"` for functions not on
-  the SFU pages).
+  the SFU pages). `formula()` returns the function as a sympy `Expr` in
+  `variables(d)` (the bowl group so far; the others raise
+  NotImplementedError).
+- `Expr` (a Protocol: a sympy expression with arithmetic), `variables(d)`
+  (`x1` to `xd`), `evaluate_formula(formula, points)` (`(n,)` values, by
+  `sympy.lambdify`).
 - `AnyDimension`: a `Problem` with a `d` field (default 2), for functions
   defined for any number of variables.
 - `Minimum`: `value`, `points` (`(k, d)`, read-only), `source`,
@@ -90,13 +95,16 @@ Public interface (`optbench/__init__.py`):
   `problem.bounds`, exactly `budget` of them, in batches; returns the
   `Tracked` record of the run.
 
-Depends on: numpy, pydantic.
+Depends on: numpy, pydantic, sympy (imported on first use, only by
+`symbolic.py`).
 
 Files: `model.py` (`Model`, the frozen, `extra="forbid"` pydantic base of
 every record); `problem.py` (`Problem`, `AnyDimension`, `Minimum`, `Group`, `box`,
 `formula_minimum`: a minimum from a formula if its minimisers lie in the
-domain);
-`functions/`: `bowl.py`, `plate.py`, `steep.py`, `valley.py`,
+domain); `symbolic.py` (the typed sympy facade: `Expr`, `variables`,
+`total`, `pi`, `cos`, `absolute`, `evaluate_formula`);
+`functions/`: `bowl_sphere_to_bohachevsky.py`, `bowl_perm_to_trid.py`,
+`plate.py`, `steep.py`, `valley.py`,
 `other_beale_to_goldstein_price.py`, `other_hartmann.py`,
 `other_perm_to_styblinski_tang.py`, `many_local_minima_any_d.py`,
 `many_local_minima_bukin_to_gramacy.py`,
@@ -131,7 +139,7 @@ allowed over it), `main` returning the exit status), `baseline.py` (`main`));
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (1621 lines, 14 files)
+## `tests` (1732 lines, 15 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
@@ -141,6 +149,8 @@ handling), `test_bowl.py`, `test_plate.py`, `test_steep.py` and
 `test_bbob.py` (every BBOB function against `cocoex`), `test_many_local_minima.py` (the group's published values,
 constants, minima that follow parameters, refusals),
 `test_problem.py` (`replace`, the stored domain, read-only minima),
+`test_formula.py` (each formula equals its numpy values; the groups
+covered so far),
 `test_registry_and_tracking.py`, `test_baseline.py`, `test_scripts.py`
 (both scripts on small budgets in a temporary folder). Depends on: `optbench` (with `optbench.scripts`), numpy, pytest, `cocoex` (dev only).
 

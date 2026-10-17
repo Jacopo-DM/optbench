@@ -40,8 +40,9 @@ Before every commit run format, lint, both type checks and the tests above.
   decisions, rejected approaches, results) and this file (commands, rules).
   Each fact lives in exactly one file.
 - This library never imports `ailigment` or any other optimiser code, and
-  depends on numpy and pydantic only at run time. A new run-time
-  dependency needs the user's approval.
+  depends on numpy, pydantic and sympy (for `formula()`, approved
+  2026-10-17) only at run time. A new run-time dependency needs the user's
+  approval.
 - Every function is written from its published formula, never from the
   SFU site's MATLAB or R code (GPL-2.0). Read the formula image on the
   function's SFU page (`<page>2.png` and so on) and the cited paper.

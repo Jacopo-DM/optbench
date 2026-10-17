@@ -34,16 +34,18 @@ from .bbob_separable import (
     BbobRastrigin,
     BbobSphere,
 )
-from .bowl import (
-    Bohachevsky1,
-    Bohachevsky2,
-    Bohachevsky3,
+from .bowl_perm_to_trid import (
     Perm0,
     RotatedHyperEllipsoid,
-    Sphere,
     SumOfDifferentPowers,
     SumSquares,
     Trid,
+)
+from .bowl_sphere_to_bohachevsky import (
+    Bohachevsky1,
+    Bohachevsky2,
+    Bohachevsky3,
+    Sphere,
 )
 from .classics_alpine_to_himmelblau import (
     AlpineN2,

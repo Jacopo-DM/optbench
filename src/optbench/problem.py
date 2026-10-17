@@ -9,6 +9,7 @@ from numpy.typing import ArrayLike, NDArray
 from pydantic import BeforeValidator, ConfigDict, Field, PlainValidator
 
 from .model import Model
+from .symbolic import Expr
 
 
 class Group(StrEnum):
@@ -179,6 +180,22 @@ class Problem(Model, ABC):
 
     def _check(self) -> None:
         """Check the parameters; subclasses with parameters override it."""
+
+    def formula(self) -> Expr:
+        """Return the function as a sympy expression in ``variables(d)``.
+
+        Built from the same fields as the numpy code, so a problem with
+        changed constants has a formula with those constants;
+        ``evaluate_formula`` turns it into values.
+
+        Raises
+        ------
+        NotImplementedError
+            For the groups that have no formulas yet (module ``formula``
+            adds them group by group).
+        """
+        msg = f"{self.name} has no formula yet"
+        raise NotImplementedError(msg)
 
     @property
     def bounds(self) -> NDArray[np.float64]:
