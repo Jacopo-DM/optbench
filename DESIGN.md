@@ -501,8 +501,13 @@ fits it. One commit; the minima are checked numerically as for SFU.
   `__data__/plots/baseline_gap.png` (figure about 8 by 19 inches for 83
   functions).
 
-- Python standard, module `python-standard` (the user, 2026-10-17, each
-  the recommended option):
+- Python standard, module `python-standard` (kind: change; spec and nine
+  tasks approved by the user on 2026-10-17). Goal: optbench passes the
+  user's Python standard (`~/.claude/standards/python/core.md`) with the
+  template configs unchanged and every value bit for bit the same.
+  Non-goals: a Sphinx docs site (the user's `/zz-python-docs` prompt),
+  any speed-up, the `ailigment` migration. The user's answers to its four
+  design questions (each the recommended option):
   - Variants come from a `problem.replace(**changes)` method that rebuilds
     the model through validation, because pydantic's `model_copy(update=...)`
     skips the checks (`model_copy(update={"d": 0})` would give a broken
@@ -528,6 +533,23 @@ fits it. One commit; the minima are checked numerically as for SFU.
     model (`frozen=False`), the standard's exception for records that must
     change. Pyright stays in the dev group as a check, since the standard
     counts its editor errors as real and a session sees no editor.
+  - Found while doing it: the generated `__init__` is typed with the
+    stored field type, so type checkers want `domain` as a tuple of tuples
+    (tests pass tuples; arrays and lists still work at run time and
+    through `model_validate`). A flat tuple where a matrix belongs
+    (`Shekel(c=(1.0, 2.0))`) is now refused by pydantic's type check with
+    its own message, not by the function's "c must be a matrix" check; an
+    empty tuple still reaches that check. Errors raised in
+    `model_post_init` reach the caller as `pydantic.ValidationError`, a
+    `ValueError` subclass, with the original message inside.
+  - Pyright types `BaseModel.__hash__` as `None` (pydantic adds it to
+    frozen models at run time), so a model cannot be a `functools.cache`
+    key without a type error; Gallagher's peak cache is keyed on the f21 or
+    f22 class instead. `Tracked(problem)` stays positional by calling
+    `BaseModel.__init__` directly, because the `__init__` type checkers
+    synthesise for `Model` has no fields. `cocoex` has no stubs: the tests
+    `cast` its `Suite` to a `Protocol` (mypy) and `.typings/cocoex` holds a
+    minimal stub (pyright), with no config change.
 
 ## Other sources of test functions (reviewed 2026-10-17)
 
@@ -553,6 +575,10 @@ optbench, and what was decided:
 - Depending on an existing Python collection of test functions: the user
   asked for an own library with every constant editable, and the licences
   and accuracy of those collections would need checking function by function.
+- Replacing BBOB's module-level `functools.cache` helpers with
+  `cached_property` on the models (`python-standard`, 2026-10-17): no
+  behaviour or speed gain, and the module cache is shared by every
+  instance with the same seed, which is what BBOB wants.
 - A `check_dimension` helper and an `as_array` helper in `problem.py`
   (Tier 1): each had one real call site, so the checks stay inline until a
   second one exists.
@@ -561,6 +587,7 @@ optbench, and what was decided:
 
 | What | Measure | Result | Notes |
 |------|---------|--------|-------|
+| Python standard (`python-standard`, template configs, 2026-10-17) | errors before, after | mypy strict 33 to 0; ruff with the template rules 70 to 0 (30 no-self-use, 23 banned-api, 17 magic values); pyright 0 to 0; coverage 100% of `src` and `scripts` to 100% of branches over `src` and `tests` | every value, bound and minimum of 254 problem variants bit-identical before and after (scratch pin); timing 1261 ms in all before, 1270 after (three runs each, minimum per function), median ratio 1.000 |
 | Batch speed, Tier 1 functions (100,000 points, CPU time, min of 5, Apple silicon under load, 2026-10-16) | ms per call | Sphere (d = 10) 0.5; Branin 1.6; Shekel (m = 10) 7.3 | spec criterion 2 asks for under 100 ms |
 | Batch speed, "many local minima" group (100,000 points, d = 10 where free, CPU time, min of 5, load average 5 to 9, 2026-10-16) | ms per call | Ackley 11.0; Bukin N. 6 0.3; Cross-in-Tray 2.9; Drop-Wave 1.5; Eggholder 2.0; Gramacy and Lee 1.8; Griewank 10.4; Holder Table 2.1; Langermann 13.2; Levy 13.0; Levy N. 13 2.8; Rastrigin 9.8; Schaffer N. 2 1.1; Schaffer N. 4 1.7; Schwefel 9.6; Shubert 14.5 | all under the 100 ms budget |
 | Batch speed, bowl-shaped group (100,000 points, d = 10 where free, CPU time, min of 5, load average 7 to 10, 2026-10-16) | ms per call | Bohachevsky 1 1.9, 2 2.0, 3 1.1; Perm 0, d, beta 43.1 (126.3 with `x ** i`); Rotated Hyper-Ellipsoid 1.6; Sphere 0.4; Sum of Different Powers 9.4; Sum Squares 1.7; Trid 2.8 | all under the 100 ms budget |

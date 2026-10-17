@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (6025 lines, 27 files)
+## `src/optbench` (6288 lines, 31 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -130,7 +130,7 @@ allowed over it), `main` returning the exit status), `baseline.py` (`main`));
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (1516 lines, 13 files)
+## `tests` (1621 lines, 14 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
@@ -146,4 +146,4 @@ constants, minima that follow parameters, refusals),
 ## Size checks (400 lines per file)
 
 No file over 400 lines; the largest is
-`functions/bbob_multimodal_weak.py` (360).
+`functions/many_local_minima_any_d.py` (389).

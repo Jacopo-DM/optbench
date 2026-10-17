@@ -1,5 +1,3 @@
-"""The part of cocoex (coco-experiment) that optbench's tests use."""
-
 class Suite:
     def __init__(
         self,
