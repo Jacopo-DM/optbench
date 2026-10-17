@@ -31,13 +31,11 @@ other). The approved spec and task list are in DESIGN.md.
   `cocoex` (1e-9 for f16 to f19 and f23, 1e-12 for the rest; DESIGN.md
   results); 83 functions in all, 1578 tests, 100% branch coverage over
   `src` and `tests`; ruff, mypy strict and pyright strict clean.
-- Git: `main` is pushed up to 1385e82. The `python-standard` work (65b1971
-  to c44f77f) is on `main`, not pushed: GitHub refused the push on
-  2026-10-17 because the `gh` token (scopes `gist`, `read:org`, `repo`)
-  lacks `workflow`, which any push adding `.github/workflows/ci.yml`
-  needs. The user runs `gh auth refresh -h github.com -s workflow`, then
-  the push can go. Branch `python-standard` is deleted;
-  `spec-python-standard` (merged) still exists.
+- Git: `main` is pushed (0e06938, 2026-10-17, the user's say-so); the
+  first CI run on it passed every step (cocoex 2.8.2 built from source in
+  17 s, 1578 tests, 100% coverage). Dependabot opened PR #1 (setup-uv
+  9.0.0 to 10.3.0), not merged. Merged local branches not yet deleted:
+  `spec-python-standard`, `notes-push-blocked`, `notes-ci-green`.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
@@ -50,8 +48,8 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Once the user has added the `workflow` scope (see Current state), push
-`main` and read the first CI run (see item 1 below). Then the `ailigment` migration.
+The `ailigment` migration: write its spec and stop for the user's
+approval.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -61,13 +59,11 @@ then BBOB, then the `ailigment` adapters. Downloading RR-6829 (573,076
 bytes, from https://inria.hal.science/inria-00362633/document) and adding
 COCO's Python package as a dev-only dependency are approved too.
 
-1. done locally, CI not run yet: module `python-standard` (approved
+1. done, CI green (2026-10-17): module `python-standard` (approved
    2026-10-17, commits ae6f494 to the pre-commit and CI commit on branch
    `python-standard`, merged into `main`). The spec, the user's four
    answers and what the work found are in DESIGN.md ("Python standard"
-   under Decisions, the results row, the rejected approach). The first CI
-   run happens on the next push and is unverified: it compiles cocoex from
-   source on ubuntu-latest; if that fails, stop and tell the user.
+   under Decisions, the results row, the rejected approach).
 
 2. later: the same migration for `ailigment`, then its adapters (its
    PLAN.md).
