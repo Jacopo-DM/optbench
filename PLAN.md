@@ -51,8 +51,8 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Get the user's approval of the draft spec for module `formula` (below);
-`ailigment`'s goal `optbench-symreg` waits on it.
+Get the user's approval of the `formula` task list (below); `ailigment`'s
+goal `optbench-symreg` waits on the module.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -69,64 +69,68 @@ COCO's Python package as a dev-only dependency are approved too.
    under Decisions, the results row, the rejected approach).
 
 2. done (2026-10-17): the same migration for `ailigment` (its PLAN.md).
-3. draft, awaiting the user's approval: module `formula` (below), asked
-   for by `ailigment`'s approved goal `optbench-symreg` (its DESIGN.md).
+3. approved 2026-10-17, task list awaiting approval: module `formula`
+   (spec in DESIGN.md, "Approved spec: formula"), asked for by
+   `ailigment`'s approved goal `optbench-symreg` (its DESIGN.md).
 
-### Draft spec: module `formula` (2026-10-17)
+### Task list: module `formula` (awaiting the user's approval)
 
-Kind: build (new behaviour). Goal: every optbench problem returns its
-formula as a sympy expression. Users: `ailigment`'s `optbench-symreg`,
-which checks whether an evolved formula equals the true one exactly, and
-anyone who wants a function's closed form (sympy can print or simplify
-it). The user chose to keep the formulas here rather than in `ailigment`,
-so they stay next to the functions and change with their parameters.
+Each task is one commit with every check passing. The equality test
+(criterion 2) is written first and runs over the problems that already
+have a formula, so each task adds its group to it. Every area touched has
+tests pinning its numbers today (the known-minimum and COCO tests), so no
+characterisation tests are needed first.
 
-Acceptance criteria:
+Tier 1 (walking skeleton):
 
-1. `Problem.formula()` returns a sympy expression in the variables
-   `optbench.variables(d)`, named `x1` to `xd` as the SFU pages write them
-   (column j of the points is `x(j+1)`; the user's choice over `x0`), for
-   every one of the 83 problems. Example: `Booth().formula()` prints
-   `(x1 + 2*x2 - 7)**2 + (2*x1 + x2 - 5)**2`.
-2. It equals the numpy value: for every problem with default parameters
-   (any-d problems at d = 1 to 6 where allowed, BBOB at d = 2 to 6 and
-   instances 1 to 5), the formula turned into a numpy function with
-   `sympy.lambdify` matches `problem(x)` at the 26 points the BBOB test
-   already uses (20 in the domain, 5 outside, the optimum), to the
-   relative tolerances of `tests/test_bbob.py` (1e-12, and 1e-9 for f16
-   to f19 and f23), absolute 1e-10.
-3. It follows the parameters: a problem built with changed constants
-   (for example `make("ackley", a=10.0)`) gives a formula that matches its
-   own values, tested on one problem per file.
-4. sympy is a required dependency of optbench (the user's choice over an
-   optional extra: simpler, and no missing-extra path to handle).
-5. The standard holds: mypy strict with no `Any`, pyright strict, ruff,
-   100% branch coverage, no change to the template configs. sympy has no
-   type information (1.14 ships no `py.typed`), so one module,
-   `optbench/symbolic.py`, reaches it through typed Protocols with a
-   `cast`, as the standard's untyped-library pattern does, and nothing
-   else imports sympy. (`untyped_calls_exclude` in `mypy.ini` is the
-   standard's other route, but that file is a template copy.)
+- F1. sympy as a dependency, the facade and the first group. `uv add
+  sympy` (1.14.0, PyPI, with mpmath; about 6.8 MB); `symbolic.py` with the
+  typed Protocols, `variables(d)` and `lambdify`; `Problem.formula()` on
+  the base class raising NotImplementedError until F9; formulas for the
+  9 bowl functions; `tests/test_formula.py` with criterion 2's check and
+  the NotImplementedError path. Files: `pyproject.toml`, `uv.lock`,
+  `src/optbench/symbolic.py`, `problem.py`, `__init__.py`,
+  `functions/bowl.py`, `tests/test_formula.py`, CODEMAP.md. Criteria 1,
+  2, 4, 5 for one group. Risk: medium (first contact between strict mypy
+  and an untyped library; the facade's Protocols must cover every
+  operation the later groups need). Cost: about 250 lines, one new
+  dependency, one new concept (the facade). Verify: the new test, mypy
+  and pyright strict, the full suite.
 
-Non-goals: simplifying the formulas, LaTeX or other printing APIs,
-symbolic gradients, evaluating through sympy instead of numpy, formulas
-for dimensions beyond what each problem allows.
+Tier 2 (by value over risk plus cost; plain formulas first, BBOB last):
 
-Dependency: sympy 1.14.0 from PyPI (wheel about 6.3 MB) with mpmath 1.3.0
-(about 0.5 MB), in `[project].dependencies`; the user accepted it for this
-purpose in `ailigment`'s spec and chose a required dependency here.
+- F2. plate (5), steep (3) and valley (4). Files: those three modules,
+  the test. Risk low; about 120 lines.
+- F3. many local minima (16, three modules), with the piecewise ones
+  (Bukin N. 6, Cross-in-Tray, Holder table) through sympy `Abs` and
+  `Piecewise`. Risk low; about 200 lines.
+- F4. other (12, three modules): Hartmann and Shekel with their constant
+  matrices as numbers, Powell, Perm. Risk low; about 180 lines.
+- F5. classics (10, two modules). Risk low; about 120 lines.
+- F6. BBOB transforms as symbolic twins in `bbob_common.py` (T_osz,
+  T_asy, Lambda, the rotations as number matrices, f_pen, the shift by
+  `x_opt`), and the separable f1 to f5. Risk: medium (T_osz is piecewise
+  in sign and log; the twins must match COCO's order of operations to the
+  tolerances); about 250 lines.
+- F7. BBOB f6 to f14. Risk medium (rotations and conditioning); about
+  150 lines.
+- F8. BBOB f15 to f24: Weierstrass's sums, Gallagher's maximum over 101
+  or 21 peaks, Katsuura's rounding, Lunacek's minimum. Risk: medium to
+  high (largest expressions; lambdify at d = 6 must stay fast enough for
+  the suite); about 250 lines.
+- F9. Every class has a formula: `formula()` becomes abstract on the
+  base class and the NotImplementedError path goes; criterion 3 (changed
+  constants, one problem per file); CODEMAP.md, the README and DESIGN.md's
+  results row (suite time before and after). Risk low; about 80 lines.
 
-Architecture: `symbolic.py` (the typed sympy facade: symbols, the
-operations the formulas use, `lambdify`); `formula()` on each problem
-class next to its `_evaluate`, written from the same fields; a symbolic
-twin of the BBOB transforms (T_osz, T_asy, Lambda, the rotations as
-number matrices, f_pen) in `bbob_common.py`. Rejected: generating the
-formulas by tracing the numpy code (fragile for the piecewise and rounding
-transforms), and one table of formulas apart from the classes (would drift
-from the parameters).
+Verify after each task: the full suite, mypy, pyright, ruff, the timing
+script (sympy must not slow `problem(x)`; it is not on that path), and the
+suite's run time (today about 5 s; the formula test adds one lambdify per
+(problem, d, instance), about 800, so I expect it to grow to tens of
+seconds; if it passes a minute, stop and ask).
 
-Estimated size: about 83 formulas and a facade, roughly 1500 lines with
-tests; the BBOB transforms are the largest part.
+Tier 3 (not built): simplifying formulas, LaTeX or printing APIs,
+symbolic gradients, evaluating through sympy (the spec's non-goals).
 
 ## Open questions for the user
 
