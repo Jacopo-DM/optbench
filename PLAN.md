@@ -31,10 +31,13 @@ other). The approved spec and task list are in DESIGN.md.
   `cocoex` (1e-9 for f16 to f19 and f23, 1e-12 for the rest; DESIGN.md
   results); 83 functions in all, 1578 tests, 100% branch coverage over
   `src` and `tests`; ruff, mypy strict and pyright strict clean.
-- Git: `main` is pushed up to 1385e82 (2026-10-17, the user's say-so);
-  the `python-standard` spec (65b1971) and its work are on `main`, not
-  pushed. The merged branch `python-standard` still exists (deleting it
-  needs the user's say-so).
+- Git: `main` is pushed up to 1385e82. The `python-standard` work (65b1971
+  to c44f77f) is on `main`, not pushed: GitHub refused the push on
+  2026-10-17 because the `gh` token (scopes `gist`, `read:org`, `repo`)
+  lacks `workflow`, which any push adding `.github/workflows/ci.yml`
+  needs. The user runs `gh auth refresh -h github.com -s workflow`, then
+  the push can go. Branch `python-standard` is deleted;
+  `spec-python-standard` (merged) still exists.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
@@ -47,8 +50,8 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-With the user's say-so, push `main` and read the first CI run (see item 1
-below). Then the `ailigment` migration.
+Once the user has added the `workflow` scope (see Current state), push
+`main` and read the first CI run (see item 1 below). Then the `ailigment` migration.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
