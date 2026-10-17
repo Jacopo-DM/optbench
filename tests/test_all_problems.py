@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import dataclasses
-
 import numpy as np
 import pytest
 
@@ -23,7 +21,7 @@ def _problems() -> list[Problem]:
     """
     problems = [optbench.make(name) for name in optbench.names()]
     free = [p for p in problems if hasattr(p, "d")]
-    problems += [dataclasses.replace(p, d=8) for p in free]
+    problems += [p.replace(d=8) for p in free]
     return problems
 
 

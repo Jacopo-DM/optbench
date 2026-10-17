@@ -116,7 +116,7 @@ VARIANTS = [
     PermDBeta(d=4, beta=3.0),
     Powell(d=4, a=1.0, c=0.5),
     StyblinskiTang(d=3, a=4.0, b=-2.0, scale=2.0),
-    StyblinskiTang(d=2, domain=[[0.0, 1.0], [-1.0, 1.0]]),
+    StyblinskiTang(d=2, domain=((0.0, 1.0), (-1.0, 1.0))),
 ]
 
 
@@ -143,7 +143,7 @@ def test_minimum_follows_the_parameters(problem: Problem) -> None:
         GoldsteinPrice(b=20.0),
         Hartmann3(alpha=(1.0, 1.0, 1.0, 1.0)),
         Hartmann4(scale=1.0),
-        Hartmann6(domain=[[0.0, 0.5]] * 6),
+        Hartmann6(domain=((0.0, 0.5),) * 6),
         Powell(b=-1.0),
         StyblinskiTang(scale=-0.5),
     ],

@@ -9,8 +9,7 @@ SFU page rounds or omits were found numerically; see ``known_minima``.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -26,7 +25,6 @@ _GROUP = Group.MANY_LOCAL_MINIMA
 _SFU = "https://www.sfu.ca/~ssurjano/"
 
 
-@dataclass(frozen=True, kw_only=True)
 class HolderTable(Problem):
     """Holder Table function: four global minima near the corners.
 
@@ -46,17 +44,21 @@ class HolderTable(Problem):
     offset: float = 1.0
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-10.0, 10.0, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published constant (found numerically)."""
         return at_defaults(self, HOLDER_TABLE)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         radius = np.sqrt(x1**2 + x2**2)
@@ -64,7 +66,6 @@ class HolderTable(Problem):
         return -np.abs(np.sin(x1) * np.cos(x2) * growth)
 
 
-@dataclass(frozen=True, kw_only=True)
 class LevyN13(Problem):
     """Levy function N. 13.
 
@@ -87,13 +88,16 @@ class LevyN13(Problem):
     c: float = 2.0
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-10.0, 10.0, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at (1, 1) when ``a`` is a whole number.
 
@@ -103,8 +107,14 @@ class LevyN13(Problem):
         points = np.ones((1, 2))
         if not float(self.a).is_integer() or not self.contains(points):
             return None
-        return Minimum(0.0, points, "formula", tolerance=0.0)
+        return Minimum(
+            value=0.0,
+            points=points,
+            source="formula",
+            tolerance=0.0,
+        )
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         first = np.sin(self.a * math.pi * x1) ** 2
@@ -113,7 +123,6 @@ class LevyN13(Problem):
         return first + second + third
 
 
-@dataclass(frozen=True, kw_only=True)
 class SchafferN2(Problem):
     """Schaffer function N. 2.
 
@@ -133,13 +142,16 @@ class SchafferN2(Problem):
     scale: float = 0.001
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-100.0, 100.0, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin for ``scale >= 0``.
 
@@ -148,8 +160,14 @@ class SchafferN2(Problem):
         points = np.zeros((1, 2))
         if self.scale < 0 or not self.contains(points):
             return None
-        return Minimum(0.0, points, "formula", tolerance=0.0)
+        return Minimum(
+            value=0.0,
+            points=points,
+            source="formula",
+            tolerance=0.0,
+        )
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         top = np.sin(x1**2 - x2**2) ** 2 - 0.5
@@ -157,7 +175,6 @@ class SchafferN2(Problem):
         return 0.5 + top / bottom
 
 
-@dataclass(frozen=True, kw_only=True)
 class SchafferN4(Problem):
     """Schaffer function N. 4.
 
@@ -177,17 +194,21 @@ class SchafferN4(Problem):
     scale: float = 0.001
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-100.0, 100.0, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published constant (found numerically)."""
         return at_defaults(self, SCHAFFER_N4)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         top = np.cos(np.sin(np.abs(x1**2 - x2**2))) ** 2 - 0.5
@@ -195,7 +216,6 @@ class SchafferN4(Problem):
         return 0.5 + top / bottom
 
 
-@dataclass(frozen=True, kw_only=True)
 class Shubert(Problem):
     """Shubert function: 18 global minima among many local ones.
 
@@ -214,23 +234,28 @@ class Shubert(Problem):
 
     terms: int = 5
 
+    @override
     def _check(self) -> None:
         if self.terms < 1:
             msg = f"terms must be at least 1, got {self.terms}"
             raise ValueError(msg)
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-10.0, 10.0, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published constant (found numerically)."""
         return at_defaults(self, SHUBERT)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         i = np.arange(1, self.terms + 1, dtype=np.float64)
         sums = np.sum(i * np.cos((i + 1) * x[:, :, np.newaxis] + i), axis=2)

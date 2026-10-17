@@ -7,8 +7,7 @@ the group is in ``other_beale_to_goldstein_price`` and
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -57,7 +56,6 @@ def _first_four(matrix: _Matrix) -> _Matrix:
     return tuple(row[:4] for row in matrix)
 
 
-@dataclass(frozen=True, kw_only=True)
 class _Hartmann(Problem):
     """What the Hartmann functions share.
 
@@ -77,6 +75,7 @@ class _Hartmann(Problem):
     a: tuple[tuple[float, ...], ...] = _A3
     p: tuple[tuple[float, ...], ...] = _P3
 
+    @override
     def _check(self) -> None:
         widths = np.asarray(self.a, dtype=np.float64)
         centres = np.asarray(self.p, dtype=np.float64)
@@ -89,9 +88,11 @@ class _Hartmann(Problem):
             raise ValueError(msg)
 
     @property
+    @override
     def dimension(self) -> int:
         return len(self.a[0])
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(0.0, 1.0, self.dimension)
 
@@ -111,7 +112,6 @@ class _Hartmann(Problem):
         return bumps
 
 
-@dataclass(frozen=True, kw_only=True)
 class Hartmann3(_Hartmann):
     """Hartmann 3-D function, ``f(x) = -g(x)``: four local minima."""
 
@@ -120,15 +120,16 @@ class Hartmann3(_Hartmann):
     references: ClassVar[tuple[str, ...]] = (HEDAR,)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published constants (found numerically)."""
         return at_defaults(self, HARTMANN_3)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         return -self._bumps(x)
 
 
-@dataclass(frozen=True, kw_only=True)
 class Hartmann4(_Hartmann):
     """Hartmann 4-D function, rescaled to mean 0 and variance 1.
 
@@ -151,15 +152,16 @@ class Hartmann4(_Hartmann):
     scale: float = 0.839
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published constants (found numerically)."""
         return at_defaults(self, HARTMANN_4)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         return (self.offset - self._bumps(x)) / self.scale
 
 
-@dataclass(frozen=True, kw_only=True)
 class Hartmann6(_Hartmann):
     """Hartmann 6-D function, ``f(x) = -g(x)``: six local minima."""
 
@@ -171,9 +173,11 @@ class Hartmann6(_Hartmann):
     p: tuple[tuple[float, ...], ...] = _P6
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published constants (found numerically)."""
         return at_defaults(self, HARTMANN_6)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         return -self._bumps(x)

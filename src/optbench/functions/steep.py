@@ -6,8 +6,7 @@ https://www.sfu.ca/~ssurjano/optimization.html, group "Steep Ridges/Drops".
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -37,7 +36,6 @@ _DE_JONG_A = (
 )
 
 
-@dataclass(frozen=True, kw_only=True)
 class DeJong5(Problem):
     """De Jong function N. 5 (Shekel's foxholes): 25 sharp drops.
 
@@ -62,23 +60,28 @@ class DeJong5(Problem):
     power: float = 6.0
     a: tuple[tuple[float, ...], tuple[float, ...]] = _DE_JONG_A
 
+    @override
     def _check(self) -> None:
         if len(self.a) != 2 or len(self.a[0]) != len(self.a[1]):  # ruff: ignore[magic-value-comparison]
             msg = "a must have two rows of equal length"
             raise ValueError(msg)
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-65.536, 65.536, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published constants (found numerically)."""
         return at_defaults(self, DE_JONG_5)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         centres = np.asarray(self.a, dtype=np.float64)
         i = np.arange(1, centres.shape[1] + 1, dtype=np.float64)
@@ -87,7 +90,6 @@ class DeJong5(Problem):
         return 1 / (self.offset + np.sum(1 / bottoms, axis=1))
 
 
-@dataclass(frozen=True, kw_only=True)
 class Easom(Problem):
     """Easom function: a single narrow drop on a flat plane.
 
@@ -107,13 +109,16 @@ class Easom(Problem):
     centre: float = math.pi
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-100.0, 100.0, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """-1 at ``(centre, centre)`` when ``centre`` is a multiple of pi.
 
@@ -126,6 +131,7 @@ class Easom(Problem):
         points = np.full((1, 2), self.centre)
         return formula_minimum(self, -1.0, points)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         distance = (x1 - self.centre) ** 2 + (x2 - self.centre) ** 2
@@ -138,7 +144,6 @@ _MICHALEWICZ_GRID = 20_000
 _NEWTON_STEPS = 30
 
 
-@dataclass(frozen=True, kw_only=True)
 class Michalewicz(AnyDimension):
     """Michalewicz function: ``d!`` local minima in steep valleys.
 
@@ -157,10 +162,12 @@ class Michalewicz(AnyDimension):
 
     m: float = 10.0
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(0.0, math.pi, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Exact for any ``d``, ``m`` and domain: the terms are independent.
 
@@ -174,8 +181,14 @@ class Michalewicz(AnyDimension):
         for i, (low, high) in enumerate(self.bounds, start=1):
             point[i - 1] = _michalewicz_argmin(i, self.m, low, high)
         value = float(self(point[np.newaxis])[0])
-        return Minimum(value, point[np.newaxis], "per-coordinate search", 1e-12)
+        return Minimum(
+            value=value,
+            points=point[np.newaxis],
+            source="per-coordinate search",
+            tolerance=1e-12,
+        )
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         i = np.arange(1, self.d + 1, dtype=np.float64)
         return -np.sum(_michalewicz_terms(x, i, self.m), axis=1)

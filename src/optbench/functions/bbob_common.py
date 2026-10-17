@@ -12,8 +12,7 @@ from __future__ import annotations
 
 import functools
 import math
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -269,7 +268,6 @@ def rastrigin(z: NDArray[np.float64], a: float) -> NDArray[np.float64]:
     return a * (z.shape[1] - waves) + np.einsum("ij,ij->i", z, z)
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobProblem(AnyDimension):
     """What every BBOB function shares; each group module subclasses it.
 
@@ -289,6 +287,7 @@ class BbobProblem(AnyDimension):
 
     instance: int = 1
 
+    @override
     def _check(self) -> None:
         super()._check()
         if self.instance < 1:
@@ -310,16 +309,17 @@ class BbobProblem(AnyDimension):
         """The minimum value."""
         return f_opt(self.function, self.instance)
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-5.0, 5.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt``, where every transformed ``z`` is 0."""
         return formula_minimum(self, self.f_opt, self.x_opt[np.newaxis])
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobRotated(BbobProblem):
     """A BBOB function with COCO's rotations ``R`` and ``Q``.
 

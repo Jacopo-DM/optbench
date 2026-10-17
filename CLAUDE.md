@@ -33,8 +33,8 @@ Before every commit run lint, type check and the tests above.
   decisions, rejected approaches, results) and this file (commands, rules).
   Each fact lives in exactly one file.
 - This library never imports `ailigment` or any other optimiser code, and
-  depends on numpy only at run time. A new run-time dependency needs the
-  user's approval.
+  depends on numpy and pydantic only at run time. A new run-time
+  dependency needs the user's approval.
 - Every function is written from its published formula, never from the
   SFU site's MATLAB or R code (GPL-2.0). Read the formula image on the
   function's SFU page (`<page>2.png` and so on) and the cited paper.
@@ -46,8 +46,10 @@ Before every commit run lint, type check and the tests above.
   100, to 1e-12, or 1e-9 where `RTOL` there says why). `cocoex` is a test
   reference only; never import it in
   `src`.
-- Adding a function (spec criteria 1 to 7): a frozen, keyword-only dataclass
-  subclass of `Problem` (or of `AnyDimension` when any `d` works, which
+- Adding a function (spec criteria 1 to 7): a subclass of `Problem` (a
+  frozen pydantic model; fields are keyword arguments; mark each
+  `_evaluate`, `default_bounds`, `minimum` and `_check` with
+  `@typing.override`) (or of `AnyDimension` when any `d` works, which
   supplies the `d` field) in the module of its SFU group under
   `src/optbench/functions/` (a function from another collection goes in
   that collection's modules, `classics_*.py`, with its `suite` set); every constant of the formula is a field with
@@ -99,6 +101,12 @@ Before every commit run lint, type check and the tests above.
 
 ## Things that bite
 
+- Ruff's typing-only-import rules (TC001 to TC003) move an import that is
+  used only in annotations under `if TYPE_CHECKING:` when the module has
+  `from __future__ import annotations`. Pydantic reads field annotations
+  at run time, so a model whose fields use such a type (`NDArray` in
+  `problem.py`) then fails to build. Modules that declare model fields of
+  imported types do not use the future import, so ruff keeps the import.
 - Editing a state file with a Python `str.replace` script does nothing when
   the old text does not match exactly (a reflowed line, a word changed by an
   earlier edit), and raises no error. Put `assert old in text` before every

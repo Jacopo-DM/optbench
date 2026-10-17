@@ -51,7 +51,7 @@ def test_easom_matches_the_published_minimum() -> None:
 
 VARIANTS = [
     Michalewicz(d=3, m=2.5),
-    Michalewicz(d=2, m=1.0, domain=[[1.0, 3.0], [0.5, 2.0]]),
+    Michalewicz(d=2, m=1.0, domain=((1.0, 3.0), (0.5, 2.0))),
     Easom(centre=2 * math.pi),
     Easom(centre=0.0),
 ]
@@ -91,13 +91,13 @@ def test_de_jong5_refuses_misshapen_centres() -> None:
 @pytest.mark.parametrize(
     "domain",
     [
-        [[1.0, 1.5]],  # the term rises across it: best at the right edge
-        [[1.0, 2.1]],  # the peak (2.20) is just outside: Newton would leave
-        [[0.0, 0.1]],  # the term is flat (below 1e-40): no curvature
+        ((1.0, 1.5),),  # the term rises across it: best at the right edge
+        ((1.0, 2.1),),  # the peak (2.20) is just outside: Newton would leave
+        ((0.0, 0.1),),  # the term is flat (below 1e-40): no curvature
     ],
 )
 def test_michalewicz_minimum_on_awkward_domains(
-    domain: list[list[float]],
+    domain: tuple[tuple[float, float], ...],
 ) -> None:
     problem = Michalewicz(d=1, domain=domain)
     minimum = problem.minimum

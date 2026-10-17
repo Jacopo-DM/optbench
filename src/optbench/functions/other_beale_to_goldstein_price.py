@@ -7,8 +7,7 @@ the group is in ``other_hartmann`` and ``other_perm_to_styblinski_tang``.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -28,7 +27,6 @@ _FORRESTER = (
 )
 
 
-@dataclass(frozen=True, kw_only=True)
 class Beale(Problem):
     """Beale function: sharp peaks at the corners of the domain.
 
@@ -48,13 +46,16 @@ class Beale(Problem):
     c: tuple[float, float, float] = (1.5, 2.25, 2.625)
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-4.5, 4.5, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero where all three brackets vanish, if they can.
 
@@ -72,6 +73,7 @@ class Beale(Problem):
             return None
         return formula_minimum(self, 0.0, np.array([[x1, x2]]))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         total = np.zeros(len(x))
@@ -80,7 +82,6 @@ class Beale(Problem):
         return total
 
 
-@dataclass(frozen=True, kw_only=True)
 class Branin(Problem):
     """Branin (Branin-Hoo) function, two variables, three global minima.
 
@@ -116,13 +117,16 @@ class Branin(Problem):
     t: float = 1 / (8 * math.pi)
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return np.array([[-5.0, 10.0], [0.0, 15.0]])
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``s t``, where ``cos(x1) = -1`` and the square is zero.
 
@@ -144,15 +148,15 @@ class Branin(Problem):
         if not np.any(inside):
             return None
         points = np.column_stack([x1[inside], x2[inside]])
-        return Minimum(self.s * self.t, points, "formula")
+        return Minimum(value=self.s * self.t, points=points, source="formula")
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         square = (x2 - self.b * x1**2 + self.c * x1 - self.r) ** 2
         return self.a * square + self.s * (1 - self.t) * np.cos(x1) + self.s
 
 
-@dataclass(frozen=True, kw_only=True)
 class Colville(Problem):
     """Colville function, four variables.
 
@@ -176,13 +180,16 @@ class Colville(Problem):
     e: float = 19.8
 
     @property
+    @override
     def dimension(self) -> int:
         return 4
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-10.0, 10.0, 4)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at (1, 1, 1, 1) when no term can be negative.
 
@@ -193,6 +200,7 @@ class Colville(Problem):
             return None
         return formula_minimum(self, 0.0, np.ones((1, 4)))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2, x3, x4 = x[:, 0], x[:, 1], x[:, 2], x[:, 3]
         u, v = x2 - 1, x4 - 1
@@ -206,7 +214,6 @@ class Colville(Problem):
         )
 
 
-@dataclass(frozen=True, kw_only=True)
 class Forrester2008(Problem):
     """Forrester et al. (2008) function, one variable.
 
@@ -229,23 +236,26 @@ class Forrester2008(Problem):
     e: float = 4.0
 
     @property
+    @override
     def dimension(self) -> int:
         return 1
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return np.array([[0.0, 1.0]])
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published constants (found numerically)."""
         return at_defaults(self, FORRESTER_2008)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         t = x[:, 0]
         return (self.a * t - self.b) ** 2 * np.sin(self.c * t - self.e)
 
 
-@dataclass(frozen=True, kw_only=True)
 class GoldsteinPrice(Problem):
     """Goldstein-Price function: several local minima.
 
@@ -271,23 +281,28 @@ class GoldsteinPrice(Problem):
     p: tuple[float, ...] = (19.0, -14.0, 3.0, -14.0, 6.0, 3.0)
     q: tuple[float, ...] = (18.0, -32.0, 12.0, 48.0, -36.0, 27.0)
 
+    @override
     def _check(self) -> None:
         if len(self.p) != 6 or len(self.q) != 6:  # ruff: ignore[magic-value-comparison]
             msg = "p and q need six coefficients each"
             raise ValueError(msg)
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-2.0, 2.0, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """3 at (0, -1), for the published constants."""
         return at_defaults(self, GOLDSTEIN_PRICE)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         terms = np.stack([np.ones(len(x)), x1, x1**2, x2, x1 * x2, x2**2])

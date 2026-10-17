@@ -98,7 +98,7 @@ def test_minimum_follows_the_parameters(problem: Problem) -> None:
         Bohachevsky3(a=-0.3),
         SumOfDifferentPowers(power_shift=-1.0),
         Trid(d=3, shift=10.0),
-        Perm0(d=2, domain=[[2.0, 3.0], [2.0, 3.0]]),
+        Perm0(d=2, domain=((2.0, 3.0), (2.0, 3.0))),
     ],
     ids=repr,
 )

@@ -5,8 +5,7 @@ https://www.sfu.ca/~ssurjano/optimization.html, group "Valley-Shaped".
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -29,7 +28,6 @@ _GROUP = Group.VALLEY
 _SFU = "https://www.sfu.ca/~ssurjano/"
 
 
-@dataclass(frozen=True, kw_only=True)
 class ThreeHumpCamel(Problem):
     """Three-hump camel function: three local minima.
 
@@ -51,17 +49,21 @@ class ThreeHumpCamel(Problem):
     c: float = 1 / 6
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-5.0, 5.0, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin, for the published constants."""
         return at_defaults(self, THREE_HUMP_CAMEL)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         squared = x1**2
@@ -69,7 +71,6 @@ class ThreeHumpCamel(Problem):
         return polynomial + x1 * x2 + x2**2
 
 
-@dataclass(frozen=True, kw_only=True)
 class SixHumpCamel(Problem):
     """Six-hump camel function: six local minima, two of them global.
 
@@ -93,17 +94,21 @@ class SixHumpCamel(Problem):
     g: float = 4.0
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return np.array([[-3.0, 3.0], [-2.0, 2.0]])
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published constants (found numerically)."""
         return at_defaults(self, SIX_HUMP_CAMEL)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         first = (self.a - self.b * x1**2 + self.c * x1**4) * x1**2
@@ -111,7 +116,6 @@ class SixHumpCamel(Problem):
         return first + x1 * x2 + last
 
 
-@dataclass(frozen=True, kw_only=True)
 class DixonPrice(AnyDimension):
     """Dixon-Price function.
 
@@ -131,10 +135,12 @@ class DixonPrice(AnyDimension):
     shift: float = 1.0
     weight: float = 2.0
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-10.0, 10.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero where ``x1 = shift`` and ``x_i = sqrt(x_{i-1} / weight)``.
 
@@ -157,6 +163,7 @@ class DixonPrice(AnyDimension):
             points = np.vstack([point, flipped])
         return formula_minimum(self, 0.0, points)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         first = (x[:, 0] - self.shift) ** 2
         i = np.arange(2, self.d + 1, dtype=np.float64)
@@ -164,7 +171,6 @@ class DixonPrice(AnyDimension):
         return first + np.sum(terms, axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class Rosenbrock(AnyDimension):
     """Rosenbrock (valley, banana) function.
 
@@ -185,10 +191,12 @@ class Rosenbrock(AnyDimension):
     a: float = 100.0
     b: float = 1.0
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-5.0, 10.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at ``(b, ..., b, b^2)`` when every term can vanish.
 
@@ -201,6 +209,7 @@ class Rosenbrock(AnyDimension):
         point[-1] = self.b**2
         return formula_minimum(self, 0.0, point[np.newaxis])
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         head, tail = x[:, :-1], x[:, 1:]
         terms = self.a * (tail - head**2) ** 2 + (head - self.b) ** 2

@@ -8,8 +8,7 @@ They have ``suite = "classic"`` and the SFU shape group that fits them.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -44,7 +43,6 @@ def _within(problem: Problem, low: float, high: float) -> bool:
     return bool(np.all(bounds >= low) and np.all(bounds <= high))
 
 
-@dataclass(frozen=True, kw_only=True)
 class AlpineN2(AnyDimension):
     """Alpine function N. 2, ``f(x) = -prod_i sqrt(x_i) sin(x_i)``.
 
@@ -64,10 +62,12 @@ class AlpineN2(AnyDimension):
     argmax: ClassVar[float] = 7.917052684666206
     peak: ClassVar[float] = 2.8081311800070052
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(0.0, 10.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``-peak^d`` with every ``x_i`` at the peak.
 
@@ -79,17 +79,17 @@ class AlpineN2(AnyDimension):
         if not (_within(self, 0.0, 10.0) and self.contains(points)):
             return None
         return Minimum(
-            -(self.peak**self.d),
-            points,
-            "formula, with the peak found by bisection",
+            value=-(self.peak**self.d),
+            points=points,
+            source="formula, with the peak found by bisection",
             tolerance=1e-12,
         )
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         return -np.prod(np.sqrt(x) * np.sin(x), axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class Bird(Problem):
     """Bird function.
 
@@ -104,17 +104,21 @@ class Bird(Problem):
     references: ClassVar[tuple[str, ...]] = (JAMIL_YANG, GAVANA)
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-2 * math.pi, 2 * math.pi, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Two minimisers, found numerically (see ``known_minima``)."""
         return at_defaults(self, BIRD)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         return (
@@ -124,7 +128,6 @@ class Bird(Problem):
         )
 
 
-@dataclass(frozen=True, kw_only=True)
 class Deceptive(AnyDimension):
     """Deceptive function, ``f(x) = -(mean_i g_i(x_i))^beta``.
 
@@ -153,6 +156,7 @@ class Deceptive(AnyDimension):
     alpha: tuple[float, ...] | None = None
     beta: float = 2.0
 
+    @override
     def _check(self) -> None:
         super()._check()
         peaks = self._peaks()
@@ -165,10 +169,12 @@ class Deceptive(AnyDimension):
             return np.arange(1, self.d + 1, dtype=np.float64) / (self.d + 1)
         return np.asarray(self.alpha, dtype=np.float64)
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(0.0, 1.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """-1 at ``x = alpha`` when ``beta > 0`` and the domain is in [0, 1].
 
@@ -180,6 +186,7 @@ class Deceptive(AnyDimension):
             return None
         return formula_minimum(self, -1.0, points)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         a = self._peaks()
         pieces = [
@@ -193,7 +200,6 @@ class Deceptive(AnyDimension):
         return -(np.mean(g, axis=1) ** self.beta)
 
 
-@dataclass(frozen=True, kw_only=True)
 class HappyCat(AnyDimension):
     """HappyCat function, a curved groove around the sphere ``|x|^2 = d``.
 
@@ -215,11 +221,13 @@ class HappyCat(AnyDimension):
 
     alpha: float = 0.125
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         # The domain of the CEC 2014 competition, which uses this function.
         return box(-100.0, 100.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at ``x_i = -1`` for ``alpha > 0``.
 
@@ -230,13 +238,13 @@ class HappyCat(AnyDimension):
             return None
         return formula_minimum(self, 0.0, np.full((1, self.d), -1.0))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         squares = np.einsum("ij,ij->i", x, x)
         groove = ((squares - self.d) ** 2) ** self.alpha
         return groove + (squares / 2 + np.sum(x, axis=1)) / self.d + 0.5
 
 
-@dataclass(frozen=True, kw_only=True)
 class Himmelblau(Problem):
     """Himmelblau's function, ``f(x) = (x1^2 + x2 - a)^2 + (x1 + x2^2 - b)^2``.
 
@@ -256,17 +264,21 @@ class Himmelblau(Problem):
     b: float = 7.0
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-5.0, 5.0, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at four points, for the published constants."""
         return at_defaults(self, HIMMELBLAU)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         return (x1**2 + x2 - self.a) ** 2 + (x1 + x2**2 - self.b) ** 2

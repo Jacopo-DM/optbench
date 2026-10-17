@@ -31,7 +31,7 @@ def test_best_is_the_lowest_of_the_points_it_drew() -> None:
 
 
 def test_same_seed_same_result() -> None:
-    problem = Sphere(d=5, domain=[[0.5, 1.0]] * 5)
+    problem = Sphere(d=5, domain=((0.5, 1.0),) * 5)
     first = random_search(problem, 1_000, np.random.default_rng(7), batch=64)
     again = random_search(problem, 1_000, np.random.default_rng(7), batch=64)
     np.testing.assert_array_equal(first.curve, again.curve)

@@ -9,8 +9,7 @@ seed and ``Q`` the one from the seed plus 1,000,000.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -27,7 +26,6 @@ _GROUP = Group.BBOB_MODERATE_CONDITIONING
 _WHOLE_STEPS = 0.5
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobAttractiveSector(bbob.BbobRotated):
     """BBOB f6, attractive sector.
 
@@ -50,12 +48,14 @@ class BbobAttractiveSector(bbob.BbobRotated):
     power: float = 0.9
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` for a positive power and a nonzero scaling."""
         if self.power <= 0 or self.conditioning <= 0:
             return None
         return super().minimum
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         scaling = bbob.scaling(self.conditioning, self.d)
         linear = self.q @ (scaling[:, np.newaxis] * self.r)
@@ -65,7 +65,6 @@ class BbobAttractiveSector(bbob.BbobRotated):
         return bbob.oscillate(squares) ** self.power + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobStepEllipsoid(bbob.BbobRotated):
     """BBOB f7, step ellipsoid: plateaus on a rotated ellipsoid.
 
@@ -98,12 +97,14 @@ class BbobStepEllipsoid(bbob.BbobRotated):
     penalty: float = 1.0
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` while every term is at least 0."""
         if min(self.scale, self.slope, self.penalty, self.weight) < 0:
             return None
         return super().minimum
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         scaling = bbob.scaling(self.conditioning, self.d)
         z_hat = bbob.rotate(x - self.x_opt, scaling[:, np.newaxis] * self.r)
@@ -132,7 +133,6 @@ def _rosenbrock(z: NDArray[np.float64], a: float) -> NDArray[np.float64]:
     return np.sum(a * (head**2 - tail) ** 2 + (head - 1) ** 2, axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobRosenbrock(bbob.BbobProblem):
     """BBOB f8, Rosenbrock.
 
@@ -158,16 +158,17 @@ class BbobRosenbrock(bbob.BbobProblem):
         return 0.75 * bbob.x_opt(self.seed, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` (``z = 1``) for ``a >= 0``."""
         return super().minimum if self.a >= 0 else None
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = bbob.rosenbrock_scale(self.d) * (x - self.x_opt) + 1
         return _rosenbrock(z, self.a) + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobRosenbrockRotated(bbob.BbobRotated):
     """BBOB f9, rotated Rosenbrock.
 
@@ -193,10 +194,12 @@ class BbobRosenbrockRotated(bbob.BbobRotated):
         return self.r.sum(axis=0) / (2 * bbob.rosenbrock_scale(self.d))
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` (``z = 1``) for ``a >= 0``."""
         return super().minimum if self.a >= 0 else None
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = bbob.rosenbrock_scale(self.d) * bbob.rotate(x, self.r) + 0.5
         return _rosenbrock(z, self.a) + self.f_opt

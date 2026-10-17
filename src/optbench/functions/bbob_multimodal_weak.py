@@ -11,8 +11,7 @@ from __future__ import annotations
 
 import functools
 import math
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar, NamedTuple
+from typing import TYPE_CHECKING, ClassVar, NamedTuple, override
 
 import numpy as np
 
@@ -34,7 +33,6 @@ _SCHWEFEL_OFFSET = 418.9828872724339
 _FLIP_BELOW = 0.5
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobSchwefel(bbob.BbobProblem):
     """BBOB f20, Schwefel x sin(x).
 
@@ -68,6 +66,7 @@ class BbobSchwefel(bbob.BbobProblem):
         return signs * _SCHWEFEL_HALF_PEAK
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """At ``x_opt``, where every ``z_i`` is 420.96874637.
 
@@ -81,6 +80,7 @@ class BbobSchwefel(bbob.BbobProblem):
         points = self.x_opt[np.newaxis]
         return formula_minimum(self, value + self.f_opt, points)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         corner = self.x_opt
         x_hat = 2 * np.sign(corner) * x
@@ -172,7 +172,6 @@ def _gallagher_peaks(seed: int, d: int, shape: _Shape) -> _Peaks:
     return _Peaks(raw[0].copy(), centres, weights, np.log(heights), constants)
 
 
-@dataclass(frozen=True, kw_only=True)
 class _Gallagher(bbob.BbobRotated):
     """What f21 and f22 share: the peaks differ in count and spread.
 
@@ -200,10 +199,12 @@ class _Gallagher(bbob.BbobRotated):
         return self._peaks.x_opt
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt``: only the highest peak reaches 10."""
         return super().minimum if self.penalty >= 0 else None
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         peaks = self._peaks
         t = bbob.rotate(x, self.r)
@@ -220,7 +221,6 @@ class _Gallagher(bbob.BbobRotated):
         return core + self.penalty * bbob.penalty(x) + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobGallagher101(_Gallagher):
     """BBOB f21, Gallagher's Gaussian 101-me peaks.
 
@@ -233,7 +233,6 @@ class BbobGallagher101(_Gallagher):
     shape: ClassVar[_Shape] = _Shape(101, 10.0, 5.0, math.sqrt(1000.0))
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobGallagher21(_Gallagher):
     """BBOB f22, Gallagher's Gaussian 21-hi peaks.
 
@@ -246,7 +245,6 @@ class BbobGallagher21(_Gallagher):
     shape: ClassVar[_Shape] = _Shape(21, 9.8, 4.9, 1000.0)
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobKatsuura(bbob.BbobRotated):
     """BBOB f23, Katsuura: rugged everywhere.
 
@@ -270,12 +268,14 @@ class BbobKatsuura(bbob.BbobRotated):
     penalty: float = 1.0
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` (``z = 0``, every distance 0)."""
         if self.conditioning <= 0 or self.penalty < 0:
             return None
         return super().minimum
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         scaling = bbob.scaling(self.conditioning, self.d)
         linear = self.q @ (scaling[:, np.newaxis] * self.r)
@@ -298,7 +298,6 @@ class BbobKatsuura(bbob.BbobRotated):
         return core + self.penalty * bbob.penalty(x) + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobLunacek(bbob.BbobRotated):
     """BBOB f24, Lunacek bi-Rastrigin: two funnels, the better one smaller.
 
@@ -332,6 +331,7 @@ class BbobLunacek(bbob.BbobRotated):
         return signs * 0.5 * self.mu0
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt``, where ``x_hat = mu_0`` and ``z = 0``.
 
@@ -345,6 +345,7 @@ class BbobLunacek(bbob.BbobRotated):
             return None
         return super().minimum
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         d = self.d
         s = 1 - 0.5 / (math.sqrt(d + 20) - 4.1)

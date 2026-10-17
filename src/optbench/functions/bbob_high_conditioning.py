@@ -10,8 +10,7 @@ and f14 ``R``, and COCO builds it as ``q``.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -25,7 +24,6 @@ if TYPE_CHECKING:
 _GROUP = Group.BBOB_HIGH_CONDITIONING
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobEllipsoidRotated(bbob.BbobRotated):
     """BBOB f10, rotated ellipsoid.
 
@@ -45,17 +43,18 @@ class BbobEllipsoidRotated(bbob.BbobRotated):
     conditioning: float = 1e6
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` for a positive conditioning."""
         return super().minimum if self.conditioning > 0 else None
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = bbob.oscillate(bbob.rotate(x - self.x_opt, self.q))
         weights = bbob.scaling(self.conditioning, self.d) ** 2
         return bbob.weighted(z**2, weights) + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobDiscus(bbob.BbobRotated):
     """BBOB f11, discus: one direction far steeper than the rest.
 
@@ -75,10 +74,12 @@ class BbobDiscus(bbob.BbobRotated):
     conditioning: float = 1e6
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` for a positive conditioning."""
         return super().minimum if self.conditioning > 0 else None
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = bbob.oscillate(bbob.rotate(x - self.x_opt, self.q))
         squares = z**2
@@ -86,7 +87,6 @@ class BbobDiscus(bbob.BbobRotated):
         return self.conditioning * squares[:, 0] + rest + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobBentCigar(bbob.BbobRotated):
     """BBOB f12, bent cigar: one direction far flatter than the rest.
 
@@ -113,10 +113,12 @@ class BbobBentCigar(bbob.BbobRotated):
         return bbob.x_opt(self.seed + bbob.SECOND_ROTATION, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` for a positive conditioning."""
         return super().minimum if self.conditioning > 0 else None
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         rotated = bbob.rotate(x - self.x_opt, self.q)
         z = bbob.rotate(bbob.asymmetric(rotated, self.beta), self.q)
@@ -125,7 +127,6 @@ class BbobBentCigar(bbob.BbobRotated):
         return squares[:, 0] + self.conditioning * rest + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobSharpRidge(bbob.BbobRotated):
     """BBOB f13, sharp ridge.
 
@@ -146,12 +147,14 @@ class BbobSharpRidge(bbob.BbobRotated):
     a: float = 100.0
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` while ``a >= 0`` and the scaling > 0."""
         if self.a < 0 or self.conditioning <= 0:
             return None
         return super().minimum
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         scaling = bbob.scaling(self.conditioning, self.d)
         linear = self.q @ (scaling[:, np.newaxis] * self.r)
@@ -160,7 +163,6 @@ class BbobSharpRidge(bbob.BbobRotated):
         return z[:, 0] ** 2 + self.a * ridge + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobDifferentPowers(bbob.BbobRotated):
     """BBOB f14, different powers.
 
@@ -181,11 +183,13 @@ class BbobDifferentPowers(bbob.BbobRotated):
     spread: float = 4.0
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` while every exponent is positive."""
         smallest_power = 2 + min(self.spread, 0.0)
         return super().minimum if smallest_power > 0 else None
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = bbob.rotate(x - self.x_opt, self.q)
         ramp = np.arange(self.d, dtype=np.float64) / (self.d - 1)

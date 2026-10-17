@@ -9,8 +9,7 @@ from __future__ import annotations
 
 import itertools
 import math
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -31,7 +30,6 @@ _SUITE = "classic"
 _GAVANA = "https://infinity77.net/global_optimization/test_functions_nd_"
 
 
-@dataclass(frozen=True, kw_only=True)
 class Qing(AnyDimension):
     """Qing function, ``f(x) = sum_i (x_i^2 - i)^2``. It has no constants."""
 
@@ -41,10 +39,12 @@ class Qing(AnyDimension):
     url: ClassVar[str] = _GAVANA + "Q.html"
     references: ClassVar[tuple[str, ...]] = (JAMIL_YANG, GAVANA)
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-500.0, 500.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at every ``x_i = +-sqrt(i)``: ``2^d`` minimisers.
 
@@ -55,12 +55,12 @@ class Qing(AnyDimension):
         signs = np.array(list(itertools.product((1.0, -1.0), repeat=self.d)))
         return formula_minimum(self, 0.0, roots * signs)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         i = np.arange(1, self.d + 1, dtype=np.float64)
         return np.sum((x**2 - i) ** 2, axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class Salomon(AnyDimension):
     """Salomon function, ``f(x) = 1 - cos(frequency |x|) + a |x|``.
 
@@ -79,22 +79,24 @@ class Salomon(AnyDimension):
     frequency: float = 2 * math.pi
     a: float = 0.1
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-100.0, 100.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin when ``a > 0``: both terms are then >= 0."""
         if self.a <= 0:
             return None
         return formula_minimum(self, 0.0, np.zeros((1, self.d)))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         radius = np.sqrt(np.einsum("ij,ij->i", x, x))
         return 1 - np.cos(self.frequency * radius) + self.a * radius
 
 
-@dataclass(frozen=True, kw_only=True)
 class Schwefel221(AnyDimension):
     """Schwefel function 2.21, ``f(x) = max_i |x_i|``. No constants."""
 
@@ -104,19 +106,21 @@ class Schwefel221(AnyDimension):
     url: ClassVar[str] = _GAVANA + "S.html"
     references: ClassVar[tuple[str, ...]] = (JAMIL_YANG, GAVANA)
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-100.0, 100.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin."""
         return formula_minimum(self, 0.0, np.zeros((1, self.d)))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         return np.max(np.abs(x), axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class Schwefel222(AnyDimension):
     """Schwefel function 2.22, ``sum_i |x_i| + prod_i |x_i|``. No constants."""
 
@@ -126,20 +130,22 @@ class Schwefel222(AnyDimension):
     url: ClassVar[str] = _GAVANA + "S.html"
     references: ClassVar[tuple[str, ...]] = (JAMIL_YANG, GAVANA)
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-100.0, 100.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin."""
         return formula_minimum(self, 0.0, np.zeros((1, self.d)))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         size = np.abs(x)
         return np.sum(size, axis=1) + np.prod(size, axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class Whitley(AnyDimension):
     """Whitley function.
 
@@ -161,10 +167,12 @@ class Whitley(AnyDimension):
     a: float = 100.0
     divisor: float = 4000.0
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-10.24, 10.24, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at ``x_i = 1`` when ``a >= 0`` and ``divisor > 0``.
 
@@ -175,6 +183,7 @@ class Whitley(AnyDimension):
             return None
         return formula_minimum(self, 0.0, np.ones((1, self.d)))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         y = (
             self.a * (x[:, :, np.newaxis] ** 2 - x[:, np.newaxis, :]) ** 2

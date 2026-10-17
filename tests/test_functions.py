@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import dataclasses
 import math
 
 import numpy as np
@@ -14,7 +13,7 @@ from optbench import Branin, Shekel, Sphere
 def test_sphere_has_its_minimum_for_any_d_and_none_off_the_domain() -> None:
     assert Sphere(d=1)(np.array([[3.0]]))[0] == pytest.approx(9.0)
     assert Sphere(d=7).minimum is not None
-    assert Sphere(d=1, domain=[[1.0, 2.0]]).minimum is None
+    assert Sphere(d=1, domain=((1.0, 2.0),)).minimum is None
     with pytest.raises(ValueError, match="at least 1"):
         Sphere(d=0)
 
@@ -41,7 +40,7 @@ def test_branin_matches_the_published_minimum() -> None:
 
 
 def test_branin_minimum_follows_its_parameters() -> None:
-    variant = dataclasses.replace(Branin(), s=5.0, t=0.2, r=4.0)
+    variant = Branin().replace(s=5.0, t=0.2, r=4.0)
     minimum = variant.minimum
     assert minimum is not None
     assert minimum.value == pytest.approx(1.0)
@@ -52,10 +51,10 @@ def test_branin_minimum_follows_its_parameters() -> None:
 
 
 def test_branin_minimisers_follow_the_domain() -> None:
-    minimum = Branin(domain=[[0.0, 5.0], [0.0, 15.0]]).minimum
+    minimum = Branin(domain=((0.0, 5.0), (0.0, 15.0))).minimum
     assert minimum is not None
     np.testing.assert_allclose(minimum.points, [[math.pi, 2.275]], atol=1e-5)
-    assert Branin(domain=[[0.0, 1.0], [0.0, 15.0]]).minimum is None
+    assert Branin(domain=((0.0, 1.0), (0.0, 15.0))).minimum is None
 
 
 def test_shekel_matches_the_published_minima() -> None:
@@ -72,7 +71,7 @@ def test_shekel_matches_the_published_minima() -> None:
 def test_shekel_minimum_is_unknown_for_changed_wells() -> None:
     assert Shekel(m=3).minimum is None
     assert Shekel(beta=(0.2,) * 10).minimum is None
-    assert Shekel(domain=[[0.0, 5.0]] * 4).minimum is None
+    assert Shekel(domain=((0.0, 5.0),) * 4).minimum is None
 
 
 def test_shekel_takes_other_wells_and_dimensions() -> None:
@@ -86,7 +85,7 @@ def test_shekel_takes_other_wells_and_dimensions() -> None:
     [
         ({"m": 11}, "m must be between"),
         ({"m": 0}, "m must be between"),
-        ({"c": (1.0, 2.0)}, "c must be a matrix"),
+        ({"c": ()}, "c must be a matrix"),
     ],
 )
 def test_shekel_refuses_bad_parameters(
@@ -99,6 +98,6 @@ def test_shekel_refuses_bad_parameters(
 
 def test_a_domain_must_fit_the_dimension() -> None:
     with pytest.raises(ValueError, match="domain must be"):
-        Branin(domain=[[0.0, 1.0]])
+        Branin(domain=((0.0, 1.0),))
     with pytest.raises(ValueError, match="domain must be"):
-        Branin(domain=[[1.0, 0.0], [0.0, 1.0]])
+        Branin(domain=((1.0, 0.0), (0.0, 1.0)))

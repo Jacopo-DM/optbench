@@ -9,8 +9,7 @@ SFU page rounds or omits were found numerically; see ``known_minima``.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -39,7 +38,6 @@ _RANJAN = (
 )
 
 
-@dataclass(frozen=True, kw_only=True)
 class Bukin6(Problem):
     """Bukin function N. 6: local minima along a curved ridge.
 
@@ -62,27 +60,35 @@ class Bukin6(Problem):
     shift: float = 10.0
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return np.array([[-15.0, -5.0], [-3.0, 3.0]])
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at ``(-shift, curvature shift^2)`` for non-negative weights."""
         points = np.array([[-self.shift, self.curvature * self.shift**2]])
         if self.scale < 0 or self.slope < 0 or not self.contains(points):
             return None
-        return Minimum(0.0, points, "formula", tolerance=0.0)
+        return Minimum(
+            value=0.0,
+            points=points,
+            source="formula",
+            tolerance=0.0,
+        )
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         ridge = np.sqrt(np.abs(x2 - self.curvature * x1**2))
         return self.scale * ridge + self.slope * np.abs(x1 + self.shift)
 
 
-@dataclass(frozen=True, kw_only=True)
 class CrossInTray(Problem):
     """Cross-in-Tray function: four global minima around a cross.
 
@@ -104,17 +110,21 @@ class CrossInTray(Problem):
     power: float = 0.1
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-10.0, 10.0, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published constants (found numerically)."""
         return at_defaults(self, CROSS_IN_TRAY)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         radius = np.sqrt(x1**2 + x2**2)
@@ -123,7 +133,6 @@ class CrossInTray(Problem):
         return -self.scale * inner**self.power
 
 
-@dataclass(frozen=True, kw_only=True)
 class DropWave(Problem):
     """Drop-Wave function: rings of local minima around a central drop.
 
@@ -146,13 +155,16 @@ class DropWave(Problem):
     offset: float = 2.0
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-5.12, 5.12, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``-2 / offset`` at the origin, for ``curvature >= 0 < offset``.
 
@@ -161,15 +173,15 @@ class DropWave(Problem):
         points = np.zeros((1, 2))
         if self.curvature < 0 or self.offset <= 0 or not self.contains(points):
             return None
-        return Minimum(-2 / self.offset, points, "formula")
+        return Minimum(value=-2 / self.offset, points=points, source="formula")
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         squares = np.sum(x**2, axis=1)
         top = 1 + np.cos(self.frequency * np.sqrt(squares))
         return -top / (self.curvature * squares + self.offset)
 
 
-@dataclass(frozen=True, kw_only=True)
 class Eggholder(Problem):
     """Eggholder function: many deep local minima; the best is on the edge.
 
@@ -191,17 +203,21 @@ class Eggholder(Problem):
     ratio: float = 0.5
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-512.0, 512.0, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published constants (found numerically)."""
         return at_defaults(self, EGGHOLDER)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         lifted = x2 + self.shift
@@ -210,7 +226,6 @@ class Eggholder(Problem):
         return -first - second
 
 
-@dataclass(frozen=True, kw_only=True)
 class GramacyLee2012(Problem):
     """Gramacy and Lee (2012) function, one variable.
 
@@ -233,17 +248,21 @@ class GramacyLee2012(Problem):
     power: float = 4.0
 
     @property
+    @override
     def dimension(self) -> int:
         return 1
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return np.array([[0.5, 2.5]])
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published constants (found numerically)."""
         return at_defaults(self, GRAMACY_LEE_2012)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         t = x[:, 0]
         wave = np.sin(self.frequency * math.pi * t) / (self.scale * t)

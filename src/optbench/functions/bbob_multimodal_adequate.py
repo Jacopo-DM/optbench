@@ -10,8 +10,7 @@ case is said in the class. ``r`` and ``q`` are COCO's two rotations (see
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -25,7 +24,6 @@ if TYPE_CHECKING:
 _GROUP = Group.BBOB_MULTIMODAL_ADEQUATE
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobRastriginRotated(bbob.BbobRotated):
     """BBOB f15, rotated Rastrigin.
 
@@ -47,12 +45,14 @@ class BbobRastriginRotated(bbob.BbobRotated):
     a: float = 10.0
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` while ``a >= 0`` and the scaling > 0."""
         if self.a < 0 or self.conditioning <= 0:
             return None
         return super().minimum
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         inner = bbob.oscillate(bbob.rotate(x - self.x_opt, self.q))
         inner = bbob.asymmetric(inner, self.beta)
@@ -61,7 +61,6 @@ class BbobRastriginRotated(bbob.BbobRotated):
         return bbob.rastrigin(bbob.rotate(inner, linear), self.a) + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobWeierstrass(bbob.BbobRotated):
     """BBOB f16, Weierstrass: rugged and repetitive.
 
@@ -91,6 +90,7 @@ class BbobWeierstrass(bbob.BbobRotated):
     scale: float = 10.0
     penalty: float = 10.0
 
+    @override
     def _check(self) -> None:
         super()._check()
         if self.terms < 1:
@@ -101,6 +101,7 @@ class BbobWeierstrass(bbob.BbobRotated):
             raise ValueError(msg)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` for the published ``a``, ``b`` and signs.
 
@@ -113,6 +114,7 @@ class BbobWeierstrass(bbob.BbobRotated):
             return None
         return super().minimum
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         inner = bbob.oscillate(bbob.rotate(x - self.x_opt, self.q))
         scaling = bbob.scaling(self.conditioning, self.d)
@@ -141,7 +143,6 @@ class BbobWeierstrass(bbob.BbobRotated):
         return core + boundary + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobSchaffersF7(bbob.BbobRotated):
     """BBOB f17, Schaffers F7.
 
@@ -165,12 +166,14 @@ class BbobSchaffersF7(bbob.BbobRotated):
     penalty: float = 10.0
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` for a positive scaling and penalty >= 0."""
         if self.conditioning <= 0 or self.penalty < 0:
             return None
         return super().minimum
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         inner = bbob.asymmetric(bbob.rotate(x - self.x_opt, self.q), self.beta)
         scaling = bbob.scaling(self.conditioning, self.d)
@@ -182,7 +185,6 @@ class BbobSchaffersF7(bbob.BbobRotated):
         return core + self.penalty * bbob.penalty(x) + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobSchaffersF7Ill(BbobSchaffersF7):
     """BBOB f18, Schaffers F7 with ``conditioning`` 1000.
 
@@ -202,7 +204,6 @@ class BbobSchaffersF7Ill(BbobSchaffersF7):
         return 17 + 10_000 * self.instance
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobGriewankRosenbrock(bbob.BbobRotated):
     """BBOB f19, composite Griewank-Rosenbrock F8F2.
 
@@ -233,6 +234,7 @@ class BbobGriewankRosenbrock(bbob.BbobRotated):
         return self.r.sum(axis=0) / (2 * bbob.rosenbrock_scale(self.d))
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` while each term is at least -1.
 
@@ -243,6 +245,7 @@ class BbobGriewankRosenbrock(bbob.BbobRotated):
             return None
         return super().minimum
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = bbob.rosenbrock_scale(self.d) * bbob.rotate(x, self.r) + 0.5
         head, tail = z[:, :-1], z[:, 1:]

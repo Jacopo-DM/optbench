@@ -8,8 +8,7 @@ case is said in the class.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -21,19 +20,18 @@ if TYPE_CHECKING:
     from optbench.problem import Minimum
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobSphere(bbob.BbobProblem):
     """BBOB f1, sphere: ``f(x) = |x - x_opt|^2 + f_opt``. No constants."""
 
     name: ClassVar[str] = "bbob_f01_sphere"
     function: ClassVar[int] = 1
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = x - self.x_opt
         return np.einsum("ij,ij->i", z, z) + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobEllipsoid(bbob.BbobProblem):
     """BBOB f2, separable ellipsoid.
 
@@ -52,17 +50,18 @@ class BbobEllipsoid(bbob.BbobProblem):
     conditioning: float = 1e6
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` for a positive conditioning."""
         return super().minimum if self.conditioning > 0 else None
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = bbob.oscillate(x - self.x_opt)
         weights = bbob.scaling(self.conditioning, self.d) ** 2
         return bbob.weighted(z**2, weights) + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobRastrigin(bbob.BbobProblem):
     """BBOB f3, separable Rastrigin.
 
@@ -83,6 +82,7 @@ class BbobRastrigin(bbob.BbobProblem):
     a: float = 10.0
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` while ``a >= 0`` and the scaling is positive.
 
@@ -92,13 +92,13 @@ class BbobRastrigin(bbob.BbobProblem):
             return None
         return super().minimum
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = bbob.asymmetric(bbob.oscillate(x - self.x_opt), self.beta)
         z *= bbob.scaling(self.conditioning, self.d)
         return bbob.rastrigin(z, self.a) + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobBucheRastrigin(bbob.BbobProblem):
     """BBOB f4, Bueche-Rastrigin.
 
@@ -138,6 +138,7 @@ class BbobBucheRastrigin(bbob.BbobProblem):
         return point
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt`` while the constants keep each term >= 0."""
         if (
@@ -147,6 +148,7 @@ class BbobBucheRastrigin(bbob.BbobProblem):
             return None
         return super().minimum
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = bbob.oscillate(x - self.x_opt)
         even = np.arange(self.d) % 2 == 0
@@ -156,7 +158,6 @@ class BbobBucheRastrigin(bbob.BbobProblem):
         return bbob.rastrigin(z, self.a) + boundary + self.f_opt
 
 
-@dataclass(frozen=True, kw_only=True)
 class BbobLinearSlope(bbob.BbobProblem):
     """BBOB f5, linear slope towards a corner of the domain.
 
@@ -183,6 +184,7 @@ class BbobLinearSlope(bbob.BbobProblem):
         return np.where(bbob.x_opt(self.seed, self.d) < 0, -5.0, 5.0)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``f_opt`` at the corner for a positive conditioning.
 
@@ -191,6 +193,7 @@ class BbobLinearSlope(bbob.BbobProblem):
         """
         return super().minimum if self.conditioning > 0 else None
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         corner = self.x_opt
         slopes = np.sign(corner) * bbob.scaling(self.conditioning, self.d)

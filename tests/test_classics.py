@@ -124,11 +124,11 @@ def test_minima_follow_the_parameters() -> None:
 
 
 def test_minima_follow_the_domain() -> None:
-    assert AlpineN2(d=2, domain=[[0.0, 12.0]] * 2).minimum is None
-    assert AlpineN2(d=2, domain=[[7.0, 9.0]] * 2).minimum is not None
-    assert Deceptive(d=2, domain=[[-1.0, 1.0]] * 2).minimum is None
-    assert Bird(domain=[[0.0, 1.0]] * 2).minimum is None
-    assert Schwefel221(d=2, domain=[[1.0, 2.0]] * 2).minimum is None
+    assert AlpineN2(d=2, domain=((0.0, 12.0),) * 2).minimum is None
+    assert AlpineN2(d=2, domain=((7.0, 9.0),) * 2).minimum is not None
+    assert Deceptive(d=2, domain=((-1.0, 1.0),) * 2).minimum is None
+    assert Bird(domain=((0.0, 1.0),) * 2).minimum is None
+    assert Schwefel221(d=2, domain=((1.0, 2.0),) * 2).minimum is None
 
 
 def test_deceptive_refuses_bad_alpha() -> None:

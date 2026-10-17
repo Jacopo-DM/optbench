@@ -55,6 +55,9 @@ Acceptance criteria, each testable:
    best-so-far curve (evaluations, best) that a caller can save as CSV. It is
    the only state in the library; problems themselves are pure.
 9. It never imports `ailigment`, and depends on numpy only at run time.
+   (Changed 2026-10-17 with module `python-standard`, which the user
+   approved: pydantic too, for the records the Python standard requires;
+   `ailigment` already depends on it.)
 
 Non-goals for the first version: the emulation, integration and uncertainty
 pages; shifted, rotated or noisy variants (CEC style); constrained or
@@ -71,8 +74,9 @@ module READMEs; feature branches and the user-level git rules.
 
 Architecture:
 - `src/optbench/problem.py`: `Problem`, the base class. Subclasses are frozen
-  dataclasses whose fields are the parameters, so `Rastrigin(d=5, a=12.0)`
-  needs no hand-written constructor and `dataclasses.replace` makes variants.
+  pydantic models whose fields are the parameters, so `Rastrigin(d=5, a=12.0)`
+  needs no hand-written constructor and `problem.replace(a=12.0)` makes a
+  checked variant.
   It provides `__call__` (shape check, then the subclass's `_evaluate`),
   `bounds`, `minimum` (a `Minimum`: value, minimisers, source) and metadata.
 - `src/optbench/functions/`: one file per SFU group (`many_local_minima.py`,
@@ -114,7 +118,7 @@ Answers to the questions asked with the specs:
   compare with published COCO data. Own numpy seeds were rejected: the
   numbers would match nothing published.
 - Tests check BBOB values against COCO's Python package, added as a
-  dev-only dependency; run time stays numpy-only. Hand-copied values were
+  dev-only dependency; run time stays numpy and pydantic only. Hand-copied values were
   rejected as too thin a check.
 
 ### Module `bbob` (build): the 24 noiseless COCO/BBOB functions
@@ -189,15 +193,17 @@ fits it. One commit; the minima are checked numerically as for SFU.
   each page; they were read from the images and the cited papers.
 - MIT license (the user, 2026-10-16): short and permissive, fits a benchmark
   library others may copy or cite.
-- Python >=3.13 and numpy only at run time: `ailigment` (Python 3.13, see its
+- Python >=3.13 and numpy and pydantic only at run time: `ailigment` (Python 3.13, see its
   CLAUDE.md for why) pulls this library in, so the floors must not exceed its
   own.
-- Problems are frozen dataclasses: their fields are the constants with the
-  published defaults, so `Branin(s=5.0)` and `dataclasses.replace` give
-  variants without hand-written constructors, and a problem is immutable and
-  pure. Metadata (`name`, `group`, `url`, `references`) are class variables.
-  Array constants (Shekel's `beta` and `c`) are tuples so the dataclass stays
-  hashable and frozen; they are turned into arrays when evaluating.
+- Problems are frozen models (frozen dataclasses until 2026-10-17, pydantic
+  since, see "Python standard" below): their fields are the constants with
+  the published defaults, so `Branin(s=5.0)` and `problem.replace(s=5.0)`
+  give variants without hand-written constructors, and a problem is
+  immutable and pure. Metadata (`name`, `group`, `url`, `references`) are
+  class variables. Array constants (Shekel's `beta` and `c`) are tuples so
+  the model stays hashable and frozen; they are turned into arrays when
+  evaluating.
 - One shape for input: `(n, d)` in, `(n,)` out. A single point is
   `x[None]`; refusing `(d,)` avoids silently treating a batch of 1-D points
   as one point.

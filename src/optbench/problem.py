@@ -1,16 +1,14 @@
 """The base class every test function derives from."""
 
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import TYPE_CHECKING, ClassVar
+from typing import Annotated, ClassVar, Self, override
 
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
+from pydantic import BeforeValidator, ConfigDict, Field, PlainValidator
 
-if TYPE_CHECKING:
-    from numpy.typing import ArrayLike, NDArray
+from .model import Model
 
 
 class Group(StrEnum):
@@ -29,16 +27,31 @@ class Group(StrEnum):
     BBOB_MULTIMODAL_WEAK = "bbob_multimodal_weak"
 
 
-@dataclass(frozen=True, eq=False)
-class Minimum:
+def _read_only(points: ArrayLike) -> NDArray[np.float64]:
+    """Return a read-only float64 copy of the points.
+
+    Returns
+    -------
+    numpy.ndarray
+        The points, which can no longer be written to.
+    """
+    array = np.array(points, dtype=np.float64)
+    array.flags.writeable = False
+    return array
+
+
+class Minimum(Model):
     """The global minimum of a problem.
+
+    Two minima are equal only if they are the same object, as when this was
+    a dataclass with ``eq=False``: ``points`` is an array.
 
     Attributes
     ----------
     value
         The lowest value the function takes on its domain.
     points
-        Every known minimiser, one per row, shaped ``(k, d)``.
+        Every known minimiser, one per row, shaped ``(k, d)``; read-only.
     source
         Where the numbers come from, for example a formula, a paper, or a
         numerical refinement of a published point.
@@ -47,26 +60,58 @@ class Minimum:
         accepts this much difference.
     """
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     value: float
-    points: NDArray[np.float64]
+    points: Annotated[NDArray[np.float64], PlainValidator(_read_only)]
     source: str
     tolerance: float = 1e-9
 
+    @override
+    def __eq__(self, other: object) -> bool:
+        return self is other
 
-@dataclass(frozen=True, kw_only=True)
-class Problem(ABC):
+    @override
+    def __hash__(self) -> int:
+        return id(self)
+
+
+def _pairs(domain: ArrayLike | None) -> tuple[tuple[float, ...], ...] | None:
+    """Turn any array-like domain into a tuple of rows.
+
+    Returns
+    -------
+    tuple of tuple of float, or None
+        One row per dimension; ``None`` stays ``None``.
+
+    Raises
+    ------
+    ValueError
+        If the domain is not two-dimensional.
+    """
+    if domain is None:
+        return None
+    bounds = np.asarray(domain, dtype=np.float64)
+    if bounds.ndim != 2:  # ruff: ignore[magic-value-comparison]
+        msg = f"domain must be rows of (low, high), got shape {bounds.shape}"
+        raise ValueError(msg)
+    return tuple(tuple(row) for row in bounds.tolist())
+
+
+class Problem(Model, ABC):
     """A test function to minimise, with its domain and known answer.
 
-    Subclasses are frozen dataclasses whose fields are the function's
+    Subclasses are frozen pydantic models whose fields are the function's
     constants, each defaulting to its published value, so
-    ``dataclasses.replace(problem, a=12.0)`` makes a variant. Calling a
-    problem evaluates a batch of points.
+    ``problem.replace(a=12.0)`` makes a checked variant. Calling a problem
+    evaluates a batch of points.
 
     Attributes
     ----------
     domain
-        Lower and upper bound per dimension, shaped ``(d, 2)``. ``None``
-        (the default) means the domain the literature uses.
+        Lower and upper bound per dimension, shaped ``(d, 2)``, stored as a
+        tuple of ``(low, high)`` rows whatever array-like is passed.
+        ``None`` (the default) means the domain the literature uses.
     """
 
     name: ClassVar[str]
@@ -75,9 +120,13 @@ class Problem(ABC):
     references: ClassVar[tuple[str, ...]]
     suite: ClassVar[str] = "sfu"
 
-    domain: ArrayLike | None = field(default=None, repr=False)
+    domain: Annotated[
+        tuple[tuple[float, ...], ...] | None,
+        BeforeValidator(_pairs),
+    ] = Field(default=None, repr=False)
 
-    def __post_init__(self) -> None:
+    @override
+    def model_post_init(self, context: object, /) -> None:
         """Check the parameters and the domain.
 
         Raises
@@ -97,6 +146,19 @@ class Problem(ABC):
                 )
                 raise ValueError(msg)
 
+    def replace(self, **changes: object) -> Self:
+        """Return a copy with some fields changed, checked like a new one.
+
+        Example: ``Branin().replace(s=5.0)``.
+
+        Returns
+        -------
+        Problem
+            A new problem of the same class.
+        """
+        fields = {name: getattr(self, name) for name in type(self).model_fields}
+        return self.model_validate(fields | changes)
+
     @property
     @abstractmethod
     def dimension(self) -> int:
@@ -115,7 +177,7 @@ class Problem(ABC):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         """Evaluate checked points shaped ``(n, d)``; return ``(n,)``."""
 
-    def _check(self) -> None:  # ruff: ignore[empty-method-without-abstract-decorator]
+    def _check(self) -> None:
         """Check the parameters; subclasses with parameters override it."""
 
     @property
@@ -176,7 +238,6 @@ class Problem(ABC):
         return self._evaluate(points)
 
 
-@dataclass(frozen=True, kw_only=True)
 class AnyDimension(Problem):
     """A problem defined for any number of variables.
 
@@ -190,12 +251,14 @@ class AnyDimension(Problem):
 
     d: int = 2
 
+    @override
     def _check(self) -> None:
         if self.d < self.smallest_dimension:
             msg = f"d must be at least {self.smallest_dimension}, got {self.d}"
             raise ValueError(msg)
 
     @property
+    @override
     def dimension(self) -> int:
         return self.d
 
@@ -225,4 +288,4 @@ def formula_minimum(
     """
     if not problem.contains(points):
         return None
-    return Minimum(value, points, "formula")
+    return Minimum(value=value, points=points, source="formula")

@@ -62,7 +62,7 @@ VARIANTS = [
     Booth(weight=0.5, a=1.0, b=2.0),
     Matyas(a=1.0, b=-1.5),
     Zakharov(d=4, coefficient=-2.0),
-    PowerSum(domain=[[0.0, 4.0]] * 4),
+    PowerSum(domain=((0.0, 4.0),) * 4),
 ]
 
 
@@ -85,7 +85,7 @@ def test_minimum_follows_the_parameters(problem: Problem) -> None:
         Booth(a=100.0),  # the minimiser leaves the domain
         Matyas(a=0.1),
         McCormick(a=2.0),
-        McCormick(domain=[[0.0, 4.0], [-3.0, 4.0]]),
+        McCormick(domain=((0.0, 4.0), (-3.0, 4.0))),
         PowerSum(b=(1.0, 2.0, 3.0)),
     ],
     ids=repr,

@@ -9,8 +9,7 @@ The fixed-dimension ones of the group are in
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -45,7 +44,6 @@ def _at(point: float, d: int) -> NDArray[np.float64]:
     return np.full((1, d), point)
 
 
-@dataclass(frozen=True, kw_only=True)
 class Ackley(AnyDimension):
     """Ackley function: a nearly flat outer region and a hole at the centre.
 
@@ -66,10 +64,12 @@ class Ackley(AnyDimension):
     b: float = 0.2
     c: float = 2 * math.pi
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-32.768, 32.768, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin when ``a`` and ``b`` are not negative.
 
@@ -79,8 +79,14 @@ class Ackley(AnyDimension):
         points = _at(0.0, self.d)
         if self.a < 0 or self.b < 0 or not self.contains(points):
             return None
-        return Minimum(0.0, points, "formula", tolerance=0.0)
+        return Minimum(
+            value=0.0,
+            points=points,
+            source="formula",
+            tolerance=0.0,
+        )
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         root_mean_square = np.sqrt(np.mean(x**2, axis=1))
         mean_cos = np.mean(np.cos(self.c * x), axis=1)
@@ -92,7 +98,6 @@ class Ackley(AnyDimension):
         )
 
 
-@dataclass(frozen=True, kw_only=True)
 class Griewank(AnyDimension):
     """Griewank function: many regularly spaced local minima.
 
@@ -111,10 +116,12 @@ class Griewank(AnyDimension):
 
     divisor: float = 4000.0
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-600.0, 600.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin for a positive divisor.
 
@@ -123,8 +130,14 @@ class Griewank(AnyDimension):
         points = _at(0.0, self.d)
         if self.divisor <= 0 or not self.contains(points):
             return None
-        return Minimum(0.0, points, "formula", tolerance=0.0)
+        return Minimum(
+            value=0.0,
+            points=points,
+            source="formula",
+            tolerance=0.0,
+        )
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         roots = np.sqrt(np.arange(1, self.d + 1))
         product = np.prod(np.cos(x / roots), axis=1)
@@ -136,7 +149,6 @@ _LANGERMANN_C = (1.0, 2.0, 5.0, 2.0, 3.0)
 _LANGERMANN_A = ((3.0, 5.0), (5.0, 2.0), (2.0, 1.0), (1.0, 4.0), (7.0, 9.0))
 
 
-@dataclass(frozen=True, kw_only=True)
 class Langermann(Problem):
     """Langermann function: unevenly spread local minima.
 
@@ -164,6 +176,7 @@ class Langermann(Problem):
     c: tuple[float, ...] = _LANGERMANN_C
     a: tuple[tuple[float, ...], ...] = _LANGERMANN_A
 
+    @override
     def _check(self) -> None:
         centres = np.asarray(self.a, dtype=np.float64)
         if centres.ndim != 2:  # ruff: ignore[magic-value-comparison]
@@ -175,17 +188,21 @@ class Langermann(Problem):
             raise ValueError(msg)
 
     @property
+    @override
     def dimension(self) -> int:
         return len(self.a[0])
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(0.0, 10.0, self.dimension)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published constants (found numerically)."""
         return at_defaults(self, LANGERMANN)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         weights = np.asarray(self.c[: self.m], dtype=np.float64)
         centres = np.asarray(self.a, dtype=np.float64)[: self.m]
@@ -197,7 +214,6 @@ class Langermann(Problem):
         return terms.sum(axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class Levy(AnyDimension):
     """Levy function.
 
@@ -221,16 +237,19 @@ class Levy(AnyDimension):
     scale: float = 4.0
     weight: float = 10.0
 
+    @override
     def _check(self) -> None:
         super()._check()
         if self.scale == 0:
             msg = "scale must not be zero"
             raise ValueError(msg)
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-10.0, 10.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at ``x_i = shift`` when ``weight >= -1``.
 
@@ -239,8 +258,14 @@ class Levy(AnyDimension):
         points = _at(self.shift, self.d)
         if self.weight < -1 or not self.contains(points):
             return None
-        return Minimum(0.0, points, "formula", tolerance=0.0)
+        return Minimum(
+            value=0.0,
+            points=points,
+            source="formula",
+            tolerance=0.0,
+        )
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         w = 1 + (x - self.shift) / self.scale
         first = np.sin(math.pi * w[:, 0]) ** 2
@@ -255,7 +280,6 @@ class Levy(AnyDimension):
         return first + middle + end
 
 
-@dataclass(frozen=True, kw_only=True)
 class Rastrigin(AnyDimension):
     """Rastrigin function: regularly spaced local minima.
 
@@ -274,10 +298,12 @@ class Rastrigin(AnyDimension):
 
     a: float = 10.0
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-5.12, 5.12, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin when ``a`` is not negative.
 
@@ -286,8 +312,14 @@ class Rastrigin(AnyDimension):
         points = _at(0.0, self.d)
         if self.a < 0 or not self.contains(points):
             return None
-        return Minimum(0.0, points, "formula", tolerance=0.0)
+        return Minimum(
+            value=0.0,
+            points=points,
+            source="formula",
+            tolerance=0.0,
+        )
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         terms = x**2 - self.a * np.cos(2 * math.pi * x)
         return self.a * self.d + np.sum(terms, axis=1)
@@ -300,7 +332,6 @@ _SCHWEFEL_ARGMAX = 420.968746359982
 _SCHWEFEL_PEAK = 418.98288727243374
 
 
-@dataclass(frozen=True, kw_only=True)
 class Schwefel(AnyDimension):
     """Schwefel function: the best point lies far from the next best.
 
@@ -327,10 +358,12 @@ class Schwefel(AnyDimension):
 
     offset: float = 418.9829
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-500.0, 500.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``d (offset - 418.98288727...)`` at ``x_i = 420.96874636...``.
 
@@ -340,12 +373,13 @@ class Schwefel(AnyDimension):
         if not self.uses_default_domain:
             return None
         return Minimum(
-            self.d * (self.offset - _SCHWEFEL_PEAK),
-            _at(_SCHWEFEL_ARGMAX, self.d),
-            "formula, with the peak found by bisection",
+            value=self.d * (self.offset - _SCHWEFEL_PEAK),
+            points=_at(_SCHWEFEL_ARGMAX, self.d),
+            source="formula, with the peak found by bisection",
             tolerance=1e-12,
         )
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         terms = x * np.sin(np.sqrt(np.abs(x)))
         return self.offset * self.d - np.sum(terms, axis=1)

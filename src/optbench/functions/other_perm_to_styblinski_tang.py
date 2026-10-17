@@ -6,8 +6,7 @@ the group is in ``other_beale_to_goldstein_price`` and ``other_hartmann``.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -29,7 +28,6 @@ _GROUP = Group.OTHER
 _SFU = "https://www.sfu.ca/~ssurjano/"
 
 
-@dataclass(frozen=True, kw_only=True)
 class PermDBeta(AnyDimension):
     """Perm function d, beta.
 
@@ -48,15 +46,18 @@ class PermDBeta(AnyDimension):
 
     beta: float = 0.5
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-self.d, self.d, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at ``x_j = j``, for every ``beta``: each inner sum is 0."""
         points = np.arange(1, self.d + 1, dtype=np.float64)[np.newaxis]
         return formula_minimum(self, 0.0, points)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         d = self.d
         j = np.arange(1, d + 1, dtype=np.float64)
@@ -73,7 +74,6 @@ class PermDBeta(AnyDimension):
         return np.sum(inner**2, axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class Powell(AnyDimension):
     """Powell function, in blocks of four variables.
 
@@ -98,22 +98,26 @@ class Powell(AnyDimension):
     c: float = 2.0
     e: float = 10.0
 
+    @override
     def _check(self) -> None:
         super()._check()
         if self.d % 4:
             msg = f"d must be a multiple of 4, got {self.d}"
             raise ValueError(msg)
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-4.0, 5.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin when ``b`` and ``e`` are not negative."""
         if min(self.b, self.e) < 0:
             return None
         return formula_minimum(self, 0.0, np.zeros((1, self.d)))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2, x3, x4 = x[:, 0::4], x[:, 1::4], x[:, 2::4], x[:, 3::4]
         blocks = (
@@ -152,7 +156,6 @@ _SHEKEL_MINIMA = {
 }
 
 
-@dataclass(frozen=True, kw_only=True)
 class Shekel(Problem):
     """Shekel function: ``m`` wells, the deepest near (4, 4, 4, 4).
 
@@ -179,6 +182,7 @@ class Shekel(Problem):
     beta: tuple[float, ...] = _SHEKEL_BETA
     c: tuple[tuple[float, ...], ...] = _SHEKEL_C
 
+    @override
     def _check(self) -> None:
         centres = np.asarray(self.c, dtype=np.float64)
         if centres.ndim != 2:  # ruff: ignore[magic-value-comparison]
@@ -192,13 +196,16 @@ class Shekel(Problem):
             raise ValueError(msg)
 
     @property
+    @override
     def dimension(self) -> int:
         return len(self.c)
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(0.0, 10.0, self.dimension)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Known for the published wells with m = 5, 7 or 10."""
         published = self.beta == _SHEKEL_BETA and self.c == _SHEKEL_C
@@ -208,12 +215,13 @@ class Shekel(Problem):
             return None
         value, point = _SHEKEL_MINIMA[self.m]
         return Minimum(
-            value,
-            np.array([point]),
-            "Newton refinement of the published (4, 4, 4, 4)",
+            value=value,
+            points=np.array([point]),
+            source="Newton refinement of the published (4, 4, 4, 4)",
             tolerance=1e-12,
         )
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         beta = np.asarray(self.beta[: self.m], dtype=np.float64)
         centres = np.asarray(self.c, dtype=np.float64)[:, : self.m]
@@ -223,7 +231,6 @@ class Shekel(Problem):
         return -wells.sum(axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class StyblinskiTang(AnyDimension):
     """Styblinski-Tang function.
 
@@ -244,10 +251,12 @@ class StyblinskiTang(AnyDimension):
     a: float = 16.0
     b: float = 5.0
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-5.0, 5.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Exact for any ``a``, ``b``, positive ``scale`` and domain.
 
@@ -266,10 +275,16 @@ class StyblinskiTang(AnyDimension):
             )
             point[k] = candidates[np.argmin(self._quartic(candidates))]
         value = self.scale * float(np.sum(self._quartic(point)))
-        return Minimum(value, point[np.newaxis], "formula", tolerance=1e-12)
+        return Minimum(
+            value=value,
+            points=point[np.newaxis],
+            source="formula",
+            tolerance=1e-12,
+        )
 
     def _quartic(self, t: NDArray[np.float64]) -> NDArray[np.float64]:
         return t**4 - self.a * t**2 + self.b * t
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         return self.scale * np.sum(self._quartic(x), axis=1)

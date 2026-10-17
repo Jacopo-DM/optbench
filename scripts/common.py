@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import dataclasses
 from pathlib import Path
 
 import optbench
@@ -30,6 +29,6 @@ def every_problem(d: int = D) -> list[Problem]:
         problem = optbench.make(name)
         if hasattr(problem, "d"):
             free = 4 * (d // 4) if name == "powell" else d
-            problem = dataclasses.replace(problem, d=free)
+            problem = problem.replace(d=free)
         problems.append(problem)
     return problems

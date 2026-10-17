@@ -6,8 +6,7 @@ https://www.sfu.ca/~ssurjano/optimization.html, group "Bowl-Shaped".
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -29,7 +28,6 @@ _GROUP = Group.BOWL
 _SFU = "https://www.sfu.ca/~ssurjano/"
 
 
-@dataclass(frozen=True, kw_only=True)
 class Sphere(AnyDimension):
     """Sphere function, ``f(x) = sum_i x_i^2``.
 
@@ -41,19 +39,21 @@ class Sphere(AnyDimension):
     url: ClassVar[str] = _SFU + "spheref.html"
     references: ClassVar[tuple[str, ...]] = (DIXON_SZEGO, MOLGA, PICHENY)
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-5.12, 5.12, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin, for every ``d``, on any domain holding it."""
         return formula_minimum(self, 0.0, np.zeros((1, self.d)))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         return np.einsum("ij,ij->i", x, x)
 
 
-@dataclass(frozen=True, kw_only=True)
 class _Bohachevsky(Problem):
     """What the three Bohachevsky functions share.
 
@@ -77,9 +77,11 @@ class _Bohachevsky(Problem):
     offset: float = 0.3
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-100.0, 100.0, 2)
 
@@ -94,6 +96,7 @@ class _Bohachevsky(Problem):
         return (self.a,)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``offset`` minus the cosine weights, at the origin.
 
@@ -110,7 +113,6 @@ class _Bohachevsky(Problem):
         return x[:, 0] ** 2 + self.weight * x[:, 1] ** 2
 
 
-@dataclass(frozen=True, kw_only=True)
 class Bohachevsky1(_Bohachevsky):
     """Bohachevsky function 1.
 
@@ -130,6 +132,7 @@ class Bohachevsky1(_Bohachevsky):
     def _cosine_weights(self) -> tuple[float, ...]:
         return (self.a, self.b)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         waves = self.a * np.cos(self.p * math.pi * x1) + self.b * np.cos(
@@ -138,7 +141,6 @@ class Bohachevsky1(_Bohachevsky):
         return self._squares(x) - waves + self.offset
 
 
-@dataclass(frozen=True, kw_only=True)
 class Bohachevsky2(_Bohachevsky):
     """Bohachevsky function 2.
 
@@ -147,13 +149,13 @@ class Bohachevsky2(_Bohachevsky):
 
     name: ClassVar[str] = "bohachevsky2"
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         wave = np.cos(self.p * math.pi * x1) * np.cos(self.q * math.pi * x2)
         return self._squares(x) - self.a * wave + self.offset
 
 
-@dataclass(frozen=True, kw_only=True)
 class Bohachevsky3(_Bohachevsky):
     """Bohachevsky function 3.
 
@@ -162,13 +164,13 @@ class Bohachevsky3(_Bohachevsky):
 
     name: ClassVar[str] = "bohachevsky3"
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         wave = np.cos(self.p * math.pi * x1 + self.q * math.pi * x2)
         return self._squares(x) - self.a * wave + self.offset
 
 
-@dataclass(frozen=True, kw_only=True)
 class Perm0(AnyDimension):
     """Perm function 0, d, beta.
 
@@ -187,15 +189,18 @@ class Perm0(AnyDimension):
 
     beta: float = 10.0
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-self.d, self.d, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at ``x_j = 1 / j``, for every ``beta``: each inner sum is 0."""
         points = 1 / np.arange(1, self.d + 1, dtype=np.float64)[np.newaxis]
         return formula_minimum(self, 0.0, points)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         d = self.d
         j = np.arange(1, d + 1, dtype=np.float64)
@@ -213,7 +218,6 @@ class Perm0(AnyDimension):
         return np.sum(inner**2, axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class RotatedHyperEllipsoid(AnyDimension):
     """Rotated hyper-ellipsoid function, ``f(x) = sum_i sum_{j<=i} x_j^2``.
 
@@ -225,21 +229,23 @@ class RotatedHyperEllipsoid(AnyDimension):
     url: ClassVar[str] = _SFU + "rothyp.html"
     references: ClassVar[tuple[str, ...]] = (MOLGA,)
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-65.536, 65.536, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin."""
         return formula_minimum(self, 0.0, np.zeros((1, self.d)))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         # x_j^2 appears in the sums for i = j, ..., d: d - j + 1 times.
         counts = np.arange(self.d, 0, -1, dtype=np.float64)
         return np.sum(counts * x**2, axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class SumOfDifferentPowers(AnyDimension):
     """Sum of different powers, ``f(x) = sum_i |x_i|^(i + power_shift)``.
 
@@ -256,22 +262,24 @@ class SumOfDifferentPowers(AnyDimension):
 
     power_shift: float = 1.0
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-1.0, 1.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin while every exponent is positive."""
         if 1 + self.power_shift <= 0:
             return None
         return formula_minimum(self, 0.0, np.zeros((1, self.d)))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         powers = np.arange(1, self.d + 1, dtype=np.float64) + self.power_shift
         return np.sum(np.abs(x) ** powers, axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class SumSquares(AnyDimension):
     """Sum squares (axis-parallel hyper-ellipsoid), ``sum_i i x_i^2``.
 
@@ -283,20 +291,22 @@ class SumSquares(AnyDimension):
     url: ClassVar[str] = _SFU + "sumsqu.html"
     references: ClassVar[tuple[str, ...]] = (HEDAR, MOLGA)
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-10.0, 10.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin."""
         return formula_minimum(self, 0.0, np.zeros((1, self.d)))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         weights = np.arange(1, self.d + 1, dtype=np.float64)
         return np.sum(weights * x**2, axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class Trid(AnyDimension):
     """Trid function, ``f(x) = sum_i (x_i - shift)^2 - sum_i x_i x_{i-1}``.
 
@@ -313,11 +323,13 @@ class Trid(AnyDimension):
 
     shift: float = 1.0
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         square = float(self.d**2)
         return box(-square, square, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``-shift^2 d (d + 4) (d - 1) / 6`` at ``x_i = shift i (d + 1 - i)``.
 
@@ -332,6 +344,7 @@ class Trid(AnyDimension):
         value = -(self.shift**2) * d * (d + 4) * (d - 1) / 6
         return formula_minimum(self, value, points)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         squares = np.sum((x - self.shift) ** 2, axis=1)
         neighbours = np.sum(x[:, 1:] * x[:, :-1], axis=1)

@@ -6,8 +6,7 @@ https://www.sfu.ca/~ssurjano/optimization.html, group "Plate-Shaped".
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
@@ -30,7 +29,6 @@ _GROUP = Group.PLATE
 _SFU = "https://www.sfu.ca/~ssurjano/"
 
 
-@dataclass(frozen=True, kw_only=True)
 class Booth(Problem):
     """Booth function.
 
@@ -52,13 +50,16 @@ class Booth(Problem):
     b: float = 5.0
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-10.0, 10.0, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero where both brackets vanish: one point unless ``weight = +-1``.
 
@@ -75,6 +76,7 @@ class Booth(Problem):
         ])
         return formula_minimum(self, 0.0, point)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         first = (x1 + self.weight * x2 - self.a) ** 2
@@ -82,7 +84,6 @@ class Booth(Problem):
         return first + second
 
 
-@dataclass(frozen=True, kw_only=True)
 class Matyas(Problem):
     """Matyas function, ``f(x) = a (x1^2 + x2^2) - b x1 x2``.
 
@@ -101,13 +102,16 @@ class Matyas(Problem):
     b: float = 0.48
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-10.0, 10.0, 2)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin while the quadratic form is not negative.
 
@@ -118,12 +122,12 @@ class Matyas(Problem):
             return None
         return formula_minimum(self, 0.0, np.zeros((1, 2)))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         return self.a * (x1**2 + x2**2) - self.b * x1 * x2
 
 
-@dataclass(frozen=True, kw_only=True)
 class McCormick(Problem):
     """McCormick function.
 
@@ -145,13 +149,16 @@ class McCormick(Problem):
     offset: float = 1.0
 
     @property
+    @override
     def dimension(self) -> int:
         return 2
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return np.array([[-1.5, 4.0], [-3.0, 4.0]])
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """``offset - 1 - sqrt(3) / 2 - pi / 3``, for the published a and b.
 
@@ -166,15 +173,19 @@ class McCormick(Problem):
             return None
         u, v = -2 * math.pi / 3, 1.0
         value = self.offset - 1 - math.sqrt(3) / 2 - math.pi / 3
-        return Minimum(value, np.array([[(u + v) / 2, (u - v) / 2]]), "formula")
+        return Minimum(
+            value=value,
+            points=np.array([[(u + v) / 2, (u - v) / 2]]),
+            source="formula",
+        )
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         linear = -self.a * x1 + self.b * x2 + self.offset
         return np.sin(x1 + x2) + (x1 - x2) ** 2 + linear
 
 
-@dataclass(frozen=True, kw_only=True)
 class PowerSum(Problem):
     """Power sum function, ``f(x) = sum_i (sum_j x_j^i - b_i)^2``.
 
@@ -193,23 +204,28 @@ class PowerSum(Problem):
 
     b: tuple[float, ...] = (8.0, 18.0, 44.0, 114.0)
 
+    @override
     def _check(self) -> None:
         if not self.b:
             msg = "b must have at least one entry"
             raise ValueError(msg)
 
     @property
+    @override
     def dimension(self) -> int:
         return len(self.b)
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(0.0, float(self.dimension), self.dimension)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the orderings of (1, 2, 2, 3), for the published b."""
         return at_defaults(self, POWER_SUM)
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         d = self.dimension
         repeated = np.broadcast_to(x[:, np.newaxis, :], (len(x), d, d))
@@ -217,7 +233,6 @@ class PowerSum(Problem):
         return np.sum((sums - np.asarray(self.b)) ** 2, axis=1)
 
 
-@dataclass(frozen=True, kw_only=True)
 class Zakharov(AnyDimension):
     """Zakharov function, with ``s = sum_i coefficient i x_i``.
 
@@ -236,14 +251,17 @@ class Zakharov(AnyDimension):
 
     coefficient: float = 0.5
 
+    @override
     def default_bounds(self) -> NDArray[np.float64]:
         return box(-5.0, 10.0, self.d)
 
     @property
+    @override
     def minimum(self) -> Minimum | None:
         """Zero at the origin, for every coefficient: no term is negative."""
         return formula_minimum(self, 0.0, np.zeros((1, self.d)))
 
+    @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         i = np.arange(1, self.d + 1, dtype=np.float64)
         s = x @ (self.coefficient * i)

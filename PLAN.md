@@ -28,22 +28,23 @@ other). The approved spec and task list are in DESIGN.md.
 - `bbob` complete (2026-10-17, five commits, one per group, each merged
   and its branch deleted on the user's say-so): all 24 functions equal to
   `cocoex` (1e-9 for f16 to f19 and f23, 1e-12 for the rest; DESIGN.md
-  results); 83 functions in all, 1573 tests, coverage 100%.
-- Git: `main` is pushed (0ecc374, 2026-10-17, the user's say-so) and is
-  the only branch.
+  results); 83 functions in all, 1578 tests, coverage 100%.
+- Git: `main` is pushed up to 1385e82 (2026-10-17, the user's say-so);
+  65b1971 (the `python-standard` spec) is on `main`, not pushed. Work on
+  `python-standard` is on branch `python-standard`.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
 ## Constraints
 
-- See CLAUDE.md rules: no import of `ailigment`, numpy only at run time,
+- See CLAUDE.md rules: no import of `ailigment`, numpy and pydantic only at
+  run time,
   formulas not GPL code.
 - Python >=3.13 to match `ailigment`.
 
 ## Next step
 
-The user approves (or changes) the `python-standard` spec and task list
-below. Nothing is coded until then.
+Task 2 of `python-standard` (below): `_Peaks` and `_Shape` to models.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -53,8 +54,9 @@ then BBOB, then the `ailigment` adapters. Downloading RR-6829 (573,076
 bytes, from https://inria.hal.science/inria-00362633/document) and adding
 COCO's Python package as a dev-only dependency are approved too.
 
-1. awaiting approval (spec written 2026-10-17): module `python-standard`
-   (kind: change). Spec and task list below; the user's answers to its four
+1. executing (approved by the user 2026-10-17): module `python-standard`
+   (kind: change). Task 1 done (with `KnownMinimum` from task 2 and the
+   tests of task 4, which it needed to keep the checks green). Spec and task list below; the user's answers to its four
    design questions are in DESIGN.md (Decisions, "Python standard").
 
 2. later: the same migration for `ailigment`, then its adapters (its
@@ -102,6 +104,15 @@ Measured on 2026-10-17 in a scratch worktree with the template configs
 - `@typing.override` on an override silences `no-self-use` (checked with
   ruff 0.17), so those 30 need no suppression comments.
 
+Found in task 1: the generated `__init__` is typed with the stored
+field type, so type checkers want `domain` as a tuple of tuples (tests now
+pass tuples; arrays and lists still work at run time, and through
+`model_validate`). A flat tuple where a matrix belongs (`Shekel(c=(1.0,
+2.0))`) is now refused by pydantic's type check with its own message, not
+by the function's "c must be a matrix" check; an empty tuple still reaches
+that check. Timing after task 1: total 1270 ms against 1261 ms before
+(three runs each, minimum per function), median ratio 1.000.
+
 Behaviour that changes (approved, see DESIGN.md): `problem.replace(...)`
 replaces `dataclasses.replace(problem, ...)`; `domain` is stored as a tuple
 of `(low, high)` pairs; `Minimum.points` is read-only; bad constructor
@@ -131,37 +142,13 @@ Verification for every task:
 
 ### Task list: `python-standard` (one commit each, in this order)
 
-1. Base model, `Problem` and every subclass, in one commit: a dataclass
-   cannot subclass a pydantic model, so every subclass moves with its
-   base or nothing passes in between. Add `pydantic` (runtime) with `uv
-   add`. New `src/optbench/model.py`: `Model(BaseModel)` with
-   `ConfigDict(frozen=True, extra="forbid")`, the one shared base. Port
-   `Minimum` (points copied to a read-only float64 array by a validator,
-   `arbitrary_types_allowed` for that field only), `Problem` (checks move
-   from `__post_init__` to `model_post_init`; a `domain` validator turns
-   any array-like into `tuple[tuple[float, float], ...]`; new
-   `replace(**changes)` rebuilds through `model_validate`) and
-   `AnyDimension`. In each of the 18 function modules the
-   `@dataclass(frozen=True, kw_only=True)` line and the import go, fields
-   keep their defaults, and `@override` goes on every `_evaluate`,
-   `default_bounds`, `minimum` and `_check`, and the three
-   `dataclasses.replace` callers (`scripts/common.py`,
-   `tests/test_all_problems.py`, `tests/test_functions.py`) switch to
-   `problem.replace`. The diff is mechanical outside `problem.py`. Risk: medium (the base of everything; the value pin and
-   cocoex cover every function). Effect: 21 of the 23 banned-api findings
-   and the 30 no-self-use.
-2. The other records: `KnownMinimum` (`known_minima.py`, whose
-   `dataclasses.replace` becomes `replace`) and BBOB's `_Peaks` and
-   `_Shape` NamedTuples become models (`arbitrary_types_allowed` for the
-   array fields). The cached `x_opt`, `r` and `q` stay module-level
-   `functools.cache` functions (they already return read-only arrays).
-   Risk: low.
+2. BBOB's `_Peaks` and `_Shape` NamedTuples become models
+   (`arbitrary_types_allowed` for the array fields). The cached `x_opt`,
+   `r` and `q` stay module-level `functools.cache` functions (they already
+   return read-only arrays). Risk: low.
 3. `Tracked` (`tracking.py`): a mutable model (`frozen=False`,
    `extra="forbid"`) since it counts calls; same attributes and behaviour.
    `baseline.py` and the registry checked for records. Risk: low.
-4. Tests for the approved behaviour changes: `replace` validates (a bad
-   `d` raises), `domain` from a numpy array equals the same domain from a
-   list, and writing into `minimum.points` raises. Risk: low.
 5. Config switch. Copy `mypy.ini`, `ruff.toml`, `pytest.ini`,
    `pyrightconfig.json`, `.gitignore` and `tools/compress_images.py` from
    `~/Functions/_rsync/python/` (`rsync-sync pull python`, then drop the

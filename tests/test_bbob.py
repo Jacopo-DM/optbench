@@ -153,7 +153,7 @@ def test_minimum_follows_the_constants() -> None:
     assert BbobRastrigin(a=-1.0).minimum is None
     assert BbobBucheRastrigin(skew=0.0).minimum is None
     assert BbobLinearSlope(conditioning=-1.0).minimum is None
-    assert BbobSphere(d=2, domain=[[4.5, 5.0]] * 2).minimum is None
+    assert BbobSphere(d=2, domain=((4.5, 5.0),) * 2).minimum is None
     assert BbobAttractiveSector(power=0.0).minimum is None
     assert BbobStepEllipsoid(slope=-1.0).minimum is None
     assert BbobRosenbrock(a=-1.0).minimum is None
