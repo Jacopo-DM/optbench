@@ -74,8 +74,6 @@ None.
   0.1 s budget; under heavier load it may cross it. T_osz (shared by seven
   BBOB functions) and the rotations are 37 ms of that; speeding up T_osz
   would help them all.
-
-
 - Power Sum's recommended b vector is given for d = 4 only (other b give
   other dimensions, with an unknown minimum). Langermann's constants are for
   d = 2; other dimensions work when the caller passes `a`
