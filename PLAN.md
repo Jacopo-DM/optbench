@@ -31,11 +31,10 @@ other). The approved spec and task list are in DESIGN.md.
   `cocoex` (1e-9 for f16 to f19 and f23, 1e-12 for the rest; DESIGN.md
   results); 83 functions in all, 1578 tests, 100% branch coverage over
   `src` and `tests`; ruff, mypy strict and pyright strict clean.
-- Git: `main` is pushed (0e06938, 2026-10-17, the user's say-so); the
-  first CI run on it passed every step (cocoex 2.8.2 built from source in
-  17 s, 1578 tests, 100% coverage). Dependabot opened PR #1 (setup-uv
-  9.0.0 to 10.3.0), not merged. Merged local branches not yet deleted:
-  `spec-python-standard`, `notes-push-blocked`, `notes-ci-green`.
+- Git: `main` is pushed (f33326f, 2026-10-17, the user's say-so) and is
+  the only local branch; the first CI run on it passed every step (cocoex
+  2.8.2 built from source in 17 s, 1578 tests, 100% coverage). Dependabot
+  opened PR #1 (setup-uv 9.0.0 to 10.3.0, CI passing), not merged.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
