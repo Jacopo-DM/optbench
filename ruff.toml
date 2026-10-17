@@ -1,5 +1,5 @@
-# Assume Python 3.12
-target-version = "py312"
+# Assume Python 3.13
+target-version = "py313"
 
 # Exclude a variety of commonly ignored directories.
 exclude = [".venv", ".git", ".typings"]
@@ -48,21 +48,21 @@ convention = "numpy"
 select = ["ALL"]
 ignore = [
     # --- Necessary (avoid conflict) ---
-    "D203",   # one-blank-line-before-class
-    "D212",   # multi-line-summary-first-line
-    "TID252", # relative-imports
-    "ISC001", # single-line-implicit-string-concatenation (--x COM812)
+    "incorrect-blank-line-before-class",   # one-blank-line-before-class
+    "multi-line-summary-first-line",   # multi-line-summary-first-line
+    "relative-imports", # relative-imports
+    "single-line-implicit-string-concatenation", # single-line-implicit-string-concatenation (--x COM812)
+    "missing-trailing-comma", # missing-trailing-comma (conflicts with the formatter)
     # --- Unnecessary (beyond usual scope) ---
-    "CPY001", # Requests copyright notice
-    "TD003",  # Requests issue-link under TODO
-    "INP001", # implicit module __init__ thing
+    "missing-copyright-notice", # Requests copyright notice
+    "missing-todo-link",  # Requests issue-link under TODO
+    "implicit-namespace-package", # implicit module __init__ thing
     # --- Annoying (but useful) ---
-    "ERA001",  # Found commented-out code
-    "D101", # No docstring in public class
-    "D102", # No docstring in public method
-    "D103", # No docstring in public function
-    "D105", # No docstring in public magic method
-    "PLR6301", # no-self-use: Protocol implementations need not use self
+    "commented-out-code",  # Found commented-out code
+    "undocumented-public-class", # No docstring in public class
+    "undocumented-public-method", # No docstring in public method
+    "undocumented-public-function", # No docstring in public function
+    "undocumented-magic-method", # No docstring in public magic method
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
@@ -78,13 +78,24 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 # Allow assertions in tests.
 # Source: https://github.com/astral-sh/ruff/issues/4368#issuecomment-2245567481
 [lint.extend-per-file-ignores]
+"**/examples/**/*.py" = [
+    "undocumented-public-class", # Missing docstring public class
+    "undocumented-public-method", # Missing docstring public method
+    "undocumented-public-function", # Missing docstring public function
+]
 "**/tests/**/*.py" = [
-    "S101", # asserts not allowed --> ok in tests
-    "PLR2004", # magic values are fine in test assertions
+    "assert", # asserts not allowed --> ok in tests
 ]
 "*/test_*.py" = [
-    "S101", # asserts not allowed --> ok in tests
+    "assert", # asserts not allowed --> ok in tests
 ]
-"noxfile.py" = [
-    "S101", # asserts not allowed --> ok in nox config
-]
+
+# --- Standards additions (python-standards) --- #
+# Ruff's own rule set cannot say "no Any, no dataclass"; banned-api can.
+[lint.flake8-tidy-imports.banned-api]
+"typing.Any".msg = "No Any. Use a model, a Protocol or a TypeVar. See typing-and-pydantic.md."
+"dataclasses.dataclass".msg = "Use a pydantic BaseModel. Exceptions need a reason, see core.md."
+"pydantic.dataclasses".msg = "Use a pydantic BaseModel, not pydantic dataclasses."
+"typing.NamedTuple".msg = "Use a frozen pydantic BaseModel."
+"collections.namedtuple".msg = "Use a frozen pydantic BaseModel."
+"typing.TypedDict".msg = "Use a pydantic BaseModel. Exceptions need a reason, see core.md."

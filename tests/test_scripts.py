@@ -9,7 +9,7 @@ import pytest
 
 import optbench
 from optbench import Sphere
-from scripts import baseline, common, timing
+from optbench.scripts import baseline, common, timing
 
 if TYPE_CHECKING:
     from pathlib import Path

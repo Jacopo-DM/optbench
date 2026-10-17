@@ -1,8 +1,8 @@
 """Time every problem on a batch of points (spec criterion 2).
 
-Run with ``uv run python -m scripts.timing``. Each problem evaluates 100,000
-uniform random points in its domain (free dimensions at 10, Powell at 8);
-the time is CPU seconds, the minimum of 5 repeats. Prints a table, writes
+Run with ``uv run python -m optbench.scripts.timing``. Each problem
+evaluates 100,000 uniform random points in its domain (free dimensions at
+10, Powell at 8); the time is CPU seconds, the minimum of 5 repeats. Prints a table, writes
 ``__data__/timing.csv`` and exits with status 1 if any problem is over the
 0.1 s budget, except the stated exceptions in ``EXCEPTIONS``.
 """
@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from scripts.common import DATA, every_problem
+from optbench.scripts.common import DATA, every_problem
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -99,5 +99,5 @@ def main(argv: Sequence[str] | None = None) -> int:
     return 1 if over else 0
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     sys.exit(main())

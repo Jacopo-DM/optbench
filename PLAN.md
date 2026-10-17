@@ -19,7 +19,8 @@ other). The approved spec and task list are in DESIGN.md.
   Every feature branch so far was merged and deleted on the user's say-so;
   the working tree is clean.
 - Tier 2 is complete (2026-10-17): `optbench.random_search` (the baseline)
-  and `scripts/timing.py` and `scripts/baseline.py`; results in DESIGN.md.
+  and the timing and baseline scripts (now `src/optbench/scripts/`);
+  results in DESIGN.md.
   All 49 functions are under the 100 ms budget. On `main` and pushed
   (2026-10-17); the branch `tier2-baseline` was deleted.
 - `classics` done (2026-10-17, branch `classics`): ten functions, 605
@@ -44,7 +45,7 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Task 5 of `python-standard` (below): the config switch.
+Task 6 of `python-standard` (below): the 30 mypy errors.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -55,9 +56,12 @@ bytes, from https://inria.hal.science/inria-00362633/document) and adding
 COCO's Python package as a dev-only dependency are approved too.
 
 1. executing (approved by the user 2026-10-17): module `python-standard`
-   (kind: change). Tasks 1 to 4 done (task 1 took `KnownMinimum` from
-   task 2 and the tests of task 4, which it needed to keep the checks
-   green). Spec and task list below; the user's answers to its four
+   (kind: change). Tasks 1 to 5 and 8 are done. Task 1 took `KnownMinimum`
+   from task 2 and the tests of task 4, which it needed to keep the checks
+   green; coverage was already 100% of branches over `src` and `tests` once
+   `pytest.ini` arrived in task 5. Since task 5 the Stop hook's checks fail
+   on mypy (30 errors) and ruff (17 magic values, 2 `Any`) until tasks 6
+   and 7. Spec and task list below; the user's answers to its four
    design questions are in DESIGN.md (Decisions, "Python standard").
 
 2. later: the same migration for `ailigment`, then its adapters (its
@@ -143,18 +147,6 @@ Verification for every task:
 
 ### Task list: `python-standard` (one commit each, in this order)
 
-5. Config switch. Copy `mypy.ini`, `ruff.toml`, `pytest.ini`,
-   `pyrightconfig.json`, `.gitignore` and `tools/compress_images.py` from
-   `~/Functions/_rsync/python/` (`rsync-sync pull python`, then drop the
-   template's `main.py`: a library keeps no top-level script), delete the
-   `[tool.pytest.ini_options]`, `[tool.coverage.report]` and
-   `[tool.pyright]` tables from `pyproject.toml`, `uv add --dev mypy
-   pillow`. Move `scripts/` to `src/optbench/scripts/` (the template's
-   `pythonpath = src` and `--cov=src` then cover them; run as `uv run
-   python -m optbench.scripts.timing`; they have no import-time side
-   effects, so shipping them in the wheel is harmless). The
-   `if __name__ == "__main__":` guards get `# pragma: no cover`. CLAUDE.md
-   commands change to the four standard ones. Risk: low.
 6. mypy fixes: the 33 errors. Numpy reductions returned as `float` get
    `float(...)`; `cocoex` goes behind a typed `Protocol` in
    `tests/test_bbob.py`, reached through one `cast`, as
@@ -164,8 +156,6 @@ Verification for every task:
    user. Risk: low.
 7. ruff fixes: the 17 magic values become named constants; whatever the
    template rules find after tasks 1 to 6. Risk: low.
-8. Coverage to 100% of branches over `src` and `tests` (tests count now;
-    any test helper branch not taken gets a case or goes). Risk: low.
 9. pre-commit and CI: `templates/pre-commit-config.yaml` to
     `.pre-commit-config.yaml`, `uv add --dev pre-commit`, `uv run
     pre-commit install`; `templates/ci.yml` to `.github/workflows/ci.yml`

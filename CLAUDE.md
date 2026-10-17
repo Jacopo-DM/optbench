@@ -11,19 +11,25 @@ All commands run from the repo root with uv (Python 3.13).
 
 | Purpose | Command |
 |---------|---------|
-| Install or rebuild the environment (numpy; dev group: pytest, pytest-cov, pyright, ruff, coco-experiment, which has no Python 3.13 wheel and is compiled from its source archive with Xcode's compiler) | `uv sync` |
-| Lint (auto-fixes) | `uv run ruff check src tests scripts` |
-| Format | `uv run ruff format src tests scripts` |
-| Type check (strict) | `uv run pyright` |
-| Tests (about 1 s) | `uv run pytest` |
-| Test coverage (`if __name__` guards are excluded in `pyproject.toml`) | `uv run pytest --cov=src/optbench --cov=scripts --cov-report=term-missing:skip-covered` |
-| Time every function on 100,000 points, spec criterion 2 (about 5 s; table, `__data__/timing.csv`, exit status 1 if any is over 0.1 s, except the stated exceptions in `scripts/timing.py`) | `uv run python -m scripts.timing [--points N] [--repeats K]` |
-| Run the random-search baseline on every function, 10 seeds of 10,000 points (about 1 s; table, curves in `__data__/baseline/`) | `uv run python -m scripts.baseline [--budget N] [--seeds K]` |
+| Install or rebuild the environment (numpy, pydantic; dev group: pytest, pytest-cov, mypy, pyright, ruff, pillow, coco-experiment, which has no Python 3.13 wheel and is compiled from its source archive with Xcode's compiler) | `uv sync` |
+| Format | `uv run ruff format` |
+| Lint (auto-fixes, unsafe fixes included: read the diff) | `uv run ruff check` |
+| Lint as the Stop hook and CI do | `uv run ruff format --check && uv run ruff check --no-fix` |
+| Type check (strict, no `Any`; the one the Stop hook runs) | `uv run mypy .` |
+| Type check as the editor does (strict, `pyrightconfig.json`) | `uv run pyright` |
+| Tests, with 100% branch coverage over `src` and `tests` enforced by `pytest.ini` (about 4 s) | `uv run pytest` |
+| One test file quickly, no coverage | `uv run pytest tests/test_x.py -k name --no-cov` |
+| Time every function on 100,000 points, spec criterion 2 (about 5 s; table, `__data__/timing.csv`, exit status 1 if any is over 0.1 s, except the stated exceptions in `src/optbench/scripts/timing.py`) | `uv run python -m optbench.scripts.timing [--points N] [--repeats K]` |
+| Run the random-search baseline on every function, 10 seeds of 10,000 points (about 1 s; table, curves in `__data__/baseline/`) | `uv run python -m optbench.scripts.baseline [--budget N] [--seeds K]` |
 
-Always pass the paths to ruff: a bare `uv run ruff check` also auto-fixes
-`ruff.toml` itself, because `fix` and `unsafe-fixes` are on.
+`mypy.ini`, `ruff.toml`, `pytest.ini`, `pyrightconfig.json`, `.gitignore`
+(below its PROJECT section) and `tools/compress_images.py` are copies of the
+user's templates in `~/Functions/_rsync/python/`: never edit them to get a
+check through (the Stop hook compares them with the templates); refresh
+them with `rsync-sync pull python` in a clean tree and read the diff (it
+also copies `main.py`, which this library deletes).
 
-Before every commit run lint, type check and the tests above.
+Before every commit run format, lint, both type checks and the tests above.
 
 ## Rules
 
@@ -96,7 +102,7 @@ Before every commit run lint, type check and the tests above.
 | `.venv/` | generated | `uv sync` / `uv run` |
 | `uv.lock` | generated | `uv add`, `uv lock`; never edit by hand |
 | `.pytest_cache/`, `.ruff_cache/`, `__pycache__/`, `.coverage` | generated | pytest, ruff, the interpreter, pytest-cov |
-| `__data__/` | generated, git-ignored (`timing.csv`, `baseline/` curves, `plots/`) | `scripts.timing`, `scripts.baseline` |
+| `__data__/` | generated, git-ignored (`timing.csv`, `baseline/` curves, `plots/`) | `optbench.scripts.timing`, `optbench.scripts.baseline` |
 | `src/optbench/py.typed` | hand-written, empty marker | n/a |
 
 ## Things that bite

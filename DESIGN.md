@@ -367,7 +367,7 @@ fits it. One commit; the minima are checked numerically as for SFU.
 - Whitley is a stated exception to spec criterion 2 (the user, 2026-10-17):
   it has d^2 terms per point, so at d = 10 a batch of 100,000 points needs
   10 million cosines, which alone take 70 to 90 ms; it measures about 125
-  ms. `scripts/timing.py` lists it in `EXCEPTIONS`, marks it "over budget,
+  ms. `src/optbench/scripts/timing.py` lists it in `EXCEPTIONS`, marks it "over budget,
   stated exception" and still exits 0. Changing the budget to scale with
   the terms per point, or leaving the script failing, were the rejected
   options.
@@ -481,10 +481,12 @@ fits it. One commit; the minima are checked numerically as for SFU.
   function, uniform points through `Tracked`, so `Tracked` stays the only
   state. Points come in batches of 1,000 (one `Tracked` curve row each) and
   the last batch is cut so the budget is exact.
-- The timing and baseline runners are scripts in `scripts/` (a package run
-  with `python -m`, checked by pyright and ruff, tested by
-  `tests/test_scripts.py` through `pythonpath = ["."]`), not part of
-  `optbench`: nobody imports them. They write to `__data__/` (git-ignored),
+- The timing and baseline runners are scripts in `src/optbench/scripts/`
+  (run with `python -m optbench.scripts.<name>`, tested by
+  `tests/test_scripts.py`). Until 2026-10-17 they were a top-level
+  `scripts/` package outside `optbench`; the Python standard's `pytest.ini`
+  (`pythonpath = src`, coverage over `src` and `tests`) moved them in (see
+  "Python standard"). The package itself never imports them. They write to `__data__/` (git-ignored),
   as in `ailigment`. The scripts draw no plots, because matplotlib would be a
   new dependency; the charts so far were drawn with `ailigment`'s
   environment from the CSVs. The script lived in a session scratch folder,

@@ -1,6 +1,6 @@
 """Run the random-search baseline on every problem.
 
-Run with ``uv run python -m scripts.baseline``. Each problem (free
+Run with ``uv run python -m optbench.scripts.baseline``. Each problem (free
 dimensions at 10, Powell at 8) gets 10 seeds of 10,000 uniform random
 points. Prints, per problem, the known minimum and the median, best and
 worst final value over the seeds, and writes every best-so-far curve to
@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from optbench import random_search
-from scripts.common import DATA, every_problem
+from optbench.scripts.common import DATA, every_problem
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -66,5 +66,5 @@ def main(argv: Sequence[str] | None = None) -> None:
     print(f"curves saved in {folder}")  # ruff: ignore[print]
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

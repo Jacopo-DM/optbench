@@ -119,20 +119,16 @@ seed) and `q` (from the seed plus `SECOND_ROTATION`, 1,000,000)),
 constants), `references.py`
 (shared citations), `__init__.py` (the list the registry reads);
 `registry.py`; `tracking.py`; `baseline.py` (`random_search`);
+`scripts/` (command-line tools run as `python -m optbench.scripts.<name>`,
+never imported by the package: `common.py` (`D = 10`, `DATA = __data__`,
+`every_problem(d)`: every registered problem with free dimensions at `d`,
+Powell at the largest multiple of 4 up to it), `timing.py`
+(`time_problem(problem, points, repeats)`, `BUDGET`, `EXCEPTIONS` (problems
+allowed over it), `main` returning the exit status), `baseline.py` (`main`));
 `__init__.py`. Order: `problem` is the leaf;
 `references` and `known_minima` use only `problem`; the group modules use
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
-
-## `scripts` (209 lines, 4 files)
-
-Command-line tools, run as `python -m scripts.<name>`; not part of the
-package. `common.py` (`D = 10`, `DATA = __data__`, `every_problem(d)`: every
-registered problem with free dimensions at `d`, Powell at the largest
-multiple of 4 up to it), `timing.py` (`time_problem(problem, points,
-repeats)`, `BUDGET`, `EXCEPTIONS` (problems allowed over it), `main`
-returning the exit status), `baseline.py` (`main`).
-Depends on: `optbench`, numpy.
 
 ## `tests` (1516 lines, 13 files)
 
@@ -145,7 +141,7 @@ handling), `test_bowl.py`, `test_plate.py`, `test_steep.py` and
 constants, minima that follow parameters, refusals),
 `test_problem.py` (`replace`, the stored domain, read-only minima),
 `test_registry_and_tracking.py`, `test_baseline.py`, `test_scripts.py`
-(both scripts on small budgets in a temporary folder). Depends on: `optbench`, `scripts`, numpy, pytest, `cocoex` (dev only).
+(both scripts on small budgets in a temporary folder). Depends on: `optbench` (with `optbench.scripts`), numpy, pytest, `cocoex` (dev only).
 
 ## Size checks (400 lines per file)
 
