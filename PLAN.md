@@ -51,8 +51,8 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Get the user's approval of the `formula` task list (below); `ailigment`'s
-goal `optbench-symreg` waits on the module.
+Module `formula`, task F1 (below); `ailigment`'s goal `optbench-symreg`
+waits on the module.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -69,11 +69,11 @@ COCO's Python package as a dev-only dependency are approved too.
    under Decisions, the results row, the rejected approach).
 
 2. done (2026-10-17): the same migration for `ailigment` (its PLAN.md).
-3. approved 2026-10-17, task list awaiting approval: module `formula`
+3. in progress (spec and task list approved 2026-10-17): module `formula`
    (spec in DESIGN.md, "Approved spec: formula"), asked for by
    `ailigment`'s approved goal `optbench-symreg` (its DESIGN.md).
 
-### Task list: module `formula` (awaiting the user's approval)
+### Task list: module `formula` (approved by the user, 2026-10-17)
 
 Each task is one commit with every check passing. The equality test
 (criterion 2) is written first and runs over the problems that already
