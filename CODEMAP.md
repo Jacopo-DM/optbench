@@ -84,7 +84,7 @@ Public interface (`optbench/__init__.py`):
     terms, penalty)`, `BbobLunacek(d, instance, mu0, depth, conditioning, a,
     penalty)`.
 - `names(group=None, suite=None)`, `make(name, **params)`: the registry.
-- `Tracked(problem)`: counts evaluations, keeps `best_value` and
+- `Tracked(problem)`: a mutable pydantic model; counts evaluations, keeps `best_value` and
   `best_point`, and `curve` (rows of evaluations, best so far).
 - `random_search(problem, budget, rng, batch=1000)`: uniform random points in
   `problem.bounds`, exactly `budget` of them, in batches; returns the

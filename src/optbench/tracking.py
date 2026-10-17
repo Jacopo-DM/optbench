@@ -1,18 +1,14 @@
 """Counting evaluations while an optimiser runs."""
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
+from pydantic import BaseModel, ConfigDict, PrivateAttr
 
-if TYPE_CHECKING:
-    from numpy.typing import ArrayLike, NDArray
-
-    from .problem import Problem
+from .model import Model
+from .problem import Problem
 
 
-class Tracked:
+class Tracked(Model):
     """Wraps a problem to count evaluations and keep the best point so far.
 
     Call it like the problem. After every call, ``curve`` gains one row
@@ -20,18 +16,29 @@ class Tracked:
     can be plotted or saved (``numpy.savetxt``) afterwards. NaN values never
     count as best.
 
+    A mutable model, the standard's exception for a record that must
+    change: it counts as it goes.
+
     Parameters
     ----------
     problem
         The problem to evaluate.
     """
 
+    model_config = ConfigDict(frozen=False, arbitrary_types_allowed=True)
+
+    problem: Problem
+    evaluations: int = 0
+    best_value: float = np.inf
+    best_point: NDArray[np.float64] | None = None
+    _curve: list[tuple[float, float]] = PrivateAttr(
+        default_factory=list[tuple[float, float]],
+    )
+
     def __init__(self, problem: Problem) -> None:
-        self.problem = problem
-        self.evaluations = 0
-        self.best_value = np.inf
-        self.best_point: NDArray[np.float64] | None = None
-        self._curve: list[tuple[float, float]] = []
+        # BaseModel's own __init__: the one type checkers synthesise for
+        # Model has no fields, so it would refuse ``problem``.
+        BaseModel.__init__(self, problem=problem)
 
     def __call__(self, x: ArrayLike) -> NDArray[np.float64]:
         """Evaluate a batch and record it.
