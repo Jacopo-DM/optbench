@@ -49,10 +49,8 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Nothing is left in this repo's approved modules. The next work is in
-`ailigment` (its PLAN.md): the adapters that use optbench, each with its
-own spec; adding optbench as a dependency there needs the user's
-approval.
+Write the spec and task list for module `python-standard` (below) and
+stop for the user's approval.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -62,7 +60,23 @@ then BBOB, then the `ailigment` adapters. Downloading RR-6829 (573,076
 bytes, from https://inria.hal.science/inria-00362633/document) and adding
 COCO's Python package as a dev-only dependency are approved too.
 
-1. later: the `ailigment` adapters (its PLAN.md).
+1. todo, needs a spec (the user chose this order on 2026-10-17): module
+   `python-standard`, bring optbench up to the user's Python standard
+   (`~/.claude/standards/python/core.md` and the files beside it): mypy
+   strict with no `Any` instead of pyright, the user's `mypy.ini`,
+   `ruff.toml`, `pyrightconfig.json` and `pytest.ini` from
+   `~/Functions/_rsync/python/` (`rsync-sync pull python`), pydantic v2
+   frozen models for every record (today 92 `@dataclass` uses in 20 files,
+   3 `NamedTuple`s, 6 `Any`), and 100% branch coverage over `src` and
+   `tests`. Since 2026-10-17 a Stop hook (`~/.claude/hooks/python-gate.sh`)
+   runs ruff, mypy and pytest after any Python edit and blocks until they
+   pass, so every later Python change here waits for this. Open design
+   point for the spec: `Problem` subclasses rely on frozen dataclasses
+   (`dataclasses.replace` makes variants; the registry builds them with
+   keyword arguments); a pydantic `BaseModel` with `model_copy(update=...)`
+   is the replacement, and `domain` (an array) needs a validator.
+2. later: the same migration for `ailigment`, then its adapters (its
+   PLAN.md).
 
 ## Open questions for the user
 
