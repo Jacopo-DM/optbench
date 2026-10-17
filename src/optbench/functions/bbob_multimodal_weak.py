@@ -7,20 +7,18 @@ case is said in the class. ``r`` and ``q`` are COCO's two rotations (see
 ``BbobRotated``).
 """
 
-from __future__ import annotations
-
 import functools
 import math
-from typing import TYPE_CHECKING, ClassVar, NamedTuple, override
+from typing import ClassVar, override
 
 import numpy as np
+from numpy.typing import NDArray
+from pydantic import ConfigDict
 
+from optbench.model import Model
 from optbench.problem import Group, Minimum, formula_minimum
 
 from . import bbob_common as bbob
-
-if TYPE_CHECKING:
-    from numpy.typing import NDArray
 
 _GROUP = Group.BBOB_MULTIMODAL_WEAK
 
@@ -95,8 +93,10 @@ class BbobSchwefel(bbob.BbobProblem):
         return 0.01 * (boundary + self.offset - waves) + self.f_opt
 
 
-class _Peaks(NamedTuple):
+class _Peaks(Model):
     """Gallagher's peaks for one instance and dimension."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     x_opt: NDArray[np.float64]
     centres: NDArray[np.float64]
@@ -105,7 +105,7 @@ class _Peaks(NamedTuple):
     constants: NDArray[np.float64]
 
 
-class _Shape(NamedTuple):
+class _Shape(Model):
     """What sets f21 and f22 apart.
 
     Attributes
@@ -125,13 +125,15 @@ class _Shape(NamedTuple):
 
 
 @functools.cache
-def _gallagher_peaks(seed: int, d: int, shape: _Shape) -> _Peaks:
+def _gallagher_peaks(seed: int, d: int, kind: "type[_Gallagher]") -> _Peaks:
     """Build Gallagher's peaks as COCO's ``f_gallagher_bbob_problem_allocate``.
 
     Each peak ``p`` has a height (10 for the global one, then 1.1 to 9.1),
     a centre (rotated by ``r``) and per-coordinate weights, a
     condition number ``c_p`` raised to a random permutation of
-    ``i / (d - 1) - 1/2``.
+    ``i / (d - 1) - 1/2``. The cache key is the class (f21 or f22), whose
+    ``shape`` is fixed, not the ``_Shape`` itself: pydantic adds a frozen
+    model's ``__hash__`` only at run time, so type checkers would refuse it.
 
     Returns
     -------
@@ -141,6 +143,7 @@ def _gallagher_peaks(seed: int, d: int, shape: _Shape) -> _Peaks:
         ``sum_j w_j (t_j - centre_j)^2`` is one product with
         ``[t^2, t]``; and the log heights.
     """
+    shape = kind.shape
     rotation = bbob.rotation(seed, d)
 
     # Condition numbers: the global peak's, then 1000 to the power of a
@@ -169,7 +172,13 @@ def _gallagher_peaks(seed: int, d: int, shape: _Shape) -> _Peaks:
     centres = bbob.rotate(raw, rotation)
     weights = np.hstack([scales, -2 * scales * centres])
     constants = np.einsum("pj,pj->p", scales, centres * centres)
-    return _Peaks(raw[0].copy(), centres, weights, np.log(heights), constants)
+    return _Peaks(
+        x_opt=raw[0].copy(),
+        centres=centres,
+        weights=weights,
+        log_heights=np.log(heights),
+        constants=constants,
+    )
 
 
 class _Gallagher(bbob.BbobRotated):
@@ -191,7 +200,7 @@ class _Gallagher(bbob.BbobRotated):
 
     @property
     def _peaks(self) -> _Peaks:
-        return _gallagher_peaks(self.seed, self.d, self.shape)
+        return _gallagher_peaks(self.seed, self.d, type(self))
 
     @property
     def x_opt(self) -> NDArray[np.float64]:
@@ -230,7 +239,12 @@ class BbobGallagher101(_Gallagher):
 
     name: ClassVar[str] = "bbob_f21_gallagher_101"
     function: ClassVar[int] = 21
-    shape: ClassVar[_Shape] = _Shape(101, 10.0, 5.0, math.sqrt(1000.0))
+    shape: ClassVar[_Shape] = _Shape(
+        peaks=101,
+        spread=10.0,
+        centre=5.0,
+        top_condition=math.sqrt(1000.0),
+    )
 
 
 class BbobGallagher21(_Gallagher):
@@ -242,7 +256,12 @@ class BbobGallagher21(_Gallagher):
 
     name: ClassVar[str] = "bbob_f22_gallagher_21"
     function: ClassVar[int] = 22
-    shape: ClassVar[_Shape] = _Shape(21, 9.8, 4.9, 1000.0)
+    shape: ClassVar[_Shape] = _Shape(
+        peaks=21,
+        spread=9.8,
+        centre=4.9,
+        top_condition=1000.0,
+    )
 
 
 class BbobKatsuura(bbob.BbobRotated):

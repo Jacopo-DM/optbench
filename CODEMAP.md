@@ -114,7 +114,7 @@ seed) and `q` (from the seed plus `SECOND_ROTATION`, 1,000,000)),
 `bbob_separable.py` (f1 to f5), `bbob_moderate.py` (f6 to f9),
 `bbob_high_conditioning.py` (f10 to f14), `bbob_multimodal_adequate.py`
 (f15 to f19), `bbob_multimodal_weak.py` (f20 to f24, with the cached
-`_gallagher_peaks(seed, d, shape)`), `known_minima.py`
+`_gallagher_peaks(seed, d, kind)`, keyed on the f21 or f22 class), `known_minima.py`
 (`KnownMinimum`, `at_defaults` and the minima known only for the published
 constants), `references.py`
 (shared citations), `__init__.py` (the list the registry reads);

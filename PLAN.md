@@ -44,7 +44,7 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Task 2 of `python-standard` (below): `_Peaks` and `_Shape` to models.
+Task 3 of `python-standard` (below): `Tracked` to a mutable model.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -55,8 +55,9 @@ bytes, from https://inria.hal.science/inria-00362633/document) and adding
 COCO's Python package as a dev-only dependency are approved too.
 
 1. executing (approved by the user 2026-10-17): module `python-standard`
-   (kind: change). Task 1 done (with `KnownMinimum` from task 2 and the
-   tests of task 4, which it needed to keep the checks green). Spec and task list below; the user's answers to its four
+   (kind: change). Tasks 1, 2 and 4 done (task 1 took `KnownMinimum` from
+   task 2 and the tests of task 4, which it needed to keep the checks
+   green). Spec and task list below; the user's answers to its four
    design questions are in DESIGN.md (Decisions, "Python standard").
 
 2. later: the same migration for `ailigment`, then its adapters (its
@@ -142,10 +143,6 @@ Verification for every task:
 
 ### Task list: `python-standard` (one commit each, in this order)
 
-2. BBOB's `_Peaks` and `_Shape` NamedTuples become models
-   (`arbitrary_types_allowed` for the array fields). The cached `x_opt`,
-   `r` and `q` stay module-level `functools.cache` functions (they already
-   return read-only arrays). Risk: low.
 3. `Tracked` (`tracking.py`): a mutable model (`frozen=False`,
    `extra="forbid"`) since it counts calls; same attributes and behaviour.
    `baseline.py` and the registry checked for records. Risk: low.
