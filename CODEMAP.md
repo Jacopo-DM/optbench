@@ -106,6 +106,7 @@ domain);
 `x_opt(seed, d)`, `f_opt(function, instance)` and `rotation(seed, d)`;
 `rotate(x, matrix)` and `weighted(values, weights)`, the batch products
 (`einsum`, so a point gives the same bits alone as in a batch);
+`linear_map(q, scaling, r)`, `q diag(scaling) r` summed in COCO's order;
 `rosenbrock_scale(d)`; the transforms `oscillate` (T_osz), `asymmetric` (T_asy), `scaling` (the
 diagonal of Lambda^alpha), `penalty` (f_pen); `rastrigin(z, a)`; and the
 base class `BbobProblem` with `instance`, `seed`, `x_opt`, `f_opt`,

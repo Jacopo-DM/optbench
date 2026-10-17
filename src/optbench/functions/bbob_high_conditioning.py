@@ -157,7 +157,7 @@ class BbobSharpRidge(bbob.BbobRotated):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         scaling = bbob.scaling(self.conditioning, self.d)
-        linear = self.q @ (scaling[:, np.newaxis] * self.r)
+        linear = bbob.linear_map(self.q, scaling, self.r)
         z = bbob.rotate(x - self.x_opt, linear)
         ridge = np.sqrt(np.sum(z[:, 1:] ** 2, axis=1))
         return z[:, 0] ** 2 + self.a * ridge + self.f_opt

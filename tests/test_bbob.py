@@ -97,11 +97,11 @@ FUNCTIONS: dict[int, type[bbob.BbobProblem]] = {
 }
 DIMENSIONS = (2, 3, 5, 10, 20, 40)
 
-# Relative tolerance against COCO. optbench sums matrix products in its own
-# order and COCO in its C loop's, so z differs in the last bit; f16 to f19
+# Relative tolerance against COCO. optbench applies the matrices with
+# einsum and COCO in its C loop, so z differs in the last bit; f16 to f19
 # take sines and cosines of large arguments (up to 3^11 z in f16, about
 # 1e5 in f19) and f23 uses 2^j z up to j = 32, which magnify that to at
-# most 7e-10 (measured 2026-10-17).
+# most 1.8e-10 on macOS (f19, measured 2026-10-17).
 RTOL = (
     dict.fromkeys(FUNCTIONS, 1e-12)
     | dict.fromkeys(range(16, 20), 1e-9)

@@ -77,12 +77,12 @@ None.
 ## Known problems
 
 - CI fails on Linux: `tests/test_bbob.py::test_values_match_coco[100-20-23]`
-  (f23 Katsuura, d = 100) differs from cocoex by 3.3e-9 relative, above
-  the 1e-9 tolerance (-0.15903416366096934 against -0.1590341641810955).
-  It passes on macOS and passed once on the Linux runner (89c9929), so the
-  last digits depend on the platform or the runner's CPU. Same failure on
-  every push to `main` since f33326f. Needs the user's decision: loosening
-  the tolerance is a config-like change.
+  (f23 Katsuura, d = 20, instance 100) differs from cocoex by 3.3e-9
+  relative, above the 1e-9 tolerance (-0.15903416366096934 against
+  -0.1590341641810955), on every push to `main` since f33326f. Fixed on
+  branch `coco-order` by summing the rotations in COCO's order (the user
+  chose this over a looser tolerance; DESIGN.md Decisions), which cuts the
+  macOS gap 18-fold, but unverified on Linux until CI runs on it.
 
 - BBOB f16 takes about 93 ms per 100,000 points at d = 10, close to the
   0.1 s budget; under heavier load it may cross it. T_osz (shared by seven

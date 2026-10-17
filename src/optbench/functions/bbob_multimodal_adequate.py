@@ -57,7 +57,7 @@ class BbobRastriginRotated(bbob.BbobRotated):
         inner = bbob.oscillate(bbob.rotate(x - self.x_opt, self.q))
         inner = bbob.asymmetric(inner, self.beta)
         scaling = bbob.scaling(self.conditioning, self.d)
-        linear = self.q @ (scaling[:, np.newaxis] * self.r)
+        linear = bbob.linear_map(self.q, scaling, self.r)
         return bbob.rastrigin(bbob.rotate(inner, linear), self.a) + self.f_opt
 
 
@@ -118,7 +118,7 @@ class BbobWeierstrass(bbob.BbobRotated):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         inner = bbob.oscillate(bbob.rotate(x - self.x_opt, self.q))
         scaling = bbob.scaling(self.conditioning, self.d)
-        linear = self.q @ (scaling[:, np.newaxis] * self.r)
+        linear = bbob.linear_map(self.q, scaling, self.r)
         z = bbob.rotate(inner, linear)
 
         # cos(2 pi b^k u) is the real part of w^(b^k), w = exp(2 pi i u):

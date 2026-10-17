@@ -58,7 +58,7 @@ class BbobAttractiveSector(bbob.BbobRotated):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         scaling = bbob.scaling(self.conditioning, self.d)
-        linear = self.q @ (scaling[:, np.newaxis] * self.r)
+        linear = bbob.linear_map(self.q, scaling, self.r)
         z = bbob.rotate(x - self.x_opt, linear)
         s = np.where(z * self.x_opt > 0, self.sector, 1.0)
         squares = np.sum((s * z) ** 2, axis=1)

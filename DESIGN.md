@@ -420,6 +420,18 @@ fits it. One commit; the minima are checked numerically as for SFU.
   batch test's 1e-14 (f10 to f14 had briefly loosened that test to 1e-13;
   it is back at 1e-14). einsum costs about 2 ms more per 100,000 points at
   d = 10.
+- The rotations and the combined matrices are summed in COCO's order
+  (2026-10-17, branch `coco-order`): `rotation`'s Gram-Schmidt adds each
+  dot product for k from 0 up (`_dot`, a `cumsum`), and `linear_map`
+  builds `q diag(scaling) r` as COCO's k loop does, both instead of `@`.
+  CI on Linux failed f23 at d = 20, instance 100, by 3.3e-9 relative
+  (tolerance 1e-9): `@` goes to BLAS, which is Accelerate on macOS and
+  OpenBLAS on Linux, and their last bits differ. The rotation was the
+  main source: a plain-Python copy of COCO's z changed f23 by only 4e-12
+  relative, while the ordered Gram-Schmidt cut the worst f23 gap on macOS
+  from 7.0e-10 to 3.8e-11. Both run once per instance (`rotation` is
+  cached) or once per call on a d by d matrix, so they cost no measurable
+  time.
 - BBOB f15 to f19 (2026-10-17) in `functions/bbob_multimodal_adequate.py`.
   Here the report's `R` is COCO's `q` and its `Q` is `r`. f18 is f17 with
   conditioning 1000 and f17's seeds for its instance and `f_opt` (COCO's
@@ -458,13 +470,16 @@ fits it. One commit; the minima are checked numerically as for SFU.
   point, and gives COCO's literal formula bit for bit on the same z.
 - `tests/test_bbob.py` compares with COCO to a relative 1e-12, and 1e-9
   for f16 to f19 and f23 (2^j z up to j = 32, with |z| up to about 100;
-  worst 7e-10): optbench and COCO sum in different orders, and those
+  worst 7e-10 before the rotations were summed in COCO's order, 3.8e-11
+  after): optbench and COCO sum in different orders, and those
   four take sines and cosines of large arguments (2 pi 3^11 z in f16, t up
-  to about 1e5 in f19). Measured worst cases, all 30 (d, instance) pairs:
+  to about 1e5 in f19). Measured worst cases, all 30 (d, instance) pairs,
+  before that change:
   f16 1.5e-10, f17 4.9e-11, f18 3.9e-12, f19 6.5e-10; every other function
-  at most 1.4e-12. Matching COCO bit for bit would mean copying its
-  summation order and the compiler's fused multiply-adds, so it was not
-  tried.
+  at most 1.4e-12 (after it: results table). Matching COCO bit for bit
+  would mean copying its summation order everywhere and the compiler's
+  fused multiply-adds (clang on Apple silicon fuses `a += b * c` by
+  default), so it was not tried; the rotations alone were enough.
 - `coco-experiment` 2.8.2 (BSD-3-Clause) is a dev dependency, used only by
   `tests/test_bbob.py` (the user approved it and the 3.9 MB source
   download, 2026-10-17). PyPI has no Python 3.13 wheel for it, so `uv sync`
@@ -570,6 +585,13 @@ optbench, and what was decided:
 ## Rejected approaches
 
 - Porting the GPL-2.0 R code: see Decisions.
+- Applying the matrix to a batch in COCO's order (a loop over j adding
+  `x[:, j] * matrix[:, j]`) and summing the penalty with `cumsum`
+  (2026-10-17, branch `coco-order`): the loop made f16 33% slower (99 to
+  132 ms per 100,000 points at d = 10) and f23 29% slower, over the 0.1 s
+  budget, and the `cumsum` penalty made f07, f22 and f24 12% to 28%
+  slower. Both went back to `einsum`; the ordered rotations alone already
+  cut the gap to COCO (Decisions).
 - One plain function per problem plus a metadata table: the parameters,
   bounds and minimum would live in three places.
 - Depending on an existing Python collection of test functions: the user
@@ -606,6 +628,7 @@ optbench, and what was decided:
 | BBOB f15 to f19 against `cocoex` 2.8.2 (2026-10-17) | max relative difference | f15 1.2e-13; f16 1.5e-10; f17 4.9e-11; f18 3.9e-12; f19 6.5e-10 | 150 combinations; tolerance 1e-9 for f16 to f19 (see Decisions) |
 | Batch speed, BBOB f15 to f19 by `scripts.timing` (as f1 to f5, load average about 4, 2026-10-17) | ms per call | f19 14.6; f17 37.1; f18 37.0; f15 60.0; f16 92.6 (145 with 12 cosines per coordinate) | all under budget; f16 is close to it: T_osz and the rotations take 37 ms of it |
 | BBOB f20 to f24 against `cocoex` 2.8.2 (2026-10-17) | max relative difference | f20 4.7e-16; f21 9.0e-14; f22 3.4e-15; f23 7.0e-10; f24 2.5e-12 | 150 combinations; all 24 BBOB functions now match COCO |
+| BBOB f1 to f24 against `cocoex` 2.8.2 after the rotations were summed in COCO's order (macOS, 2026-10-17, branch `coco-order`) | max relative difference | f16 1.7e-11; f19 1.8e-10; f23 3.8e-11 (was 7.0e-10); every other function at most 2.2e-13 | timing unchanged: interleaved with the old code, min of 3 rounds, every BBOB function within 0.98x to 1.03x; f16 103 ms in both under load |
 | Batch speed, BBOB f20 to f24 by `scripts.timing` (as f1 to f5, load average 2 to 3, 2026-10-17) | ms per call | f20 15.8; f24 17.4; f22 24.1; f21 71.7; f23 78.9 | all under budget; 0 of 83 functions over it (Whitley excepted) |
 | Random-search baseline, BBOB f20 to f24 by `scripts.baseline` (as f1 to f5) | median final value (f_opt) | f20 -242.3 (-546.5); f21 55.93 (40.78); f22 -979.9 (-1000); f23 8.556 (6.87); f24 220.1 (102.61) | |
 | Random-search baseline, BBOB f15 to f19 by `scripts.baseline` (as f1 to f5) | median final value (f_opt) | f15 1135 (1000); f16 82.18 (71.35); f17 -12.19 (-16.94); f18 0.66 (-16.94); f19 -95.60 (-102.55) | |

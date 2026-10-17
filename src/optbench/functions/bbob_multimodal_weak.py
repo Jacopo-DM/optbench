@@ -300,7 +300,7 @@ class BbobKatsuura(bbob.BbobRotated):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         scaling = bbob.scaling(self.conditioning, self.d)
-        linear = self.q @ (scaling[:, np.newaxis] * self.r)
+        linear = bbob.linear_map(self.q, scaling, self.r)
         z = bbob.rotate(x - self.x_opt, linear)
 
         # The distance of 2^j z to the nearest integer, with halves rounded
@@ -376,7 +376,7 @@ class BbobLunacek(bbob.BbobRotated):
         near = np.sum((x_hat - self.mu0) ** 2, axis=1)
         far = self.depth * d + s * np.sum((x_hat - mu1) ** 2, axis=1)
         scaling = bbob.scaling(self.conditioning, d)
-        linear = self.q @ (scaling[:, np.newaxis] * self.r)
+        linear = bbob.linear_map(self.q, scaling, self.r)
         z = bbob.rotate(x_hat - self.mu0, linear)
         waves = self.a * (d - np.sum(np.cos(2 * math.pi * z), axis=1))
         boundary = self.penalty * bbob.penalty(x)

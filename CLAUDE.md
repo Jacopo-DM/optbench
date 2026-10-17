@@ -137,4 +137,7 @@ Before every commit run format, lint, both type checks and the tests above.
 - BBOB batch products go through `bbob_common.rotate` and `weighted`
   (`einsum`), never `@`: BLAS may sum one row in another order than a
   batch, and the functions that take powers or cosines of large arguments
-  magnify that past the batch test's 1e-14.
+  magnify that past the batch test's 1e-14. Matrices built from the
+  rotations go through `bbob_common._dot` and `linear_map` (COCO's order),
+  never `@`: BLAS sums differently on macOS and on Linux, which failed CI
+  on f23.

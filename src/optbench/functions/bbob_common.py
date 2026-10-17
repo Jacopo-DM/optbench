@@ -136,7 +136,10 @@ def rotate(
     """Apply ``matrix`` to every point: ``z_i = sum_j matrix[i, j] x_j``.
 
     Uses ``einsum``, not BLAS, so a point gives the same bits alone as in a
-    batch (BLAS may sum in another order for one row than for many).
+    batch (BLAS may sum in another order for one row than for many). Adding
+    in COCO's order (a loop over j) would match COCO more closely but made
+    f16 and f23 a third slower, over the 0.1 s budget; one ulp in z moves
+    f23 by about 7e-12, far inside the tests' tolerance.
 
     Returns
     -------
@@ -213,6 +216,29 @@ def scaling(alpha: float, d: int) -> NDArray[np.float64]:
     return alpha ** (0.5 * np.arange(d) / (d - 1))
 
 
+def linear_map(
+    q: NDArray[np.float64],
+    scaling: NDArray[np.float64],
+    r: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Return ``q diag(scaling) r``, summed in COCO's order.
+
+    COCO's C loop adds ``q[i, k] * scaling[k] * r[k, j]`` for k from 0 up.
+    numpy's ``@`` hands the product to BLAS, which sums in its own order:
+    Accelerate on macOS and OpenBLAS on Linux give different last bits, and
+    f23's ``2^j z`` magnifies them past the tests' tolerance on Linux.
+
+    Returns
+    -------
+    numpy.ndarray
+        Shaped ``(d, d)``.
+    """
+    result = np.zeros((q.shape[0], r.shape[1]))
+    for k, s in enumerate(scaling):
+        result += np.outer(q[:, k] * s, r[k])
+    return result
+
+
 def penalty(x: NDArray[np.float64]) -> NDArray[np.float64]:
     """f_pen: the squared distance outside [-5, 5]^d, per point.
 
@@ -224,6 +250,20 @@ def penalty(x: NDArray[np.float64]) -> NDArray[np.float64]:
     outside = np.maximum(0.0, np.abs(x) - 5)
     result: NDArray[np.float64] = np.einsum("ij,ij->i", outside, outside)
     return result
+
+
+def _dot(a: NDArray[np.float64], b: NDArray[np.float64]) -> float:
+    """Return ``sum_k a_k b_k``, added for k from 0 up as COCO's C loop does.
+
+    ``cumsum`` adds in order; ``@`` hands the sum to BLAS, whose order
+    differs between Accelerate (macOS) and OpenBLAS (Linux).
+
+    Returns
+    -------
+    float
+        The dot product.
+    """
+    return float(np.cumsum(a * b)[-1])
 
 
 @functools.cache
@@ -242,8 +282,8 @@ def rotation(seed: int, d: int) -> NDArray[np.float64]:
     matrix = gauss(d * d, seed).reshape(d, d).T.copy()
     for i in range(d):
         for j in range(i):
-            matrix[:, i] -= (matrix[:, i] @ matrix[:, j]) * matrix[:, j]
-        matrix[:, i] /= math.sqrt(matrix[:, i] @ matrix[:, i])
+            matrix[:, i] -= _dot(matrix[:, i], matrix[:, j]) * matrix[:, j]
+        matrix[:, i] /= math.sqrt(_dot(matrix[:, i], matrix[:, i]))
     matrix.flags.writeable = False
     return matrix
 
