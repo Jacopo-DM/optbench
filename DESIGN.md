@@ -400,6 +400,17 @@ fits it. One commit; the minima are checked numerically as for SFU.
   |z_hat_i| < 0.05 after rounding), a continuum that criterion 4 cannot
   list; `minimum.points` holds `x_opt` only, and the class docstring
   describes the plateau. `tests/test_bbob.py` checks a plateau point.
+- BBOB f10 to f14 (2026-10-17) in `functions/bbob_high_conditioning.py`.
+  RR-6829 calls the single rotation of f10, f11, f12 and f14 `R`, but
+  COCO builds it from the seed plus 1,000,000, which is `q` here; the base
+  `BbobRotated` (moved to `bbob_common.py` when a second module needed it)
+  names the rotations by seed, not by the report's letters. As in COCO's
+  code but not the report, f12's `x_opt` also comes from the seed plus
+  1,000,000. f14's exponent spread (4) is the field `spread`.
+- `tests/test_all_problems.py` compares a batch with one point at a time
+  to 1e-13 (it was 1e-14): a matrix product can take a different BLAS path
+  for one row than for 20, and f14's powers up to 6 magnify that last-bit
+  difference to about 2e-14.
 - `coco-experiment` 2.8.2 (BSD-3-Clause) is a dev dependency, used only by
   `tests/test_bbob.py` (the user approved it and the 3.9 MB source
   download, 2026-10-17). PyPI has no Python 3.13 wheel for it, so `uv sync`
@@ -469,6 +480,9 @@ optbench, and what was decided:
 | Batch speed, BBOB f1 to f5 by `scripts.timing` (100,000 points, d = 10, CPU time, min of 5, load average about 7, 2026-10-17) | ms per call | f1 0.9; f5 4.0; f2 34.4; f4 45.3; f3 51.4 | all under the 100 ms budget; T_osz (a log, an exp and two sines per coordinate) is most of f2 to f4 |
 | BBOB f6 to f9 against `cocoex` 2.8.2 (2026-10-17) | max relative difference | at most 1e-12, same points, dimensions and instances as f1 to f5 | 120 combinations, all pass on the first run |
 | Batch speed, BBOB f6 to f9 by `scripts.timing` (as f1 to f5, load average 5 to 10, 2026-10-17) | ms per call | f8 4.4; f9 4.9; f6 8.4; f7 10.3 | all under budget |
+| BBOB f10 to f14 against `cocoex` 2.8.2 (2026-10-17) | max relative difference | at most 1e-12, same points, dimensions and instances as f1 to f5 | 150 combinations, all pass on the first run |
+| Batch speed, BBOB f10 to f14 by `scripts.timing` (as f1 to f5, load average 4 to 7, 2026-10-17) | ms per call | f13 3.3; f14 10.7; f12 13.9; f10 35.5; f11 35.5 | all under budget; T_osz again is most of f10 and f11 |
+| Random-search baseline, BBOB f10 to f14 by `scripts.baseline` (as f1 to f5) | median final value (f_opt) | f10 67282 (-54.94); f11 136.9 (76.27); f12 1.13e7 (-621.11); f13 662.3 (29.97); f14 -46.88 (-52.35) | |
 | Random-search baseline, BBOB f6 to f9 by `scripts.baseline` (as f1 to f5) | median final value (f_opt) | f6 156.9 (35.9); f7 146.8 (92.94); f8 3131 (149.15); f9 2695 (123.83) | |
 | Random-search baseline, BBOB f1 to f5 by `scripts.baseline` (instance 1, d = 10, 10 seeds of 10,000 points) | median final value (f_opt) | f1 92.29 (79.48); f2 62435 (-209.88); f3 -339.4 (-462.09); f4 -290.2 (-462.09); f5 47.19 (-9.21) | |
 | Random-search baseline, the ten classics by `scripts.baseline` (as the row below) | median final value (minimum) | Alpine N. 2 -1563 (-30491); Bird -106.59 (-106.76); Deceptive -0.494 (-1); Happy Cat 250 (0); Himmelblau 0.026 (0); Qing 3.3e9 (0); Salomon 7.8 (0); Schwefel 2.21 37 (0); Schwefel 2.22 1.7e8 (0); Whitley 2.6e6 (0) | |

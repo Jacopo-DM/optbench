@@ -24,32 +24,12 @@ if TYPE_CHECKING:
 
 _GROUP = Group.BBOB_MODERATE_CONDITIONING
 
-# COCO's offset between the seeds of the two rotations of an instance.
-_SECOND_ROTATION = 1_000_000
-
 # Beyond this size f7 rounds a coordinate to an integer, not to 1 / step.
 _WHOLE_STEPS = 0.5
 
 
 @dataclass(frozen=True, kw_only=True)
-class _Rotated(bbob.BbobProblem):
-    """A BBOB function with the rotations ``R`` and ``Q``."""
-
-    group: ClassVar[Group] = _GROUP
-
-    @property
-    def r(self) -> NDArray[np.float64]:
-        """The rotation ``R``, shaped ``(d, d)``."""
-        return bbob.rotation(self.seed, self.d)
-
-    @property
-    def q(self) -> NDArray[np.float64]:
-        """The rotation ``Q``, shaped ``(d, d)``."""
-        return bbob.rotation(self.seed + _SECOND_ROTATION, self.d)
-
-
-@dataclass(frozen=True, kw_only=True)
-class BbobAttractiveSector(_Rotated):
+class BbobAttractiveSector(bbob.BbobRotated):
     """BBOB f6, attractive sector.
 
     ``f(x) = T_osz(sum_i (s_i z_i)^2)^power + f_opt``, with
@@ -63,6 +43,7 @@ class BbobAttractiveSector(_Rotated):
     """
 
     name: ClassVar[str] = "bbob_f06_attractive_sector"
+    group: ClassVar[Group] = _GROUP
     function: ClassVar[int] = 6
 
     conditioning: float = 10.0
@@ -86,7 +67,7 @@ class BbobAttractiveSector(_Rotated):
 
 
 @dataclass(frozen=True, kw_only=True)
-class BbobStepEllipsoid(_Rotated):
+class BbobStepEllipsoid(bbob.BbobRotated):
     """BBOB f7, step ellipsoid: plateaus on a rotated ellipsoid.
 
     With ``z_hat = Lambda^conditioning R (x - x_opt)``, each ``z_hat_i`` is
@@ -107,6 +88,7 @@ class BbobStepEllipsoid(_Rotated):
     """
 
     name: ClassVar[str] = "bbob_f07_step_ellipsoid"
+    group: ClassVar[Group] = _GROUP
     function: ClassVar[int] = 7
 
     conditioning: float = 10.0
@@ -198,7 +180,7 @@ class BbobRosenbrock(bbob.BbobProblem):
 
 
 @dataclass(frozen=True, kw_only=True)
-class BbobRosenbrockRotated(_Rotated):
+class BbobRosenbrockRotated(bbob.BbobRotated):
     """BBOB f9, rotated Rosenbrock.
 
     ``f(x)`` is f8's sum with ``z = max(1, sqrt(d) / 8) R x + 1/2``; the
@@ -212,6 +194,7 @@ class BbobRosenbrockRotated(_Rotated):
     """
 
     name: ClassVar[str] = "bbob_f09_rosenbrock_rotated"
+    group: ClassVar[Group] = _GROUP
     function: ClassVar[int] = 9
 
     a: float = 100.0

@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (4840 lines, 23 files)
+## `src/optbench` (5062 lines, 24 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -25,7 +25,7 @@ Public interface (`optbench/__init__.py`):
   `valley`, `steep`, `other`) and the five BBOB ones (`bbob_separable`,
   `bbob_moderate_conditioning`, `bbob_high_conditioning`,
   `bbob_multimodal_adequate`, `bbob_multimodal_weak`).
-- Functions (49 SFU, 10 classic, 9 BBOB so far), by group:
+- Functions (49 SFU, 10 classic, 14 BBOB so far), by group:
   - many local minima: `Ackley(d, a, b, c)`, `Griewank(d, divisor)`,
     `Langermann(m, c, a)`, `Levy(d, shift, scale, weight)`,
     `Rastrigin(d, a)`, `Schwefel(d, offset)`, `Bukin6(scale, curvature,
@@ -59,11 +59,15 @@ Public interface (`optbench/__init__.py`):
     `BbobRastrigin(d, instance, conditioning, beta, a)`,
     `BbobBucheRastrigin(d, instance, conditioning, skew, a, penalty)`,
     `BbobLinearSlope(d, instance, conditioning)`.
-  - BBOB moderate conditioning (the rotated ones also have properties `r`
-    and `q`): `BbobAttractiveSector(d, instance, conditioning, sector,
+  - BBOB moderate conditioning (the rotated ones, subclasses of
+    `BbobRotated`, also have properties `r` and `q`): `BbobAttractiveSector(d, instance, conditioning, sector,
     power)`, `BbobStepEllipsoid(d, instance, conditioning, step, weight,
     scale, slope, penalty)`, `BbobRosenbrock(d, instance, a)`,
     `BbobRosenbrockRotated(d, instance, a)`.
+  - BBOB high conditioning (all `BbobRotated`): `BbobEllipsoidRotated(d,
+    instance, conditioning)`, `BbobDiscus(d, instance, conditioning)`,
+    `BbobBentCigar(d, instance, conditioning, beta)`, `BbobSharpRidge(d,
+    instance, conditioning, a)`, `BbobDifferentPowers(d, instance, spread)`.
 - `names(group=None, suite=None)`, `make(name, **params)`: the registry.
 - `Tracked(problem)`: counts evaluations, keeps `best_value` and
   `best_point`, and `curve` (rows of evaluations, best so far).
@@ -87,8 +91,10 @@ domain);
 the transforms `oscillate` (T_osz), `asymmetric` (T_asy), `scaling` (the
 diagonal of Lambda^alpha), `penalty` (f_pen); `rastrigin(z, a)`; and the
 base class `BbobProblem` with `instance`, `seed`, `x_opt`, `f_opt`,
-`minimum`), `bbob_separable.py` (f1 to f5), `bbob_moderate.py` (f6 to f9,
-the base `_Rotated` with `r` and `q`), `known_minima.py`
+`minimum`, and its subclass `BbobRotated` with `r` (rotation from the
+seed) and `q` (from the seed plus `SECOND_ROTATION`, 1,000,000)),
+`bbob_separable.py` (f1 to f5), `bbob_moderate.py` (f6 to f9),
+`bbob_high_conditioning.py` (f10 to f14), `known_minima.py`
 (`KnownMinimum`, `at_defaults` and the minima known only for the published
 constants), `references.py`
 (shared citations), `__init__.py` (the list the registry reads);
@@ -108,7 +114,7 @@ repeats)`, `BUDGET`, `EXCEPTIONS` (problems allowed over it), `main`
 returning the exit status), `baseline.py` (`main`).
 Depends on: `optbench`, numpy.
 
-## `tests` (1438 lines, 13 files)
+## `tests` (1456 lines, 13 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,

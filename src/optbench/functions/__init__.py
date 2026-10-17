@@ -1,5 +1,12 @@
 """The test functions: one module per SFU group, split before 400 lines."""
 
+from .bbob_high_conditioning import (
+    BbobBentCigar,
+    BbobDifferentPowers,
+    BbobDiscus,
+    BbobEllipsoidRotated,
+    BbobSharpRidge,
+)
 from .bbob_moderate import (
     BbobAttractiveSector,
     BbobRosenbrock,
@@ -82,12 +89,17 @@ __all__ = [
     "Ackley",
     "AlpineN2",
     "BbobAttractiveSector",
+    "BbobBentCigar",
     "BbobBucheRastrigin",
+    "BbobDifferentPowers",
+    "BbobDiscus",
     "BbobEllipsoid",
+    "BbobEllipsoidRotated",
     "BbobLinearSlope",
     "BbobRastrigin",
     "BbobRosenbrock",
     "BbobRosenbrockRotated",
+    "BbobSharpRidge",
     "BbobSphere",
     "BbobStepEllipsoid",
     "Beale",

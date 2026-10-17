@@ -24,6 +24,9 @@ from .references import HANSEN_BBOB
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+# COCO's offset between the seeds of the two rotations of an instance.
+SECOND_ROTATION = 1_000_000
+
 # COCO's generator: a Park-Miller "minimal standard" sequence shuffled
 # through a table of 32 (Numerical Recipes' ran1).
 _MULTIPLIER = 16807
@@ -272,3 +275,24 @@ class BbobProblem(AnyDimension):
     def minimum(self) -> Minimum | None:
         """``f_opt`` at ``x_opt``, where every transformed ``z`` is 0."""
         return formula_minimum(self, self.f_opt, self.x_opt[np.newaxis])
+
+
+@dataclass(frozen=True, kw_only=True)
+class BbobRotated(BbobProblem):
+    """A BBOB function with COCO's rotations ``R`` and ``Q``.
+
+    RR-6829 names them by role, so a function with one rotation may call
+    either of them ``R``; here ``r`` is always the one from the instance's
+    seed and ``q`` the one from the seed plus 1,000,000, as COCO's code
+    builds them.
+    """
+
+    @property
+    def r(self) -> NDArray[np.float64]:
+        """The rotation from the seed, shaped ``(d, d)``."""
+        return rotation(self.seed, self.d)
+
+    @property
+    def q(self) -> NDArray[np.float64]:
+        """The rotation from the seed plus 1,000,000, shaped ``(d, d)``."""
+        return rotation(self.seed + SECOND_ROTATION, self.d)

@@ -17,12 +17,17 @@ import pytest
 import optbench
 from optbench import (
     BbobAttractiveSector,
+    BbobBentCigar,
     BbobBucheRastrigin,
+    BbobDifferentPowers,
+    BbobDiscus,
     BbobEllipsoid,
+    BbobEllipsoidRotated,
     BbobLinearSlope,
     BbobRastrigin,
     BbobRosenbrock,
     BbobRosenbrockRotated,
+    BbobSharpRidge,
     BbobSphere,
     BbobStepEllipsoid,
 )
@@ -38,6 +43,11 @@ FUNCTIONS = {
     7: BbobStepEllipsoid,
     8: BbobRosenbrock,
     9: BbobRosenbrockRotated,
+    10: BbobEllipsoidRotated,
+    11: BbobDiscus,
+    12: BbobBentCigar,
+    13: BbobSharpRidge,
+    14: BbobDifferentPowers,
 }
 DIMENSIONS = (2, 3, 5, 10, 20, 40)
 INSTANCES = (1, 2, 7, 15, 100)
@@ -112,6 +122,11 @@ def test_minimum_follows_the_constants() -> None:
     assert BbobStepEllipsoid(slope=-1.0).minimum is None
     assert BbobRosenbrock(a=-1.0).minimum is None
     assert BbobRosenbrockRotated(a=-1.0).minimum is None
+    assert BbobEllipsoidRotated(conditioning=0.0).minimum is None
+    assert BbobDiscus(conditioning=0.0).minimum is None
+    assert BbobBentCigar(conditioning=0.0).minimum is None
+    assert BbobSharpRidge(a=-1.0).minimum is None
+    assert BbobDifferentPowers(spread=-2.0).minimum is None
 
 
 def test_the_step_ellipsoid_has_a_plateau_at_its_minimum() -> None:
@@ -142,6 +157,7 @@ def test_the_registry_lists_the_suite() -> None:
     groups = {
         optbench.Group.BBOB_SEPARABLE: range(1, 6),
         optbench.Group.BBOB_MODERATE_CONDITIONING: range(6, 10),
+        optbench.Group.BBOB_HIGH_CONDITIONING: range(10, 15),
     }
     for group, functions in groups.items():
         expected = sorted(FUNCTIONS[f].name for f in functions)

@@ -65,7 +65,9 @@ def test_a_batch_equals_one_point_at_a_time(problem: Problem) -> None:
     batch = problem(x)
     assert batch.shape == (20,)
     assert batch.dtype == np.float64
-    np.testing.assert_allclose(batch, one_by_one, rtol=1e-14, atol=0)
+    # A matrix product may take a different BLAS path for one row than for
+    # many, and BBOB f14's powers up to 6 magnify that last bit to ~2e-14.
+    np.testing.assert_allclose(batch, one_by_one, rtol=1e-13, atol=0)
 
 
 @pytest.mark.parametrize("problem", PROBLEMS, ids=IDS)
