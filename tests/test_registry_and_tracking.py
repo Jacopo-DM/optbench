@@ -34,10 +34,14 @@ def test_make_builds_with_changed_parameters() -> None:
 
 def test_tracked_counts_and_keeps_the_best() -> None:
     tracked = Tracked(Sphere(d=2))
-    tracked(np.array([[3.0, 0.0], [1.0, 1.0]]))
-    tracked(np.array([[2.0, 2.0]]))
-    tracked(np.array([[0.5, 0.0], [4.0, 0.0], [1.0, 0.0]]))
-    assert tracked.evaluations == 6
+    batches = [
+        np.array([[3.0, 0.0], [1.0, 1.0]]),
+        np.array([[2.0, 2.0]]),
+        np.array([[0.5, 0.0], [4.0, 0.0], [1.0, 0.0]]),
+    ]
+    for batch in batches:
+        tracked(batch)
+    assert tracked.evaluations == sum(len(batch) for batch in batches)
     assert tracked.best_value == pytest.approx(0.25)
     assert tracked.best_point is not None
     np.testing.assert_array_equal(tracked.best_point, [0.5, 0.0])

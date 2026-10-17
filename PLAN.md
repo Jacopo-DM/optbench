@@ -45,7 +45,7 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Task 7 of `python-standard` (below): the 17 magic values.
+Task 9 of `python-standard` (below): pre-commit and CI.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -56,12 +56,10 @@ bytes, from https://inria.hal.science/inria-00362633/document) and adding
 COCO's Python package as a dev-only dependency are approved too.
 
 1. executing (approved by the user 2026-10-17): module `python-standard`
-   (kind: change). Tasks 1 to 6 and 8 are done. Task 1 took `KnownMinimum`
+   (kind: change). Tasks 1 to 8 are done. Task 1 took `KnownMinimum`
    from task 2 and the tests of task 4, which it needed to keep the checks
    green; coverage was already 100% of branches over `src` and `tests` once
-   `pytest.ini` arrived in task 5. Since task 5 the Stop hook's ruff check
-   fails (17 magic values, one long line) until task 7; mypy passes since
-   task 6. Spec and task list below; the user's answers to its four
+   `pytest.ini` arrived in task 5. All four standard checks pass since task 7. Spec and task list below; the user's answers to its four
    design questions are in DESIGN.md (Decisions, "Python standard").
 
 2. later: the same migration for `ailigment`, then its adapters (its
@@ -147,8 +145,6 @@ Verification for every task:
 
 ### Task list: `python-standard` (one commit each, in this order)
 
-7. ruff fixes: the 17 magic values become named constants; whatever the
-   template rules find after tasks 1 to 6. Risk: low.
 9. pre-commit and CI: `templates/pre-commit-config.yaml` to
     `.pre-commit-config.yaml`, `uv add --dev pre-commit`, `uv run
     pre-commit install`; `templates/ci.yml` to `.github/workflows/ci.yml`

@@ -35,6 +35,9 @@ if TYPE_CHECKING:
 
 # SFU's published minimum values (rounded as printed there), where it gives
 # one, with the number of minimisers it lists.
+# Shubert's published number of terms.
+SHUBERT_TERMS = 5
+
 PUBLISHED = [
     (Ackley(), 0.0, 1),
     (Bukin6(), 0.0, 1),
@@ -101,7 +104,7 @@ def test_published_constants() -> None:
     assert (levy13.a, levy13.b, levy13.c) == (3.0, 3.0, 2.0)
     assert SchafferN2().scale == pytest.approx(0.001)
     assert SchafferN4().scale == pytest.approx(0.001)
-    assert Shubert().terms == 5
+    assert Shubert().terms == SHUBERT_TERMS
     langermann = Langermann()
     assert langermann.c == (1.0, 2.0, 5.0, 2.0, 3.0)
     assert langermann.a == ((3, 5), (5, 2), (2, 1), (1, 4), (7, 9))
@@ -191,5 +194,6 @@ def test_bad_parameters_are_refused(
 
 def test_langermann_takes_other_dimensions() -> None:
     problem = optbench.make("langermann", m=1, c=(2.0,), a=((1.0, 2.0, 3.0),))
-    assert problem.dimension == 3
-    assert problem(np.array([[1.0, 2.0, 3.0]]))[0] == pytest.approx(2.0)
+    point = np.array([[1.0, 2.0, 3.0]])
+    assert problem.dimension == point.shape[1]
+    assert problem(point)[0] == pytest.approx(2.0)

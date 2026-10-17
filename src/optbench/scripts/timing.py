@@ -2,9 +2,10 @@
 
 Run with ``uv run python -m optbench.scripts.timing``. Each problem
 evaluates 100,000 uniform random points in its domain (free dimensions at
-10, Powell at 8); the time is CPU seconds, the minimum of 5 repeats. Prints a table, writes
-``__data__/timing.csv`` and exits with status 1 if any problem is over the
-0.1 s budget, except the stated exceptions in ``EXCEPTIONS``.
+10, Powell at 8); the time is CPU seconds, the minimum of 5 repeats.
+Prints a table, writes ``__data__/timing.csv`` and exits with status 1 if
+any problem is over the 0.1 s budget, except the stated exceptions in
+``EXCEPTIONS``.
 """
 
 from __future__ import annotations

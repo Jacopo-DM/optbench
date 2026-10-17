@@ -38,6 +38,9 @@ def _known(problem: Problem) -> Minimum:
     return minimum
 
 
+# The SFU pages' functions, which the classics must not repeat.
+SFU_FUNCTIONS = 49
+
 CLASSICS = [
     "alpine_n2",
     "bird",
@@ -55,7 +58,7 @@ CLASSICS = [
 def test_the_registry_lists_them_as_a_suite() -> None:
     assert optbench.names(suite="classic") == CLASSICS
     assert not set(CLASSICS) & set(optbench.names(suite="sfu"))
-    assert len(optbench.names(suite="sfu")) == 49
+    assert len(optbench.names(suite="sfu")) == SFU_FUNCTIONS
     assert optbench.names(Group.BOWL, suite="classic") == [
         "schwefel_2_21",
         "schwefel_2_22",
@@ -104,7 +107,7 @@ def test_deceptive_pieces_join_and_peak_at_alpha() -> None:
     for knot in (0.32, 0.4, 0.52):
         sides = np.array([[knot - 1e-9], [knot + 1e-9]])
         values = np.sqrt(-problem(sides))
-        assert abs(values[0] - values[1]) < 1e-7
+        assert values[0] == pytest.approx(values[1], rel=0, abs=1e-7)
 
     default = Deceptive(d=3)
     np.testing.assert_allclose(_known(default).points, [[0.25, 0.5, 0.75]])

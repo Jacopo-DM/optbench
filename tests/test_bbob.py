@@ -158,11 +158,11 @@ def test_values_match_coco(function: int, d: int, instance: int) -> None:
 def test_the_generator_is_uniform_and_normal() -> None:
     u = bbob.uniform(1000, 12345)
     assert np.all((u > 0) & (u < 1))
-    assert abs(u.mean() - 0.5) < 0.05
+    assert u.mean() == pytest.approx(0.5, abs=0.05)
     np.testing.assert_array_equal(u, bbob.uniform(1000, 12345))
     g = bbob.gauss(2000, 7)
-    assert abs(g.mean()) < 0.1
-    assert abs(g.std() - 1) < 0.1
+    assert g.mean() == pytest.approx(0.0, abs=0.1)
+    assert g.std() == pytest.approx(1.0, abs=0.1)
 
 
 def test_minimum_is_f_opt_at_x_opt() -> None:
@@ -171,7 +171,10 @@ def test_minimum_is_f_opt_at_x_opt() -> None:
         minimum = problem.minimum
         assert minimum is not None
         assert problem(minimum.points)[0] == pytest.approx(minimum.value)
-    assert np.all(np.abs(BbobLinearSlope(d=6).x_opt) == 5)
+    np.testing.assert_array_equal(
+        np.abs(BbobLinearSlope(d=6).x_opt),
+        np.full(6, 5.0),
+    )
     assert np.all(BbobBucheRastrigin(d=7).x_opt[::2] > 0)
 
 

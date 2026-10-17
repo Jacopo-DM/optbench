@@ -12,6 +12,9 @@ from optbench import DixonPrice, Rosenbrock, SixHumpCamel, ThreeHumpCamel
 if TYPE_CHECKING:
     from optbench import Problem
 
+# A value this far above zero is clearly not Dixon-Price's minimum.
+NOT_A_MINIMUM = 0.1
+
 
 def test_published_constants() -> None:
     three = ThreeHumpCamel()
@@ -57,7 +60,7 @@ def test_dixon_price_has_two_minimisers_differing_in_the_last_sign() -> None:
 
     # Flipping any earlier coordinate is not a minimiser.
     flipped = minimum.points[:1] * np.array([1.0, -1.0, 1.0, 1.0])
-    assert problem(flipped)[0] > 0.1
+    assert problem(flipped)[0] > NOT_A_MINIMUM
     one = DixonPrice(d=1).minimum
     assert one is not None
     assert len(one.points) == 1

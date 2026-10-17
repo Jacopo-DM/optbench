@@ -76,8 +76,9 @@ def test_shekel_minimum_is_unknown_for_changed_wells() -> None:
 
 def test_shekel_takes_other_wells_and_dimensions() -> None:
     shekel = Shekel(m=1, beta=(0.5,), c=((1.0,), (2.0,)))
-    assert shekel.dimension == 2
-    assert shekel(np.array([[1.0, 2.0]]))[0] == pytest.approx(-2.0)
+    point = np.array([[1.0, 2.0]])
+    assert shekel.dimension == point.shape[1]
+    assert shekel(point)[0] == pytest.approx(-2.0)
 
 
 @pytest.mark.parametrize(

@@ -96,8 +96,9 @@ def test_minimum_is_unknown_where_nothing_covers_it(problem: Problem) -> None:
 
 def test_power_sum_takes_other_dimensions_and_refuses_none() -> None:
     problem = PowerSum(b=(3.0, 5.0))
-    assert problem.dimension == 2
-    assert problem(np.array([[1.0, 2.0]]))[0] == pytest.approx(0.0)
+    point = np.array([[1.0, 2.0]])
+    assert problem.dimension == point.shape[1]
+    assert problem(point)[0] == pytest.approx(0.0)
     with pytest.raises(ValueError, match="at least one entry"):
         PowerSum(b=())
     assert math.isclose(PowerSum().bounds[0, 1], 4.0)

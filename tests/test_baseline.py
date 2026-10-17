@@ -9,8 +9,9 @@ from optbench import Branin, Sphere, random_search
 
 
 def test_uses_exactly_the_budget() -> None:
-    tracked = random_search(Sphere(d=3), 2_500, np.random.default_rng(0))
-    assert tracked.evaluations == 2_500
+    budget = 2_500
+    tracked = random_search(Sphere(d=3), budget, np.random.default_rng(0))
+    assert tracked.evaluations == budget
 
     # Batches of 1,000 and a last one of 500.
     np.testing.assert_array_equal(tracked.curve[:, 0], [1_000, 2_000, 2_500])

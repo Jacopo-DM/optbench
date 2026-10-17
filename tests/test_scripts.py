@@ -27,9 +27,9 @@ def test_every_problem_sets_free_dimensions() -> None:
     problems = common.every_problem()
     assert [p.name for p in problems] == optbench.names()
     dimensions = {p.name: p.dimension for p in problems}
-    assert dimensions["ackley"] == 10
-    assert dimensions["powell"] == 8
-    assert dimensions["branin"] == 2
+    assert dimensions["ackley"] == common.D
+    assert dimensions["powell"] == 4 * (common.D // 4)
+    assert dimensions["branin"] == optbench.Branin().dimension
 
 
 def test_time_problem_is_positive() -> None:
@@ -63,7 +63,8 @@ def test_timing_excuses_the_stated_exceptions(
 
 
 def test_baseline_writes_one_curve_per_seed(data: Path) -> None:
-    baseline.main(["--budget", "50", "--seeds", "2"])
+    budget = 50
+    baseline.main(["--budget", str(budget), "--seeds", "2"])
     curves = sorted((data / "baseline").glob("*.csv"))
     assert len(curves) == 2 * len(optbench.names())
     curve = np.loadtxt(
@@ -72,4 +73,4 @@ def test_baseline_writes_one_curve_per_seed(data: Path) -> None:
         skiprows=1,
         ndmin=2,
     )
-    assert curve[-1, 0] == 50
+    assert curve[-1, 0] == budget
