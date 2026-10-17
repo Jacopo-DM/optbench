@@ -50,9 +50,9 @@ class BbobEllipsoidRotated(bbob.BbobRotated):
         return super().minimum if self.conditioning > 0 else None
 
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
-        z = bbob.oscillate((x - self.x_opt) @ self.q.T)
+        z = bbob.oscillate(bbob.rotate(x - self.x_opt, self.q))
         weights = bbob.scaling(self.conditioning, self.d) ** 2
-        return z**2 @ weights + self.f_opt
+        return bbob.weighted(z**2, weights) + self.f_opt
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -80,7 +80,7 @@ class BbobDiscus(bbob.BbobRotated):
         return super().minimum if self.conditioning > 0 else None
 
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
-        z = bbob.oscillate((x - self.x_opt) @ self.q.T)
+        z = bbob.oscillate(bbob.rotate(x - self.x_opt, self.q))
         squares = z**2
         rest = np.sum(squares[:, 1:], axis=1)
         return self.conditioning * squares[:, 0] + rest + self.f_opt
@@ -118,8 +118,8 @@ class BbobBentCigar(bbob.BbobRotated):
         return super().minimum if self.conditioning > 0 else None
 
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
-        rotated = (x - self.x_opt) @ self.q.T
-        z = bbob.asymmetric(rotated, self.beta) @ self.q.T
+        rotated = bbob.rotate(x - self.x_opt, self.q)
+        z = bbob.rotate(bbob.asymmetric(rotated, self.beta), self.q)
         squares = z**2
         rest = np.sum(squares[:, 1:], axis=1)
         return squares[:, 0] + self.conditioning * rest + self.f_opt
@@ -155,7 +155,7 @@ class BbobSharpRidge(bbob.BbobRotated):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         scaling = bbob.scaling(self.conditioning, self.d)
         linear = self.q @ (scaling[:, np.newaxis] * self.r)
-        z = (x - self.x_opt) @ linear.T
+        z = bbob.rotate(x - self.x_opt, linear)
         ridge = np.sqrt(np.sum(z[:, 1:] ** 2, axis=1))
         return z[:, 0] ** 2 + self.a * ridge + self.f_opt
 
@@ -187,7 +187,7 @@ class BbobDifferentPowers(bbob.BbobRotated):
         return super().minimum if smallest_power > 0 else None
 
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
-        z = (x - self.x_opt) @ self.q.T
+        z = bbob.rotate(x - self.x_opt, self.q)
         ramp = np.arange(self.d, dtype=np.float64) / (self.d - 1)
         powers = np.abs(z) ** (2 + self.spread * ramp)
         return np.sqrt(np.sum(powers, axis=1)) + self.f_opt

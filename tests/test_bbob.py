@@ -23,13 +23,18 @@ from optbench import (
     BbobDiscus,
     BbobEllipsoid,
     BbobEllipsoidRotated,
+    BbobGriewankRosenbrock,
     BbobLinearSlope,
     BbobRastrigin,
+    BbobRastriginRotated,
     BbobRosenbrock,
     BbobRosenbrockRotated,
+    BbobSchaffersF7,
+    BbobSchaffersF7Ill,
     BbobSharpRidge,
     BbobSphere,
     BbobStepEllipsoid,
+    BbobWeierstrass,
 )
 from optbench.functions import bbob_common as bbob
 
@@ -48,8 +53,19 @@ FUNCTIONS = {
     12: BbobBentCigar,
     13: BbobSharpRidge,
     14: BbobDifferentPowers,
+    15: BbobRastriginRotated,
+    16: BbobWeierstrass,
+    17: BbobSchaffersF7,
+    18: BbobSchaffersF7Ill,
+    19: BbobGriewankRosenbrock,
 }
 DIMENSIONS = (2, 3, 5, 10, 20, 40)
+
+# Relative tolerance against COCO. optbench sums matrix products in BLAS's
+# order and COCO in its C loop's, so z differs in the last bit; f16 to f19
+# take sines and cosines of large arguments (up to 3^11 z in f16, about
+# 1e5 in f19), which magnify that to at most 7e-10 (measured 2026-10-17).
+RTOL = dict.fromkeys(FUNCTIONS, 1e-12) | dict.fromkeys(range(16, 20), 1e-9)
 INSTANCES = (1, 2, 7, 15, 100)
 
 SUITE = cocoex.Suite(
@@ -89,7 +105,12 @@ def test_values_match_coco(function: int, d: int, instance: int) -> None:
         problem.x_opt[np.newaxis],
     ])
     expected = np.array([reference(point) for point in x], dtype=np.float64)
-    np.testing.assert_allclose(problem(x), expected, rtol=1e-12, atol=1e-10)
+    np.testing.assert_allclose(
+        problem(x),
+        expected,
+        rtol=RTOL[function],
+        atol=1e-10,
+    )
 
 
 def test_the_generator_is_uniform_and_normal() -> None:
@@ -127,6 +148,12 @@ def test_minimum_follows_the_constants() -> None:
     assert BbobBentCigar(conditioning=0.0).minimum is None
     assert BbobSharpRidge(a=-1.0).minimum is None
     assert BbobDifferentPowers(spread=-2.0).minimum is None
+    assert BbobRastriginRotated(a=-1.0).minimum is None
+    assert BbobWeierstrass(b=2).minimum is None
+    assert BbobWeierstrass(conditioning=0.0).minimum is None
+    assert BbobSchaffersF7(penalty=-1.0).minimum is None
+    assert BbobSchaffersF7Ill(conditioning=0.0).minimum is None
+    assert BbobGriewankRosenbrock(divisor=0.0).minimum is None
 
 
 def test_the_step_ellipsoid_has_a_plateau_at_its_minimum() -> None:
@@ -149,6 +176,20 @@ def test_refuses_bad_arguments() -> None:
         BbobSphere(instance=0)
     with pytest.raises(ValueError, match="d must be at least 2"):
         BbobSphere(d=1)
+    with pytest.raises(ValueError, match="terms"):
+        BbobWeierstrass(terms=0)
+    with pytest.raises(ValueError, match="b must be"):
+        BbobWeierstrass(b=1)
+
+
+def test_f18_is_f17_with_more_conditioning() -> None:
+    f17 = BbobSchaffersF7(d=5, instance=4)
+    f18 = BbobSchaffersF7Ill(d=5, instance=4)
+    np.testing.assert_array_equal(f17.x_opt, f18.x_opt)
+    assert f17.f_opt == f18.f_opt
+    same = BbobSchaffersF7(d=5, instance=4, conditioning=1000.0)
+    x = np.random.default_rng(0).uniform(-5, 5, size=(10, 5))
+    np.testing.assert_array_equal(same(x), f18(x))
 
 
 def test_the_registry_lists_the_suite() -> None:
@@ -158,6 +199,7 @@ def test_the_registry_lists_the_suite() -> None:
         optbench.Group.BBOB_SEPARABLE: range(1, 6),
         optbench.Group.BBOB_MODERATE_CONDITIONING: range(6, 10),
         optbench.Group.BBOB_HIGH_CONDITIONING: range(10, 15),
+        optbench.Group.BBOB_MULTIMODAL_ADEQUATE: range(15, 20),
     }
     for group, functions in groups.items():
         expected = sorted(FUNCTIONS[f].name for f in functions)

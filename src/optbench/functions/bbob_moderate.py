@@ -9,7 +9,6 @@ seed and ``Q`` the one from the seed plus 1,000,000.
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
@@ -60,7 +59,7 @@ class BbobAttractiveSector(bbob.BbobRotated):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         scaling = bbob.scaling(self.conditioning, self.d)
         linear = self.q @ (scaling[:, np.newaxis] * self.r)
-        z = (x - self.x_opt) @ linear.T
+        z = bbob.rotate(x - self.x_opt, linear)
         s = np.where(z * self.x_opt > 0, self.sector, 1.0)
         squares = np.sum((s * z) ** 2, axis=1)
         return bbob.oscillate(squares) ** self.power + self.f_opt
@@ -107,15 +106,15 @@ class BbobStepEllipsoid(bbob.BbobRotated):
 
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         scaling = bbob.scaling(self.conditioning, self.d)
-        z_hat = (x - self.x_opt) @ (scaling[:, np.newaxis] * self.r).T
+        z_hat = bbob.rotate(x - self.x_opt, scaling[:, np.newaxis] * self.r)
         rounded = np.where(
             np.abs(z_hat) > _WHOLE_STEPS,
             np.floor(z_hat + 0.5),
             np.floor(self.step * z_hat + 0.5) / self.step,
         )
-        z = rounded @ self.q.T
+        z = bbob.rotate(rounded, self.q)
         weights = bbob.scaling(self.weight, self.d) ** 2
-        ellipsoid = z**2 @ weights
+        ellipsoid = bbob.weighted(z**2, weights)
         floor = np.abs(z_hat[:, 0]) * self.slope
         boundary = self.penalty * bbob.penalty(x)
         return self.scale * np.maximum(floor, ellipsoid) + boundary + self.f_opt
@@ -131,17 +130,6 @@ def _rosenbrock(z: NDArray[np.float64], a: float) -> NDArray[np.float64]:
     """
     head, tail = z[:, :-1], z[:, 1:]
     return np.sum(a * (head**2 - tail) ** 2 + (head - 1) ** 2, axis=1)
-
-
-def _rosenbrock_scale(d: int) -> float:
-    """``max(1, sqrt(d) / 8)``, Rosenbrock's scaling in BBOB.
-
-    Returns
-    -------
-    float
-        The factor.
-    """
-    return max(1.0, math.sqrt(d) / 8)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -175,7 +163,7 @@ class BbobRosenbrock(bbob.BbobProblem):
         return super().minimum if self.a >= 0 else None
 
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
-        z = _rosenbrock_scale(self.d) * (x - self.x_opt) + 1
+        z = bbob.rosenbrock_scale(self.d) * (x - self.x_opt) + 1
         return _rosenbrock(z, self.a) + self.f_opt
 
 
@@ -202,7 +190,7 @@ class BbobRosenbrockRotated(bbob.BbobRotated):
     @property
     def x_opt(self) -> NDArray[np.float64]:
         """``R^T 1 / (2 max(1, sqrt(d) / 8))``."""
-        return self.r.sum(axis=0) / (2 * _rosenbrock_scale(self.d))
+        return self.r.sum(axis=0) / (2 * bbob.rosenbrock_scale(self.d))
 
     @property
     def minimum(self) -> Minimum | None:
@@ -210,5 +198,5 @@ class BbobRosenbrockRotated(bbob.BbobRotated):
         return super().minimum if self.a >= 0 else None
 
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
-        z = _rosenbrock_scale(self.d) * (x @ self.r.T) + 0.5
+        z = bbob.rosenbrock_scale(self.d) * bbob.rotate(x, self.r) + 0.5
         return _rosenbrock(z, self.a) + self.f_opt

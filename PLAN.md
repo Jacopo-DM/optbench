@@ -32,6 +32,9 @@ other). The approved spec and task list are in DESIGN.md.
   rotations: equal to `cocoex` to 1e-12; 972 tests, coverage 100%.
 - `bbob` f10 to f14 done (2026-10-17, branch `bbob-f10-f14`): equal to
   `cocoex` to 1e-12; 1172 tests, coverage 100%.
+- `bbob` f15 to f19 done (2026-10-17, branch `bbob-f15-f19`): equal to
+  `cocoex` to 1e-9 (f16 to f19, cosines of large arguments) or 1e-12;
+  1373 tests, coverage 100%.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
@@ -43,11 +46,10 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-`bbob` group f15 to f19 (rotated Rastrigin, Weierstrass, Schaffers F7,
-ill-conditioned Schaffers F7, composite Griewank-Rosenbrock), in
-`functions/bbob_multimodal_adequate.py`. f18 takes f17's seeds for
-`f_opt` (already in `bbob_common.f_opt`) and for its instance (COCO's
-`rseed_17` in `suite_bbob.c`). The full order is below.
+`bbob` group f20 to f24 (Schwefel, Gallagher 101 and 21 peaks, Katsuura,
+Lunacek bi-Rastrigin), in `functions/bbob_multimodal_weak.py`; the last
+BBOB group. COCO's sources: `f_schwefel.c`, `f_gallagher.c`,
+`f_katsuura.c`, `f_lunacek_bi_rastrigin.c`. The full order is below.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -57,7 +59,7 @@ then BBOB, then the `ailigment` adapters. Downloading RR-6829 (573,076
 bytes, from https://inria.hal.science/inria-00362633/document) and adding
 COCO's Python package as a dev-only dependency are approved too.
 
-1. todo: `bbob` Tier 2, one commit per group: f15 to f19, f20 to f24. COCO's sources for each are in its repository,
+1. todo: `bbob` Tier 2, the last group: f20 to f24. COCO's sources for each are in its repository,
    `code-experiments/src/f_<name>.c` (read on GitHub; BSD-3-Clause), and
    RR-6829 sections 2 to 5 give the formulas.
 2. later: the `ailigment` adapters (its PLAN.md).
@@ -67,6 +69,11 @@ COCO's Python package as a dev-only dependency are approved too.
 None.
 
 ## Known problems
+
+- BBOB f16 takes about 93 ms per 100,000 points at d = 10, close to the
+  0.1 s budget; under heavier load it may cross it. T_osz (shared by seven
+  BBOB functions) and the rotations are 37 ms of that; speeding up T_osz
+  would help them all.
 
 
 - Power Sum's recommended b vector is given for d = 4 only (other b give

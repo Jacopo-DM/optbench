@@ -407,10 +407,38 @@ fits it. One commit; the minima are checked numerically as for SFU.
   names the rotations by seed, not by the report's letters. As in COCO's
   code but not the report, f12's `x_opt` also comes from the seed plus
   1,000,000. f14's exponent spread (4) is the field `spread`.
-- `tests/test_all_problems.py` compares a batch with one point at a time
-  to 1e-13 (it was 1e-14): a matrix product can take a different BLAS path
-  for one row than for 20, and f14's powers up to 6 magnify that last-bit
-  difference to about 2e-14.
+- Batch products of points with a matrix go through `bbob_common.rotate`
+  and `weighted` (`einsum`) since f15 to f19, not `@`: BLAS may sum one row
+  in another order than 20, and f14's powers up to 6 and f16's and f19's
+  cosines of large arguments magnified that last-bit difference past the
+  batch test's 1e-14 (f10 to f14 had briefly loosened that test to 1e-13;
+  it is back at 1e-14). einsum costs about 2 ms more per 100,000 points at
+  d = 10.
+- BBOB f15 to f19 (2026-10-17) in `functions/bbob_multimodal_adequate.py`.
+  Here the report's `R` is COCO's `q` and its `Q` is `r`. f18 is f17 with
+  conditioning 1000 and f17's seeds for its instance and `f_opt` (COCO's
+  `rseed_17`). f16's minimum is reached wherever every `z_i` is an
+  integer (the report: "non-unique global optimum"); like f7's plateau,
+  `minimum` lists `x_opt` only. f19's true minimiser is
+  `r^T 1 / (2 max(1, sqrt(d) / 8))`; COCO reports `r^T 1 / 2`, which is
+  the same for d <= 64.
+- f16 computes `cos(2 pi b^k u)` as the real part of `w^(b^k)` with
+  `w = exp(2 pi i u)`, raising to the power `b` each term (b - 1 complex
+  products) instead of 12 cosines per coordinate: 46 against 105 ms for the
+  sum alone, the whole function 145 to about 93 ms. It needs an integer
+  `b` (the field is now `int`, at least 2), which the published 3 is.
+  Repeated products multiply the angle's rounding error by `b` per term,
+  as the direct cosine does; the values stay within 1.5e-10 of COCO. The
+  real triple-angle formula `4c^3 - 3c` was rejected: it multiplies
+  errors by up to 9 per term (9^11 is 3e10) and timed 50 ms.
+- `tests/test_bbob.py` compares with COCO to a relative 1e-12, and 1e-9
+  for f16 to f19: optbench and COCO sum in different orders, and those
+  four take sines and cosines of large arguments (2 pi 3^11 z in f16, t up
+  to about 1e5 in f19). Measured worst cases, all 30 (d, instance) pairs:
+  f16 1.5e-10, f17 4.9e-11, f18 3.9e-12, f19 6.5e-10; every other function
+  at most 1.4e-12. Matching COCO bit for bit would mean copying its
+  summation order and the compiler's fused multiply-adds, so it was not
+  tried.
 - `coco-experiment` 2.8.2 (BSD-3-Clause) is a dev dependency, used only by
   `tests/test_bbob.py` (the user approved it and the 3.9 MB source
   download, 2026-10-17). PyPI has no Python 3.13 wheel for it, so `uv sync`
@@ -482,6 +510,9 @@ optbench, and what was decided:
 | Batch speed, BBOB f6 to f9 by `scripts.timing` (as f1 to f5, load average 5 to 10, 2026-10-17) | ms per call | f8 4.4; f9 4.9; f6 8.4; f7 10.3 | all under budget |
 | BBOB f10 to f14 against `cocoex` 2.8.2 (2026-10-17) | max relative difference | at most 1e-12, same points, dimensions and instances as f1 to f5 | 150 combinations, all pass on the first run |
 | Batch speed, BBOB f10 to f14 by `scripts.timing` (as f1 to f5, load average 4 to 7, 2026-10-17) | ms per call | f13 3.3; f14 10.7; f12 13.9; f10 35.5; f11 35.5 | all under budget; T_osz again is most of f10 and f11 |
+| BBOB f15 to f19 against `cocoex` 2.8.2 (2026-10-17) | max relative difference | f15 1.2e-13; f16 1.5e-10; f17 4.9e-11; f18 3.9e-12; f19 6.5e-10 | 150 combinations; tolerance 1e-9 for f16 to f19 (see Decisions) |
+| Batch speed, BBOB f15 to f19 by `scripts.timing` (as f1 to f5, load average about 4, 2026-10-17) | ms per call | f19 14.6; f17 37.1; f18 37.0; f15 60.0; f16 92.6 (145 with 12 cosines per coordinate) | all under budget; f16 is close to it: T_osz and the rotations take 37 ms of it |
+| Random-search baseline, BBOB f15 to f19 by `scripts.baseline` (as f1 to f5) | median final value (f_opt) | f15 1135 (1000); f16 82.18 (71.35); f17 -12.19 (-16.94); f18 0.66 (-16.94); f19 -95.60 (-102.55) | |
 | Random-search baseline, BBOB f10 to f14 by `scripts.baseline` (as f1 to f5) | median final value (f_opt) | f10 67282 (-54.94); f11 136.9 (76.27); f12 1.13e7 (-621.11); f13 662.3 (29.97); f14 -46.88 (-52.35) | |
 | Random-search baseline, BBOB f6 to f9 by `scripts.baseline` (as f1 to f5) | median final value (f_opt) | f6 156.9 (35.9); f7 146.8 (92.94); f8 3131 (149.15); f9 2695 (123.83) | |
 | Random-search baseline, BBOB f1 to f5 by `scripts.baseline` (instance 1, d = 10, 10 seeds of 10,000 points) | median final value (f_opt) | f1 92.29 (79.48); f2 62435 (-209.88); f3 -339.4 (-462.09); f4 -290.2 (-462.09); f5 47.19 (-9.21) | |

@@ -130,6 +130,37 @@ def f_opt(function: int, instance: int) -> float:
     return min(1000.0, max(-1000.0, rounded))
 
 
+def rotate(
+    x: NDArray[np.float64],
+    matrix: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Apply ``matrix`` to every point: ``z_i = sum_j matrix[i, j] x_j``.
+
+    Uses ``einsum``, not BLAS, so a point gives the same bits alone as in a
+    batch (BLAS may sum in another order for one row than for many).
+
+    Returns
+    -------
+    numpy.ndarray
+        Shaped like ``x``.
+    """
+    return np.einsum("nj,ij->ni", x, matrix)
+
+
+def weighted(
+    values: NDArray[np.float64],
+    weights: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Sum the last axis of ``values`` with ``weights``, without BLAS.
+
+    Returns
+    -------
+    numpy.ndarray
+        ``values`` without its last axis.
+    """
+    return np.einsum("...j,j->...", values, weights)
+
+
 def oscillate(x: NDArray[np.float64]) -> NDArray[np.float64]:
     """T_osz: a smooth, coordinate-wise oscillation about the identity.
 
@@ -213,6 +244,17 @@ def rotation(seed: int, d: int) -> NDArray[np.float64]:
         matrix[:, i] /= math.sqrt(matrix[:, i] @ matrix[:, i])
     matrix.flags.writeable = False
     return matrix
+
+
+def rosenbrock_scale(d: int) -> float:
+    """``max(1, sqrt(d) / 8)``, Rosenbrock's scaling in BBOB.
+
+    Returns
+    -------
+    float
+        The factor.
+    """
+    return max(1.0, math.sqrt(d) / 8)
 
 
 def rastrigin(z: NDArray[np.float64], a: float) -> NDArray[np.float64]:

@@ -59,7 +59,7 @@ class BbobEllipsoid(bbob.BbobProblem):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = bbob.oscillate(x - self.x_opt)
         weights = bbob.scaling(self.conditioning, self.d) ** 2
-        return z**2 @ weights + self.f_opt
+        return bbob.weighted(z**2, weights) + self.f_opt
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -30,7 +30,7 @@ run.best_value, run.best_point, run.curve
 (`optbench.names(suite="sfu")`), ten well-known ones not on them
 (`suite="classic"`: Alpine N. 2, Bird, Deceptive, Happy Cat, Himmelblau,
 Qing, Salomon, Schwefel 2.21 and 2.22, Whitley), and the COCO/BBOB
-noiseless suite (`suite="bbob"`; f1 to f14 so far), whose instances equal
+noiseless suite (`suite="bbob"`; f1 to f19 so far), whose instances equal
 COCO's: `optbench.BbobRastrigin(d=10, instance=3)` is COCO's f3, instance
 3, in 10-D. `optbench.names(group)`
 lists those of one shape group. MIT license.

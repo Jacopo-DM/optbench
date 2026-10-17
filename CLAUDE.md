@@ -43,7 +43,8 @@ Before every commit run lint, type check and the tests above.
   where COCO's code and the report differ, follow the code, say so in the
   class docstring, and add the function to the `cocoex` comparison in
   `tests/test_bbob.py` (every function, d = 2 to 40, instances 1, 2, 7, 15,
-  100, to 1e-12). `cocoex` is a test reference only; never import it in
+  100, to 1e-12, or 1e-9 where `RTOL` there says why). `cocoex` is a test
+  reference only; never import it in
   `src`.
 - Adding a function (spec criteria 1 to 7): a frozen, keyword-only dataclass
   subclass of `Problem` (or of `AnyDimension` when any `d` works, which
@@ -111,3 +112,13 @@ Before every commit run lint, type check and the tests above.
   deletes the whole call (T201 is an unsafe fix). It removed the baseline
   table's header on 2026-10-17. Keep such lines under 80 characters, and read
   the diff after ruff.
+- Ruff's auto-fix (`non-augmented-assignment`) rewrites `y = y * w` into
+  `y *= w`, which changes the array in place. When `y` may be the same
+  array as `w` or another live array (`power = w`, then a loop), that
+  silently changes it: on 2026-10-17 it broke BBOB f16 (values off by up to
+  170) until the COCO test caught it. Start such a loop from a new array
+  (`power = w * w`) and read the diff after ruff.
+- BBOB batch products go through `bbob_common.rotate` and `weighted`
+  (`einsum`), never `@`: BLAS may sum one row in another order than a
+  batch, and the functions that take powers or cosines of large arguments
+  magnify that past the batch test's 1e-14.
