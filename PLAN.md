@@ -29,12 +29,8 @@ other). The approved spec and task list are in DESIGN.md.
   and its branch deleted on the user's say-so): all 24 functions equal to
   `cocoex` (1e-9 for f16 to f19 and f23, 1e-12 for the rest; DESIGN.md
   results); 83 functions in all, 1573 tests, coverage 100%.
-- Git, at the end of the 2026-10-17 session: `main` is one commit ahead of
-  GitHub (d1a952c, the PLAN.md entry for `python-standard`, plus this
-  notes commit), and the merged branch `plan-python-standard` still exists.
-  The user asked to push `main`, delete `plan-python-standard` (here and in
-  `ailigment`) and then write the `python-standard` spec; the context-notes
-  hook stopped the session first, so none of that is done yet.
+- Git: `main` is pushed (0ecc374, 2026-10-17, the user's say-so) and is
+  the only branch.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
