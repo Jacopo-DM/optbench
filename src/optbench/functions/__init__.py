@@ -20,6 +20,13 @@ from .bbob_multimodal_adequate import (
     BbobSchaffersF7Ill,
     BbobWeierstrass,
 )
+from .bbob_multimodal_weak import (
+    BbobGallagher21,
+    BbobGallagher101,
+    BbobKatsuura,
+    BbobLunacek,
+    BbobSchwefel,
+)
 from .bbob_separable import (
     BbobBucheRastrigin,
     BbobEllipsoid,
@@ -102,14 +109,19 @@ __all__ = [
     "BbobDiscus",
     "BbobEllipsoid",
     "BbobEllipsoidRotated",
+    "BbobGallagher21",
+    "BbobGallagher101",
     "BbobGriewankRosenbrock",
+    "BbobKatsuura",
     "BbobLinearSlope",
+    "BbobLunacek",
     "BbobRastrigin",
     "BbobRastriginRotated",
     "BbobRosenbrock",
     "BbobRosenbrockRotated",
     "BbobSchaffersF7",
     "BbobSchaffersF7Ill",
+    "BbobSchwefel",
     "BbobSharpRidge",
     "BbobSphere",
     "BbobStepEllipsoid",

@@ -35,6 +35,9 @@ other). The approved spec and task list are in DESIGN.md.
 - `bbob` f15 to f19 done (2026-10-17, branch `bbob-f15-f19`): equal to
   `cocoex` to 1e-9 (f16 to f19, cosines of large arguments) or 1e-12;
   1373 tests, coverage 100%.
+- `bbob` complete (2026-10-17, f20 to f24 on branch `bbob-f20-f24`): all
+  24 functions equal to `cocoex` (1e-9 for f16 to f19 and f23, 1e-12 for
+  the rest); 83 functions in all, 1573 tests, coverage 100%.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
@@ -46,10 +49,10 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-`bbob` group f20 to f24 (Schwefel, Gallagher 101 and 21 peaks, Katsuura,
-Lunacek bi-Rastrigin), in `functions/bbob_multimodal_weak.py`; the last
-BBOB group. COCO's sources: `f_schwefel.c`, `f_gallagher.c`,
-`f_katsuura.c`, `f_lunacek_bi_rastrigin.c`. The full order is below.
+Nothing is left in this repo's approved modules. The next work is in
+`ailigment` (its PLAN.md): the adapters that use optbench, each with its
+own spec; adding optbench as a dependency there needs the user's
+approval.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -59,10 +62,7 @@ then BBOB, then the `ailigment` adapters. Downloading RR-6829 (573,076
 bytes, from https://inria.hal.science/inria-00362633/document) and adding
 COCO's Python package as a dev-only dependency are approved too.
 
-1. todo: `bbob` Tier 2, the last group: f20 to f24. COCO's sources for each are in its repository,
-   `code-experiments/src/f_<name>.c` (read on GitHub; BSD-3-Clause), and
-   RR-6829 sections 2 to 5 give the formulas.
-2. later: the `ailigment` adapters (its PLAN.md).
+1. later: the `ailigment` adapters (its PLAN.md).
 
 ## Open questions for the user
 

@@ -23,14 +23,19 @@ from optbench import (
     BbobDiscus,
     BbobEllipsoid,
     BbobEllipsoidRotated,
+    BbobGallagher21,
+    BbobGallagher101,
     BbobGriewankRosenbrock,
+    BbobKatsuura,
     BbobLinearSlope,
+    BbobLunacek,
     BbobRastrigin,
     BbobRastriginRotated,
     BbobRosenbrock,
     BbobRosenbrockRotated,
     BbobSchaffersF7,
     BbobSchaffersF7Ill,
+    BbobSchwefel,
     BbobSharpRidge,
     BbobSphere,
     BbobStepEllipsoid,
@@ -58,14 +63,24 @@ FUNCTIONS = {
     17: BbobSchaffersF7,
     18: BbobSchaffersF7Ill,
     19: BbobGriewankRosenbrock,
+    20: BbobSchwefel,
+    21: BbobGallagher101,
+    22: BbobGallagher21,
+    23: BbobKatsuura,
+    24: BbobLunacek,
 }
 DIMENSIONS = (2, 3, 5, 10, 20, 40)
 
-# Relative tolerance against COCO. optbench sums matrix products in BLAS's
+# Relative tolerance against COCO. optbench sums matrix products in its own
 # order and COCO in its C loop's, so z differs in the last bit; f16 to f19
 # take sines and cosines of large arguments (up to 3^11 z in f16, about
-# 1e5 in f19), which magnify that to at most 7e-10 (measured 2026-10-17).
-RTOL = dict.fromkeys(FUNCTIONS, 1e-12) | dict.fromkeys(range(16, 20), 1e-9)
+# 1e5 in f19) and f23 uses 2^j z up to j = 32, which magnify that to at
+# most 7e-10 (measured 2026-10-17).
+RTOL = (
+    dict.fromkeys(FUNCTIONS, 1e-12)
+    | dict.fromkeys(range(16, 20), 1e-9)
+    | {23: 1e-9}
+)
 INSTANCES = (1, 2, 7, 15, 100)
 
 SUITE = cocoex.Suite(
@@ -154,6 +169,10 @@ def test_minimum_follows_the_constants() -> None:
     assert BbobSchaffersF7(penalty=-1.0).minimum is None
     assert BbobSchaffersF7Ill(conditioning=0.0).minimum is None
     assert BbobGriewankRosenbrock(divisor=0.0).minimum is None
+    assert BbobSchwefel(conditioning=0.0).minimum is None
+    assert BbobGallagher21(penalty=-1.0).minimum is None
+    assert BbobKatsuura(penalty=-1.0).minimum is None
+    assert BbobLunacek(depth=0.0).minimum is None
 
 
 def test_the_step_ellipsoid_has_a_plateau_at_its_minimum() -> None:
@@ -200,6 +219,7 @@ def test_the_registry_lists_the_suite() -> None:
         optbench.Group.BBOB_MODERATE_CONDITIONING: range(6, 10),
         optbench.Group.BBOB_HIGH_CONDITIONING: range(10, 15),
         optbench.Group.BBOB_MULTIMODAL_ADEQUATE: range(15, 20),
+        optbench.Group.BBOB_MULTIMODAL_WEAK: range(20, 25),
     }
     for group, functions in groups.items():
         expected = sorted(FUNCTIONS[f].name for f in functions)

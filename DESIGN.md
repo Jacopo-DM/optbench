@@ -431,8 +431,28 @@ fits it. One commit; the minima are checked numerically as for SFU.
   as the direct cosine does; the values stay within 1.5e-10 of COCO. The
   real triple-angle formula `4c^3 - 3c` was rejected: it multiplies
   errors by up to 9 per term (9^11 is 3e10) and timed 50 ms.
+- BBOB f20 to f24 (2026-10-17) in `functions/bbob_multimodal_weak.py`,
+  which completes the suite (24 functions). f20's `x_opt` is
+  `+-4.2096874637 / 2` with signs from COCO's uniform numbers (below 0.5
+  is negative), and its value at `x_opt` is `f_opt` plus 0.01 times the
+  offset minus the peak of `z sin(sqrt|z|)` at z = 420.96874637 (about
+  1e-15). f24's `x_opt` is `+-1.25` with signs from COCO's normal numbers;
+  COCO first draws a random point and then overwrites it.
+- Gallagher (f21, f22): COCO draws the peaks' condition numbers, each
+  peak's coordinate permutation (seed + 1000 p) and the centres from its
+  generator, sorting uniform numbers into permutations (`argsort`; ties
+  have probability 0). The first centre, before rotation, is `x_opt`. The
+  squared distances to all peaks are one `einsum` of `[t^2, t]` with
+  precomputed weights, and `max_p h_p exp(-a_p)` is
+  `exp(max_p (log h_p - a_p))`, one exp per point. BLAS for that product
+  timed 23 against 84 ms, but differed by 2e-12 between a batch and one
+  point; einsum keeps the batch test at 1e-14 and f21 at 72 ms.
+- Katsuura (f23): `|2^j z - round(2^j z)|` for j = 1 to 32 is computed by
+  doubling the fractional part of z, which is exact in binary floating
+  point, and gives COCO's literal formula bit for bit on the same z.
 - `tests/test_bbob.py` compares with COCO to a relative 1e-12, and 1e-9
-  for f16 to f19: optbench and COCO sum in different orders, and those
+  for f16 to f19 and f23 (2^j z up to j = 32, with |z| up to about 100;
+  worst 7e-10): optbench and COCO sum in different orders, and those
   four take sines and cosines of large arguments (2 pi 3^11 z in f16, t up
   to about 1e5 in f19). Measured worst cases, all 30 (d, instance) pairs:
   f16 1.5e-10, f17 4.9e-11, f18 3.9e-12, f19 6.5e-10; every other function
@@ -512,6 +532,9 @@ optbench, and what was decided:
 | Batch speed, BBOB f10 to f14 by `scripts.timing` (as f1 to f5, load average 4 to 7, 2026-10-17) | ms per call | f13 3.3; f14 10.7; f12 13.9; f10 35.5; f11 35.5 | all under budget; T_osz again is most of f10 and f11 |
 | BBOB f15 to f19 against `cocoex` 2.8.2 (2026-10-17) | max relative difference | f15 1.2e-13; f16 1.5e-10; f17 4.9e-11; f18 3.9e-12; f19 6.5e-10 | 150 combinations; tolerance 1e-9 for f16 to f19 (see Decisions) |
 | Batch speed, BBOB f15 to f19 by `scripts.timing` (as f1 to f5, load average about 4, 2026-10-17) | ms per call | f19 14.6; f17 37.1; f18 37.0; f15 60.0; f16 92.6 (145 with 12 cosines per coordinate) | all under budget; f16 is close to it: T_osz and the rotations take 37 ms of it |
+| BBOB f20 to f24 against `cocoex` 2.8.2 (2026-10-17) | max relative difference | f20 4.7e-16; f21 9.0e-14; f22 3.4e-15; f23 7.0e-10; f24 2.5e-12 | 150 combinations; all 24 BBOB functions now match COCO |
+| Batch speed, BBOB f20 to f24 by `scripts.timing` (as f1 to f5, load average 2 to 3, 2026-10-17) | ms per call | f20 15.8; f24 17.4; f22 24.1; f21 71.7; f23 78.9 | all under budget; 0 of 83 functions over it (Whitley excepted) |
+| Random-search baseline, BBOB f20 to f24 by `scripts.baseline` (as f1 to f5) | median final value (f_opt) | f20 -242.3 (-546.5); f21 55.93 (40.78); f22 -979.9 (-1000); f23 8.556 (6.87); f24 220.1 (102.61) | |
 | Random-search baseline, BBOB f15 to f19 by `scripts.baseline` (as f1 to f5) | median final value (f_opt) | f15 1135 (1000); f16 82.18 (71.35); f17 -12.19 (-16.94); f18 0.66 (-16.94); f19 -95.60 (-102.55) | |
 | Random-search baseline, BBOB f10 to f14 by `scripts.baseline` (as f1 to f5) | median final value (f_opt) | f10 67282 (-54.94); f11 136.9 (76.27); f12 1.13e7 (-621.11); f13 662.3 (29.97); f14 -46.88 (-52.35) | |
 | Random-search baseline, BBOB f6 to f9 by `scripts.baseline` (as f1 to f5) | median final value (f_opt) | f6 156.9 (35.9); f7 146.8 (92.94); f8 3131 (149.15); f9 2695 (123.83) | |
