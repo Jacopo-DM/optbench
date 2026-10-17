@@ -33,8 +33,11 @@ other). The approved spec and task list are in DESIGN.md.
   `src` and `tests`; ruff, mypy strict and pyright strict clean.
 - Git: `main` is pushed (f33326f, 2026-10-17, the user's say-so) and is
   the only local branch; the first CI run on it passed every step (cocoex
-  2.8.2 built from source in 17 s, 1578 tests, 100% coverage). Dependabot
-  opened PR #1 (setup-uv 9.0.0 to 10.3.0, CI passing), not merged.
+  2.8.2 built from source in 17 s, 1578 tests, 100% coverage). Dependabot's
+  PR #1 (setup-uv 9.0.0 to 10.3.0, CI passing) was merged by rebase on
+  2026-10-17 (2aea30c, the user's say-so), so `ci.yml` now pins a newer
+  setup-uv than the user's template. This notes commit is on `main`, not
+  pushed, and its branch `notes-before-compact` still exists.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
