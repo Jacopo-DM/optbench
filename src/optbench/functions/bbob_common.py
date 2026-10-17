@@ -1,4 +1,4 @@
-"""What the BBOB functions share: instances and transformations.
+"""What the BBOB functions share: instances, transformations, a base class.
 
 From Hansen, Finck, Ros and Auger (2009), "Real-Parameter Black-Box
 Optimization Benchmarking 2009: Noiseless Functions Definitions", INRIA
@@ -12,9 +12,14 @@ from __future__ import annotations
 
 import functools
 import math
-from typing import TYPE_CHECKING
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, ClassVar
 
 import numpy as np
+
+from optbench.problem import AnyDimension, Group, Minimum, box, formula_minimum
+
+from .references import HANSEN_BBOB
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -183,3 +188,87 @@ def penalty(x: NDArray[np.float64]) -> NDArray[np.float64]:
     """
     outside = np.maximum(0.0, np.abs(x) - 5)
     return np.einsum("ij,ij->i", outside, outside)
+
+
+@functools.cache
+def rotation(seed: int, d: int) -> NDArray[np.float64]:
+    """Return COCO's random rotation, as ``bbob2009_compute_rotation``.
+
+    A d by d matrix of ``gauss`` numbers, filled column by column, made
+    orthonormal by Gram-Schmidt on its columns from the first.
+
+    Returns
+    -------
+    numpy.ndarray
+        Shaped ``(d, d)``, read-only (it is cached); row ``i`` gives
+        ``z_i = sum_j rotation[i, j] x_j``.
+    """
+    matrix = gauss(d * d, seed).reshape(d, d).T.copy()
+    for i in range(d):
+        for j in range(i):
+            matrix[:, i] -= (matrix[:, i] @ matrix[:, j]) * matrix[:, j]
+        matrix[:, i] /= math.sqrt(matrix[:, i] @ matrix[:, i])
+    matrix.flags.writeable = False
+    return matrix
+
+
+def rastrigin(z: NDArray[np.float64], a: float) -> NDArray[np.float64]:
+    """Rastrigin's ``a (d - sum cos(2 pi z_i)) + |z|^2``, per point.
+
+    Returns
+    -------
+    numpy.ndarray
+        Shaped ``(n,)``.
+    """
+    waves = np.sum(np.cos(2 * math.pi * z), axis=1)
+    return a * (z.shape[1] - waves) + np.einsum("ij,ij->i", z, z)
+
+
+@dataclass(frozen=True, kw_only=True)
+class BbobProblem(AnyDimension):
+    """What every BBOB function shares; each group module subclasses it.
+
+    Attributes
+    ----------
+    instance
+        COCO's instance number, which fixes ``x_opt``, ``f_opt`` and any
+        rotation. The 2009 workshop used 1 to 15.
+    """
+
+    smallest_dimension: ClassVar[int] = 2
+    group: ClassVar[Group] = Group.BBOB_SEPARABLE
+    suite: ClassVar[str] = "bbob"
+    url: ClassVar[str] = "https://inria.hal.science/inria-00362633"
+    references: ClassVar[tuple[str, ...]] = (HANSEN_BBOB,)
+    function: ClassVar[int]
+
+    instance: int = 1
+
+    def _check(self) -> None:
+        super()._check()
+        if self.instance < 1:
+            msg = f"instance must be at least 1, got {self.instance}"
+            raise ValueError(msg)
+
+    @property
+    def seed(self) -> int:
+        """COCO's seed for this function and instance."""
+        return self.function + 10_000 * self.instance
+
+    @property
+    def x_opt(self) -> NDArray[np.float64]:
+        """Where the minimum is, shaped ``(d,)``."""
+        return x_opt(self.seed, self.d)
+
+    @property
+    def f_opt(self) -> float:
+        """The minimum value."""
+        return f_opt(self.function, self.instance)
+
+    def default_bounds(self) -> NDArray[np.float64]:
+        return box(-5.0, 5.0, self.d)
+
+    @property
+    def minimum(self) -> Minimum | None:
+        """``f_opt`` at ``x_opt``, where every transformed ``z`` is 0."""
+        return formula_minimum(self, self.f_opt, self.x_opt[np.newaxis])

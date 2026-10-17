@@ -1,83 +1,28 @@
 """BBOB functions f1 to f5: the separable group.
 
 From Hansen, Finck, Ros and Auger (2009), INRIA RR-6829, section 1, with
-the instances of COCO (see ``bbob_transforms``). Where COCO's code and the
+the instances of COCO (see ``bbob_common``). Where COCO's code and the
 report differ, the code wins, so values match COCO's published data; each
 case is said in the class.
 """
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
 import numpy as np
 
-from optbench.problem import AnyDimension, Group, Minimum, box, formula_minimum
-
-from . import bbob_transforms as bbob
-from .references import HANSEN_BBOB
+from . import bbob_common as bbob
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-_GROUP = Group.BBOB_SEPARABLE
-_URL = "https://inria.hal.science/inria-00362633"
+    from optbench.problem import Minimum
 
 
 @dataclass(frozen=True, kw_only=True)
-class _Bbob(AnyDimension):
-    """What every BBOB function shares.
-
-    Attributes
-    ----------
-    instance
-        COCO's instance number, which fixes ``x_opt``, ``f_opt`` and any
-        rotation. The 2009 workshop used 1 to 15.
-    """
-
-    smallest_dimension: ClassVar[int] = 2
-    group: ClassVar[Group] = _GROUP
-    suite: ClassVar[str] = "bbob"
-    url: ClassVar[str] = _URL
-    references: ClassVar[tuple[str, ...]] = (HANSEN_BBOB,)
-    function: ClassVar[int]
-
-    instance: int = 1
-
-    def _check(self) -> None:
-        super()._check()
-        if self.instance < 1:
-            msg = f"instance must be at least 1, got {self.instance}"
-            raise ValueError(msg)
-
-    @property
-    def seed(self) -> int:
-        """COCO's seed for this function and instance."""
-        return self.function + 10_000 * self.instance
-
-    @property
-    def x_opt(self) -> NDArray[np.float64]:
-        """Where the minimum is, shaped ``(d,)``."""
-        return bbob.x_opt(self.seed, self.d)
-
-    @property
-    def f_opt(self) -> float:
-        """The minimum value."""
-        return bbob.f_opt(self.function, self.instance)
-
-    def default_bounds(self) -> NDArray[np.float64]:
-        return box(-5.0, 5.0, self.d)
-
-    @property
-    def minimum(self) -> Minimum | None:
-        """``f_opt`` at ``x_opt``, where every transformed ``z`` is 0."""
-        return formula_minimum(self, self.f_opt, self.x_opt[np.newaxis])
-
-
-@dataclass(frozen=True, kw_only=True)
-class BbobSphere(_Bbob):
+class BbobSphere(bbob.BbobProblem):
     """BBOB f1, sphere: ``f(x) = |x - x_opt|^2 + f_opt``. No constants."""
 
     name: ClassVar[str] = "bbob_f01_sphere"
@@ -89,7 +34,7 @@ class BbobSphere(_Bbob):
 
 
 @dataclass(frozen=True, kw_only=True)
-class BbobEllipsoid(_Bbob):
+class BbobEllipsoid(bbob.BbobProblem):
     """BBOB f2, separable ellipsoid.
 
     ``f(x) = sum_i conditioning^(i/(d-1)) z_i^2 + f_opt``, with
@@ -117,20 +62,8 @@ class BbobEllipsoid(_Bbob):
         return z**2 @ weights + self.f_opt
 
 
-def _rastrigin(z: NDArray[np.float64], a: float) -> NDArray[np.float64]:
-    """Rastrigin's ``a (d - sum cos(2 pi z_i)) + |z|^2``, per point.
-
-    Returns
-    -------
-    numpy.ndarray
-        Shaped ``(n,)``.
-    """
-    waves = np.sum(np.cos(2 * math.pi * z), axis=1)
-    return a * (z.shape[1] - waves) + np.einsum("ij,ij->i", z, z)
-
-
 @dataclass(frozen=True, kw_only=True)
-class BbobRastrigin(_Bbob):
+class BbobRastrigin(bbob.BbobProblem):
     """BBOB f3, separable Rastrigin.
 
     ``f(x) = a (d - sum_i cos(2 pi z_i)) + |z|^2 + f_opt``, with
@@ -162,11 +95,11 @@ class BbobRastrigin(_Bbob):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = bbob.asymmetric(bbob.oscillate(x - self.x_opt), self.beta)
         z *= bbob.scaling(self.conditioning, self.d)
-        return _rastrigin(z, self.a) + self.f_opt
+        return bbob.rastrigin(z, self.a) + self.f_opt
 
 
 @dataclass(frozen=True, kw_only=True)
-class BbobBucheRastrigin(_Bbob):
+class BbobBucheRastrigin(bbob.BbobProblem):
     """BBOB f4, Bueche-Rastrigin.
 
     ``f(x) = a (d - sum_i cos(2 pi z_i)) + |z|^2 + penalty f_pen(x)
@@ -220,11 +153,11 @@ class BbobBucheRastrigin(_Bbob):
         skewed = np.where((z > 0) & even, self.skew, 1.0)
         z = z * bbob.scaling(self.conditioning, self.d) * skewed
         boundary = self.penalty * bbob.penalty(x)
-        return _rastrigin(z, self.a) + boundary + self.f_opt
+        return bbob.rastrigin(z, self.a) + boundary + self.f_opt
 
 
 @dataclass(frozen=True, kw_only=True)
-class BbobLinearSlope(_Bbob):
+class BbobLinearSlope(bbob.BbobProblem):
     """BBOB f5, linear slope towards a corner of the domain.
 
     ``f(x) = sum_i 5 |s_i| - s_i z_i + f_opt``, where ``x_opt`` is the

@@ -154,7 +154,8 @@ Non-goals: the noisy suite, bbob-biobj, large-scale, mixed-integer and
 constrained suites; COCO's experiment runner and post-processing.
 
 Architecture: a new module area `functions/bbob_*.py` (split by group to
-stay under 400 lines) and `functions/bbob_transforms.py`. A new class
+stay under 400 lines) and `functions/bbob_transforms.py` (built as
+`functions/bbob_common.py`, see Decisions). A new class
 variable `suite` (`"sfu"`, `"bbob"`, `"classic"`) beside `group`, with BBOB's
 five groups as their own `Group` values, and `names(group=None, suite=None)`.
 Names like `bbob_f01_sphere`.
@@ -365,7 +366,9 @@ fits it. One commit; the minima are checked numerically as for SFU.
   the terms per point, or leaving the script failing, were the rejected
   options.
 - BBOB Tier 1 (2026-10-17): f1 to f5 in `functions/bbob_separable.py`,
-  the generator and transforms in `functions/bbob_transforms.py`. Each
+  the generator and transforms in `functions/bbob_common.py` (first named
+  `bbob_transforms.py`; renamed when f6 to f9 made it also hold the base
+  class `BbobProblem` and `rastrigin`, each used by two group modules). Each
   problem takes `d` (at least 2: the formulas divide by d - 1) and
   `instance`; `x_opt` and `f_opt` are derived from them, cached per (seed,
   d), and are not fields. Instance k uses COCO's seed function + 10000 k,
@@ -385,6 +388,18 @@ fits it. One commit; the minima are checked numerically as for SFU.
   100; f5 `conditioning` 100 (slopes 1 to 10). The 0.049, 10, 7.9, 5.5 and
   3.1 inside T_osz are fixed, being part of the transform's definition, as
   is f5's boundary at 5^2.
+- BBOB f6 to f9 (2026-10-17) in `functions/bbob_moderate.py`. COCO's
+  rotation `R` comes from the instance's seed and `Q` from the seed plus
+  1,000,000; both are Gram-Schmidt on a column-filled d by d matrix of
+  `gauss` numbers, cached per (seed, d). f9 uses only `R`, and its `x_opt`
+  is `R^T 1 / (2 max(1, sqrt(d) / 8))`, not a random point; f8's `x_opt`
+  is 0.75 times COCO's random point. f7 rounds where `|z_hat_i| > 0.5`
+  (COCO's code; the report has no absolute value) with halves rounding up,
+  as COCO's `floor(x + 0.5)`.
+- f7 reaches its minimum on a plateau (z_hat_1 = 0 and every other
+  |z_hat_i| < 0.05 after rounding), a continuum that criterion 4 cannot
+  list; `minimum.points` holds `x_opt` only, and the class docstring
+  describes the plateau. `tests/test_bbob.py` checks a plateau point.
 - `coco-experiment` 2.8.2 (BSD-3-Clause) is a dev dependency, used only by
   `tests/test_bbob.py` (the user approved it and the 3.9 MB source
   download, 2026-10-17). PyPI has no Python 3.13 wheel for it, so `uv sync`
@@ -452,6 +467,9 @@ optbench, and what was decided:
 | Batch speed, the ten classics by `scripts.timing` (100,000 points, d = 10 where free, CPU time, min of 5, load average about 7, 2026-10-17) | ms per call | Himmelblau 0.3; Salomon 1.3; Schwefel 2.21 1.4; Qing 1.7; Schwefel 2.22 1.8; Happy Cat 2.1; Bird 4.7; Alpine N. 2 10.8; Deceptive 20.8; Whitley 128.4 | Whitley is over the 100 ms budget: it has d^2 = 100 terms per point, and the 10 million cosines alone take 70 to 90 ms; an in-place rewrite saved 3% (noise), so it was not kept |
 | BBOB f1 to f5 against `cocoex` 2.8.2 (2026-10-17) | max relative difference | at most 1e-12 at 26 points each (20 in the domain, 5 outside, `x_opt`) for d = 2, 3, 5, 10, 20, 40 and instances 1, 2, 7, 15, 100 | 150 combinations, all pass |
 | Batch speed, BBOB f1 to f5 by `scripts.timing` (100,000 points, d = 10, CPU time, min of 5, load average about 7, 2026-10-17) | ms per call | f1 0.9; f5 4.0; f2 34.4; f4 45.3; f3 51.4 | all under the 100 ms budget; T_osz (a log, an exp and two sines per coordinate) is most of f2 to f4 |
+| BBOB f6 to f9 against `cocoex` 2.8.2 (2026-10-17) | max relative difference | at most 1e-12, same points, dimensions and instances as f1 to f5 | 120 combinations, all pass on the first run |
+| Batch speed, BBOB f6 to f9 by `scripts.timing` (as f1 to f5, load average 5 to 10, 2026-10-17) | ms per call | f8 4.4; f9 4.9; f6 8.4; f7 10.3 | all under budget |
+| Random-search baseline, BBOB f6 to f9 by `scripts.baseline` (as f1 to f5) | median final value (f_opt) | f6 156.9 (35.9); f7 146.8 (92.94); f8 3131 (149.15); f9 2695 (123.83) | |
 | Random-search baseline, BBOB f1 to f5 by `scripts.baseline` (instance 1, d = 10, 10 seeds of 10,000 points) | median final value (f_opt) | f1 92.29 (79.48); f2 62435 (-209.88); f3 -339.4 (-462.09); f4 -290.2 (-462.09); f5 47.19 (-9.21) | |
 | Random-search baseline, the ten classics by `scripts.baseline` (as the row below) | median final value (minimum) | Alpine N. 2 -1563 (-30491); Bird -106.59 (-106.76); Deceptive -0.494 (-1); Happy Cat 250 (0); Himmelblau 0.026 (0); Qing 3.3e9 (0); Salomon 7.8 (0); Schwefel 2.21 37 (0); Schwefel 2.22 1.7e8 (0); Whitley 2.6e6 (0) | |
 | Random-search baseline, all 49 by `scripts.baseline` (10 seeds of 10,000 points, d = 10 where free, Powell d = 8, 2026-10-17) | median final value minus the minimum | 1-D: about 1e-6 (Forrester, Gramacy and Lee); 2-D: 1e-4 to 10 (Cross-in-Tray 3e-4, Branin 4e-3, Eggholder 16); d = 10: Sphere 13, Rastrigin 72, Rosenbrock 1.1e4, Perm 0 2e14, Perm d, beta 2e15 | the reference an optimiser must beat at the same budget; Michalewicz d = 10 reaches -4.8 of -9.66, Shekel -3.2 of -10.54 |

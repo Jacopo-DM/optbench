@@ -16,13 +16,17 @@ import pytest
 
 import optbench
 from optbench import (
+    BbobAttractiveSector,
     BbobBucheRastrigin,
     BbobEllipsoid,
     BbobLinearSlope,
     BbobRastrigin,
+    BbobRosenbrock,
+    BbobRosenbrockRotated,
     BbobSphere,
+    BbobStepEllipsoid,
 )
-from optbench.functions import bbob_transforms as bbob
+from optbench.functions import bbob_common as bbob
 
 FUNCTIONS = {
     1: BbobSphere,
@@ -30,6 +34,10 @@ FUNCTIONS = {
     3: BbobRastrigin,
     4: BbobBucheRastrigin,
     5: BbobLinearSlope,
+    6: BbobAttractiveSector,
+    7: BbobStepEllipsoid,
+    8: BbobRosenbrock,
+    9: BbobRosenbrockRotated,
 }
 DIMENSIONS = (2, 3, 5, 10, 20, 40)
 INSTANCES = (1, 2, 7, 15, 100)
@@ -100,6 +108,25 @@ def test_minimum_follows_the_constants() -> None:
     assert BbobBucheRastrigin(skew=0.0).minimum is None
     assert BbobLinearSlope(conditioning=-1.0).minimum is None
     assert BbobSphere(d=2, domain=[[4.5, 5.0]] * 2).minimum is None
+    assert BbobAttractiveSector(power=0.0).minimum is None
+    assert BbobStepEllipsoid(slope=-1.0).minimum is None
+    assert BbobRosenbrock(a=-1.0).minimum is None
+    assert BbobRosenbrockRotated(a=-1.0).minimum is None
+
+
+def test_the_step_ellipsoid_has_a_plateau_at_its_minimum() -> None:
+    problem = BbobStepEllipsoid(d=4, instance=1)
+
+    # Move along a direction that keeps z_hat_1 at 0 and the rest small.
+    scaling = bbob.scaling(problem.conditioning, problem.d)
+    linear = scaling[:, np.newaxis] * problem.r
+    z_hat = np.array([0.0, 0.03, -0.02, 0.04])
+    x = problem.x_opt + np.linalg.solve(linear, z_hat)
+    assert problem(x[np.newaxis])[0] == pytest.approx(problem.f_opt)
+
+    # x_opt is the listed minimiser, and the rotations are orthonormal.
+    np.testing.assert_allclose(problem.r @ problem.r.T, np.eye(4), atol=1e-14)
+    np.testing.assert_allclose(problem.q @ problem.q.T, np.eye(4), atol=1e-14)
 
 
 def test_refuses_bad_arguments() -> None:
@@ -112,4 +139,10 @@ def test_refuses_bad_arguments() -> None:
 def test_the_registry_lists_the_suite() -> None:
     names = sorted(cls.name for cls in FUNCTIONS.values())
     assert optbench.names(suite="bbob") == names
-    assert optbench.names(optbench.Group.BBOB_SEPARABLE) == names
+    groups = {
+        optbench.Group.BBOB_SEPARABLE: range(1, 6),
+        optbench.Group.BBOB_MODERATE_CONDITIONING: range(6, 10),
+    }
+    for group, functions in groups.items():
+        expected = sorted(FUNCTIONS[f].name for f in functions)
+        assert optbench.names(group) == expected

@@ -28,6 +28,8 @@ other). The approved spec and task list are in DESIGN.md.
 - `bbob` Tier 1 done (2026-10-17, branch `bbob-tier1`): the generator, the
   transforms and f1 to f5, equal to `cocoex` to 1e-12 over 150
   (function, d, instance) combinations; 811 tests, coverage 100%.
+- `bbob` f6 to f9 done (2026-10-17, branch `bbob-f6-f9`), with COCO's
+  rotations: equal to `cocoex` to 1e-12; 972 tests, coverage 100%.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 
@@ -39,11 +41,9 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-`bbob` Tier 2, group f6 to f9 (attractive sector, step ellipsoid,
-Rosenbrock, rotated Rosenbrock): it brings in COCO's rotation matrices
-(`bbob2009_compute_rotation`: Gram-Schmidt on the columns of a d by d
-matrix of `gauss` numbers, seed + 1000000 for R, seed for Q). The full
-order is below.
+`bbob` group f10 to f14 (rotated ellipsoid, discus, bent cigar, sharp
+ridge, different powers), in `functions/bbob_high_conditioning.py`. The
+full order is below.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -53,8 +53,8 @@ then BBOB, then the `ailigment` adapters. Downloading RR-6829 (573,076
 bytes, from https://inria.hal.science/inria-00362633/document) and adding
 COCO's Python package as a dev-only dependency are approved too.
 
-1. todo: `bbob` Tier 2, one commit per group: f6 to f9, f10 to f14, f15
-   to f19, f20 to f24. COCO's sources for each are in its repository,
+1. todo: `bbob` Tier 2, one commit per group: f10 to f14, f15 to f19,
+   f20 to f24. COCO's sources for each are in its repository,
    `code-experiments/src/f_<name>.c` (read on GitHub; BSD-3-Clause), and
    RR-6829 sections 2 to 5 give the formulas.
 2. later: the `ailigment` adapters (its PLAN.md).
