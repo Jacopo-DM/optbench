@@ -493,6 +493,34 @@ fits it. One commit; the minima are checked numerically as for SFU.
   `__data__/plots/baseline_gap.png` (figure about 8 by 19 inches for 83
   functions).
 
+- Python standard, module `python-standard` (the user, 2026-10-17, each
+  the recommended option):
+  - Variants come from a `problem.replace(**changes)` method that rebuilds
+    the model through validation, because pydantic's `model_copy(update=...)`
+    skips the checks (`model_copy(update={"d": 0})` would give a broken
+    problem silently) and the constructor form
+    `Branin(**{**p.model_dump(), "s": 5.0})` is long.
+    `dataclasses.replace` did run the checks, so `replace` keeps that.
+  - `domain` is stored as a tuple of `(low, high)` float pairs, whatever
+    array-like the caller passes, so problems stay hashable and `==`
+    between them works (`known_minima` compares a problem with its
+    published default). A numpy array field would make `==` raise.
+    `bounds` still returns the float64 array.
+  - `Minimum.points` is a read-only float64 array, so the frozen record is
+    frozen in fact; it matches the read-only cached `x_opt` and rotations
+    of BBOB, and `problem(minimum.points)` is unchanged.
+  - pre-commit and CI come in the same module; CI compiles cocoex from
+    source (no Python 3.13 wheel), about a minute per run.
+  - Mine, under the standard's "packaging is yours": `scripts/` moves into
+    the package as `optbench.scripts`, because the template's
+    `pythonpath = src` and `--cov=src` must not change and the tests import
+    the scripts; they have no import-time side effects. Overrides that
+    ignore `self` take `@typing.override`, which ruff's `no-self-use`
+    honours, instead of suppression comments. `Tracked` becomes a mutable
+    model (`frozen=False`), the standard's exception for records that must
+    change. Pyright stays in the dev group as a check, since the standard
+    counts its editor errors as real and a session sees no editor.
+
 ## Other sources of test functions (reviewed 2026-10-17)
 
 The user shared a list of other collections on 2026-10-17. What each offers
