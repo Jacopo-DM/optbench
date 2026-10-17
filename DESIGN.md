@@ -481,7 +481,17 @@ fits it. One commit; the minima are checked numerically as for SFU.
   `optbench`: nobody imports them. They write to `__data__/` (git-ignored),
   as in `ailigment`. The scripts draw no plots, because matplotlib would be a
   new dependency; the charts so far were drawn with `ailigment`'s
-  environment from the CSVs.
+  environment from the CSVs. The script lived in a session scratch folder,
+  so redo it when needed: run from this repo with
+  `PYTHONPATH=.:src ../ailigment/.venv/bin/python <script>`, read
+  `__data__/timing.csv` into a horizontal bar chart (one bar per
+  `name (d=..)`, a dashed line at the 100 ms budget), and for each
+  `scripts.common.every_problem()` take the last row of the 10 curves
+  `__data__/baseline/<name>_seed<s>.csv`, subtract `problem.minimum.value`,
+  clip at 1e-12 and draw a horizontal box plot on a log x axis, sorted by
+  the median; save both to `__data__/plots/timing.png` and
+  `__data__/plots/baseline_gap.png` (figure about 8 by 19 inches for 83
+  functions).
 
 ## Other sources of test functions (reviewed 2026-10-17)
 

@@ -25,19 +25,16 @@ other). The approved spec and task list are in DESIGN.md.
 - `classics` done (2026-10-17, branch `classics`): ten functions, 605
   tests, coverage 100%, ruff and pyright clean. Whitley is over the speed
   budget at d = 10, a stated exception (the user, 2026-10-17; DESIGN.md).
-- `bbob` Tier 1 done (2026-10-17, branch `bbob-tier1`): the generator, the
-  transforms and f1 to f5, equal to `cocoex` to 1e-12 over 150
-  (function, d, instance) combinations; 811 tests, coverage 100%.
-- `bbob` f6 to f9 done (2026-10-17, branch `bbob-f6-f9`), with COCO's
-  rotations: equal to `cocoex` to 1e-12; 972 tests, coverage 100%.
-- `bbob` f10 to f14 done (2026-10-17, branch `bbob-f10-f14`): equal to
-  `cocoex` to 1e-12; 1172 tests, coverage 100%.
-- `bbob` f15 to f19 done (2026-10-17, branch `bbob-f15-f19`): equal to
-  `cocoex` to 1e-9 (f16 to f19, cosines of large arguments) or 1e-12;
-  1373 tests, coverage 100%.
-- `bbob` complete (2026-10-17, f20 to f24 on branch `bbob-f20-f24`): all
-  24 functions equal to `cocoex` (1e-9 for f16 to f19 and f23, 1e-12 for
-  the rest); 83 functions in all, 1573 tests, coverage 100%.
+- `bbob` complete (2026-10-17, five commits, one per group, each merged
+  and its branch deleted on the user's say-so): all 24 functions equal to
+  `cocoex` (1e-9 for f16 to f19 and f23, 1e-12 for the rest; DESIGN.md
+  results); 83 functions in all, 1573 tests, coverage 100%.
+- Git, at the end of the 2026-10-17 session: `main` is one commit ahead of
+  GitHub (d1a952c, the PLAN.md entry for `python-standard`, plus this
+  notes commit), and the merged branch `plan-python-standard` still exists.
+  The user asked to push `main`, delete `plan-python-standard` (here and in
+  `ailigment`) and then write the `python-standard` spec; the context-notes
+  hook stopped the session first, so none of that is done yet.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 

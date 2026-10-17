@@ -146,4 +146,4 @@ constants, minima that follow parameters, refusals),
 ## Size checks (400 lines per file)
 
 No file over 400 lines; the largest is
-`functions/many_local_minima_any_d.py` (351).
+`functions/bbob_multimodal_weak.py` (360).
