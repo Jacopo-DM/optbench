@@ -645,7 +645,7 @@ tests; the BBOB transforms are the largest part.
   tasks approved by the user on 2026-10-17). Goal: optbench passes the
   user's Python standard (`~/.claude/standards/python/core.md`) with the
   template configs unchanged and every value bit for bit the same.
-  Non-goals: a Sphinx docs site (the user's `/zz-08-python-docs` prompt),
+  Non-goals: a Sphinx docs site (the user's `/zz-09-python-docs` prompt),
   any speed-up, the `ailigment` migration. The user's answers to its four
   design questions (each the recommended option):
   - Variants come from a `problem.replace(**changes)` method that rebuilds
