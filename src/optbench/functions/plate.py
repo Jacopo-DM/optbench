@@ -18,12 +18,15 @@ from optbench.problem import (
     box,
     formula_minimum,
 )
+from optbench.symbolic import sin, total, variables
 
 from .known_minima import POWER_SUM, at_defaults
 from .references import ADORIO, HEDAR
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from optbench.symbolic import Expr
 
 _GROUP = Group.PLATE
 _SFU = "https://www.sfu.ca/~ssurjano/"
@@ -83,6 +86,13 @@ class Booth(Problem):
         second = (self.weight * x1 + x2 - self.b) ** 2
         return first + second
 
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        first = (x1 + self.weight * x2 - self.a) ** 2
+        second = (self.weight * x1 + x2 - self.b) ** 2
+        return first + second
+
 
 class Matyas(Problem):
     """Matyas function, ``f(x) = a (x1^2 + x2^2) - b x1 x2``.
@@ -125,6 +135,11 @@ class Matyas(Problem):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
+        return self.a * (x1**2 + x2**2) - self.b * x1 * x2
+
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
         return self.a * (x1**2 + x2**2) - self.b * x1 * x2
 
 
@@ -185,6 +200,12 @@ class McCormick(Problem):
         linear = -self.a * x1 + self.b * x2 + self.offset
         return np.sin(x1 + x2) + (x1 - x2) ** 2 + linear
 
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        linear = -self.a * x1 + self.b * x2 + self.offset
+        return sin(x1 + x2) + (x1 - x2) ** 2 + linear
+
 
 class PowerSum(Problem):
     """Power sum function, ``f(x) = sum_i (sum_j x_j^i - b_i)^2``.
@@ -232,6 +253,14 @@ class PowerSum(Problem):
         sums = np.sum(np.cumprod(repeated, axis=1), axis=2)
         return np.sum((sums - np.asarray(self.b)) ** 2, axis=1)
 
+    @override
+    def formula(self) -> Expr:
+        x = variables(self.dimension)
+        return total(
+            (total(xj**i for xj in x) - b) ** 2
+            for i, b in enumerate(self.b, start=1)
+        )
+
 
 class Zakharov(AnyDimension):
     """Zakharov function, with ``s = sum_i coefficient i x_i``.
@@ -266,3 +295,9 @@ class Zakharov(AnyDimension):
         i = np.arange(1, self.d + 1, dtype=np.float64)
         s = x @ (self.coefficient * i)
         return np.sum(x**2, axis=1) + s**2 + s**4
+
+    @override
+    def formula(self) -> Expr:
+        x = variables(self.d)
+        s = total(self.coefficient * i * xi for i, xi in enumerate(x, start=1))
+        return total(xi**2 for xi in x) + s**2 + s**4

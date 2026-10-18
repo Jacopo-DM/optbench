@@ -48,7 +48,9 @@ class _Sympy(Protocol):
     pi: Expr
 
     def symbols(self, names: str, /, *, real: bool) -> tuple[Expr, ...]: ...
+    def sin(self, x: Expr | float, /) -> Expr: ...
     def cos(self, x: Expr | float, /) -> Expr: ...
+    def exp(self, x: Expr | float, /) -> Expr: ...
     def Abs(self, x: Expr | float, /) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
     def Add(self, *terms: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
     def lambdify(
@@ -109,6 +111,17 @@ def pi() -> Expr:
     return _sympy().pi
 
 
+def sin(x: Expr | float) -> Expr:
+    """Return ``sin(x)``.
+
+    Returns
+    -------
+    Expr
+        The sine.
+    """
+    return _sympy().sin(x)
+
+
 def cos(x: Expr | float) -> Expr:
     """Return ``cos(x)``.
 
@@ -118,6 +131,17 @@ def cos(x: Expr | float) -> Expr:
         The cosine.
     """
     return _sympy().cos(x)
+
+
+def exp(x: Expr | float) -> Expr:
+    """Return ``e^x``.
+
+    Returns
+    -------
+    Expr
+        The exponential.
+    """
+    return _sympy().exp(x)
 
 
 def absolute(x: Expr | float) -> Expr:

@@ -51,7 +51,7 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Module `formula`, task F2 (below); `ailigment`'s goal `optbench-symreg`
+Module `formula`, task F3 (below); `ailigment`'s goal `optbench-symreg`
 waits on the module.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
@@ -87,8 +87,7 @@ Tier 1 (walking skeleton):
 
 Tier 2 (by value over risk plus cost; plain formulas first, BBOB last):
 
-- F2. plate (5), steep (3) and valley (4). Files: those three modules,
-  the test. Risk low; about 120 lines.
+- F2: done (see DESIGN.md results).
 - F3. many local minima (16, three modules), with the piecewise ones
   (Bukin N. 6, Cross-in-Tray, Holder table) through sympy `Abs` and
   `Piecewise`. Risk low; about 200 lines.

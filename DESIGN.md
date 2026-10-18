@@ -684,6 +684,7 @@ optbench, and what was decided:
 
 | What | Measure | Result | Notes |
 |------|---------|--------|-------|
+| Formulas F2: plate (5), steep (3) and valley (4) (`tests/test_formula.py`, as F1) | formula against numpy | all 32 new problem variants equal to rtol 1e-12, atol 1e-10; Booth prints as `(x1 + 2.0*x2 - 7.0)**2 + (2.0*x1 + x2 - 5.0)**2` | suite 1652 tests, about 6 s |
 | Formulas F1: the 9 bowl functions (`tests/test_formula.py`, d = 1 to 6, 26 points each, 2026-10-17) | formula against numpy | all 42 problem variants equal to rtol 1e-12, atol 1e-10 | suite 1578 to 1620 tests, about 5 s either way |
 | Python standard (`python-standard`, template configs, 2026-10-17) | errors before, after | mypy strict 33 to 0; ruff with the template rules 70 to 0 (30 no-self-use, 23 banned-api, 17 magic values); pyright 0 to 0; coverage 100% of `src` and `scripts` to 100% of branches over `src` and `tests` | every value, bound and minimum of 254 problem variants bit-identical before and after (scratch pin); timing 1261 ms in all before, 1270 after (three runs each, minimum per function), median ratio 1.000 |
 | Batch speed, Tier 1 functions (100,000 points, CPU time, min of 5, Apple silicon under load, 2026-10-16) | ms per call | Sphere (d = 10) 0.5; Branin 1.6; Shekel (m = 10) 7.3 | spec criterion 2 asks for under 100 ms |

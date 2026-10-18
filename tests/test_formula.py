@@ -15,7 +15,12 @@ if TYPE_CHECKING:
 
 # The (suite, group) pairs whose problems have a formula so far; each task
 # of module formula adds its own.
-COVERED = (("sfu", Group.BOWL),)
+COVERED = (
+    ("sfu", Group.BOWL),
+    ("sfu", Group.PLATE),
+    ("sfu", Group.STEEP),
+    ("sfu", Group.VALLEY),
+)
 DIMENSIONS = range(1, 7)
 RTOL = 1e-12
 ATOL = 1e-10
@@ -106,6 +111,13 @@ def test_a_constant_formula_gives_one_value_per_point() -> None:
     np.testing.assert_array_equal(values, [2.5] * 4)
 
 
+def test_booth_prints_as_the_sfu_page_writes_it() -> None:
+    # The constants are float fields, so they print with a decimal point.
+    assert str(optbench.make("booth").formula()) == (
+        "(x1 + 2.0*x2 - 7.0)**2 + (2.0*x1 + x2 - 5.0)**2"
+    )
+
+
 def test_a_problem_without_a_formula_yet_says_so() -> None:
     with pytest.raises(NotImplementedError, match="no formula yet"):
-        optbench.make("booth").formula()
+        optbench.make("ackley").formula()

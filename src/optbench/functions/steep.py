@@ -18,12 +18,15 @@ from optbench.problem import (
     box,
     formula_minimum,
 )
+from optbench.symbolic import cos, exp, pi, sin, total, variables
 
 from .known_minima import DE_JONG_5, at_defaults
 from .references import GAVANA, HEDAR, MOLGA
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from optbench.symbolic import Expr
 
 _GROUP = Group.STEEP
 _SFU = "https://www.sfu.ca/~ssurjano/"
@@ -90,6 +93,20 @@ class DeJong5(Problem):
         bottoms = i + np.sum(diff**self.power, axis=1)
         return 1 / (self.offset + np.sum(1 / bottoms, axis=1))
 
+    @override
+    def formula(self) -> Expr:
+        x = variables(2)
+        columns = zip(*self.a, strict=True)
+        bottoms = (
+            j
+            + total(
+                (xi - aij) ** self.power
+                for xi, aij in zip(x, column, strict=True)
+            )
+            for j, column in enumerate(columns, start=1)
+        )
+        return 1 / (self.offset + total(1 / bottom for bottom in bottoms))
+
 
 class Easom(Problem):
     """Easom function: a single narrow drop on a flat plane.
@@ -137,6 +154,12 @@ class Easom(Problem):
         x1, x2 = x[:, 0], x[:, 1]
         distance = (x1 - self.centre) ** 2 + (x2 - self.centre) ** 2
         return -np.cos(x1) * np.cos(x2) * np.exp(-distance)
+
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        distance = (x1 - self.centre) ** 2 + (x2 - self.centre) ** 2
+        return -cos(x1) * cos(x2) * exp(-distance)
 
 
 # Points per unit length of the grid that brackets each coordinate's
@@ -193,6 +216,15 @@ class Michalewicz(AnyDimension):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         i = np.arange(1, self.d + 1, dtype=np.float64)
         return -np.sum(_michalewicz_terms(x, i, self.m), axis=1)
+
+    @override
+    def formula(self) -> Expr:
+        # The power is taken as (sin^2)^m, as in _michalewicz_terms.
+        x = variables(self.d)
+        return -total(
+            sin(xi) * (sin(i * xi**2 / pi()) ** 2) ** self.m
+            for i, xi in enumerate(x, start=1)
+        )
 
 
 def _michalewicz_terms(

@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (6613 lines, 33 files)
+## `src/optbench` (6738 lines, 33 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -19,8 +19,8 @@ Public interface (`optbench/__init__.py`):
   (a `Minimum` or `None`), class variables `name`, `group`, `url`,
   `references`, `suite` (`"sfu"`, or `"classic"` for functions not on
   the SFU pages). `formula()` returns the function as a sympy `Expr` in
-  `variables(d)` (the bowl group so far; the others raise
-  NotImplementedError).
+  `variables(d)` (the SFU bowl, plate, steep and valley groups so far;
+  the others raise NotImplementedError).
 - `Expr` (a Protocol: a sympy expression with arithmetic), `variables(d)`
   (`x1` to `xd`), `evaluate_formula(formula, points)` (`(n,)` values, by
   `sympy.lambdify`).
@@ -102,7 +102,7 @@ Files: `model.py` (`Model`, the frozen, `extra="forbid"` pydantic base of
 every record); `problem.py` (`Problem`, `AnyDimension`, `Minimum`, `Group`, `box`,
 `formula_minimum`: a minimum from a formula if its minimisers lie in the
 domain); `symbolic.py` (the typed sympy facade: `Expr`, `variables`,
-`total`, `pi`, `cos`, `absolute`, `evaluate_formula`);
+`total`, `pi`, `sin`, `cos`, `exp`, `absolute`, `evaluate_formula`);
 `functions/`: `bowl_sphere_to_bohachevsky.py`, `bowl_perm_to_trid.py`,
 `plate.py`, `steep.py`, `valley.py`,
 `other_beale_to_goldstein_price.py`, `other_hartmann.py`,
@@ -139,7 +139,7 @@ allowed over it), `main` returning the exit status), `baseline.py` (`main`));
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (1732 lines, 15 files)
+## `tests` (1744 lines, 15 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,

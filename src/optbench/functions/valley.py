@@ -17,12 +17,15 @@ from optbench.problem import (
     box,
     formula_minimum,
 )
+from optbench.symbolic import total, variables
 
 from .known_minima import SIX_HUMP_CAMEL, THREE_HUMP_CAMEL, at_defaults
 from .references import DIXON_SZEGO, GAVANA, HEDAR, MOLGA, PICHENY, WIKIPEDIA
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from optbench.symbolic import Expr
 
 _GROUP = Group.VALLEY
 _SFU = "https://www.sfu.ca/~ssurjano/"
@@ -70,6 +73,13 @@ class ThreeHumpCamel(Problem):
         polynomial = (self.a - (self.b - self.c * squared) * squared) * squared
         return polynomial + x1 * x2 + x2**2
 
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        squared = x1**2
+        polynomial = (self.a - (self.b - self.c * squared) * squared) * squared
+        return polynomial + x1 * x2 + x2**2
+
 
 class SixHumpCamel(Problem):
     """Six-hump camel function: six local minima, two of them global.
@@ -111,6 +121,13 @@ class SixHumpCamel(Problem):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
+        first = (self.a - self.b * x1**2 + self.c * x1**4) * x1**2
+        last = (-self.e + self.g * x2**2) * x2**2
+        return first + x1 * x2 + last
+
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
         first = (self.a - self.b * x1**2 + self.c * x1**4) * x1**2
         last = (-self.e + self.g * x2**2) * x2**2
         return first + x1 * x2 + last
@@ -170,6 +187,15 @@ class DixonPrice(AnyDimension):
         terms = i * (self.weight * x[:, 1:] ** 2 - x[:, :-1]) ** 2
         return first + np.sum(terms, axis=1)
 
+    @override
+    def formula(self) -> Expr:
+        x = variables(self.d)
+        first = (x[0] - self.shift) ** 2
+        return first + total(
+            i * (self.weight * x[i - 1] ** 2 - x[i - 2]) ** 2
+            for i in range(2, self.d + 1)
+        )
+
 
 class Rosenbrock(AnyDimension):
     """Rosenbrock (valley, banana) function.
@@ -214,3 +240,11 @@ class Rosenbrock(AnyDimension):
         head, tail = x[:, :-1], x[:, 1:]
         terms = self.a * (tail - head**2) ** 2 + (head - self.b) ** 2
         return np.sum(terms, axis=1)
+
+    @override
+    def formula(self) -> Expr:
+        x = variables(self.d)
+        return total(
+            self.a * (x[i + 1] - x[i] ** 2) ** 2 + (x[i] - self.b) ** 2
+            for i in range(self.d - 1)
+        )
