@@ -113,7 +113,10 @@ Tier 2 (by value over risk plus cost; plain formulas first, BBOB last):
   the suite); about 250 lines.
 - F9. Every class has a formula: `formula()` becomes abstract on the
   base class and the NotImplementedError path goes; criterion 3 (changed
-  constants, one problem per file); CODEMAP.md, the README and DESIGN.md's
+  constants, one problem per file); CODEMAP.md, the README (a draft for
+  the user's review: `formula()`, an install line, and a docs link, which
+  the standard now asks for; the user chose to fold these into F9 on
+  2026-10-18) and DESIGN.md's
   results row (suite time before and after). Risk low; about 80 lines.
 
 Verify after each task: the full suite, mypy, pyright, ruff, the timing
