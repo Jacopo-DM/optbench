@@ -9,17 +9,22 @@ case is said in the class. ``r`` and ``q`` are COCO's two rotations (see
 
 from __future__ import annotations
 
+import itertools
 import math
 from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
 from optbench.problem import Group, Minimum
+from optbench.symbolic import cos, pi, sin, sqrt, total, variables
 
 from . import bbob_common as bbob
+from . import bbob_symbolic as sym
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from optbench.symbolic import Expr
 
 _GROUP = Group.BBOB_MULTIMODAL_ADEQUATE
 
@@ -59,6 +64,14 @@ class BbobRastriginRotated(bbob.BbobRotated):
         scaling = bbob.scaling(self.conditioning, self.d)
         linear = bbob.linear_map(self.q, scaling, self.r)
         return bbob.rastrigin(bbob.rotate(inner, linear), self.a) + self.f_opt
+
+    @override
+    def formula(self) -> Expr:
+        rotated = sym.rotated(self.q, sym.shifted(self.x_opt))
+        inner = sym.oscillate_asymmetric(rotated, self.beta)
+        scaling = bbob.scaling(self.conditioning, self.d)
+        linear = bbob.linear_map(self.q, scaling, self.r)
+        return sym.rastrigin(sym.rotated(linear, inner), self.a) + self.f_opt
 
 
 class BbobWeierstrass(bbob.BbobRotated):
@@ -142,6 +155,24 @@ class BbobWeierstrass(bbob.BbobRotated):
         boundary = self.penalty / self.d * bbob.penalty(x)
         return core + boundary + self.f_opt
 
+    @override
+    def formula(self) -> Expr:
+        inner = sym.oscillate(sym.rotated(self.q, sym.shifted(self.x_opt)))
+        scaling = bbob.scaling(self.conditioning, self.d)
+        linear = bbob.linear_map(self.q, scaling, self.r)
+        z = sym.rotated(linear, inner)
+        waves = total(
+            self.a**k * cos(2 * pi() * self.b**k * (zi + 0.5))
+            for zi in z
+            for k in range(self.terms)
+        )
+        f0 = sum(
+            self.a**k * math.cos(math.pi * self.b**k) for k in range(self.terms)
+        )
+        core = self.scale * (waves / self.d - f0) ** 3
+        boundary = self.penalty / self.d * sym.penalty(variables(self.d))
+        return core + boundary + self.f_opt
+
 
 class BbobSchaffersF7(bbob.BbobRotated):
     """BBOB f17, Schaffers F7.
@@ -183,6 +214,20 @@ class BbobSchaffersF7(bbob.BbobRotated):
         ripple = np.sin(self.frequency * squares**0.1) ** 2
         core = np.mean(root * (1 + ripple), axis=1) ** 2
         return core + self.penalty * bbob.penalty(x) + self.f_opt
+
+    @override
+    def formula(self) -> Expr:
+        rotated = sym.rotated(self.q, sym.shifted(self.x_opt))
+        inner = sym.asymmetric(rotated, self.beta)
+        scaling = bbob.scaling(self.conditioning, self.d)
+        z = sym.rotated(scaling[:, np.newaxis] * self.r, inner)
+        terms: list[Expr] = []
+        for head, tail in itertools.pairwise(z):
+            squares = head**2 + tail**2
+            ripple = sin(self.frequency * squares**0.1) ** 2
+            terms.append(sqrt(sqrt(squares)) * (1 + ripple))
+        core = (total(terms) / (self.d - 1)) ** 2
+        return core + self.penalty * sym.penalty(variables(self.d)) + self.f_opt
 
 
 class BbobSchaffersF7Ill(BbobSchaffersF7):
@@ -251,4 +296,15 @@ class BbobGriewankRosenbrock(bbob.BbobRotated):
         head, tail = z[:, :-1], z[:, 1:]
         t = self.a * (head**2 - tail) ** 2 + (head - 1) ** 2
         terms = np.mean(t / self.divisor - np.cos(t), axis=1)
+        return self.scale + self.scale * terms + self.f_opt
+
+    @override
+    def formula(self) -> Expr:
+        scale = bbob.rosenbrock_scale(self.d)
+        z = [scale * zi + 0.5 for zi in sym.rotated(self.r, variables(self.d))]
+        ts = [
+            self.a * (head**2 - tail) ** 2 + (head - 1) ** 2
+            for head, tail in itertools.pairwise(z)
+        ]
+        terms = total(t / self.divisor - cos(t) for t in ts) / (self.d - 1)
         return self.scale + self.scale * terms + self.f_opt

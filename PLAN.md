@@ -34,7 +34,7 @@ other). The approved spec and task list are in DESIGN.md.
 - Git (2026-10-18): `main` holds the `formula` spec and task list
   (5a6efef to 4df5b43, from `spec-formula`) and was pushed at 4df5b43 (the
   user's say-so); `spec-formula` was deleted (the user's say-so). The module's work is on branch `formula` (569f452,
-  186c2ae, b9dbc97, a3c021a, 29d3b65, 44a20c4 and the F7 commit: F1 to F7), not merged or pushed yet; it merges into
+  186c2ae, b9dbc97, a3c021a, 29d3b65, 44a20c4, 0862e9d and the F8 commit: F1 to F8), not merged or pushed yet; it merges into
   `main` when F9 is done. Earlier: `main` was pushed (de53338, 2026-10-17,
   the user's say-so). Every push to `main` from f33326f to fb9bd7e
   failed f23 on Linux by 3.3e-9 relative; summing the rotations in COCO's
@@ -45,13 +45,10 @@ other). The approved spec and task list are in DESIGN.md.
   setup-uv than the user's template.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
-- Module `formula` in progress (branch `formula`): F1 to F7 done, so 73
-  of the 83 problems have `formula()` (every SFU function and classic,
-  BBOB f1 to f14);
-  `tests/test_formula.py` lists the covered (suite, group) pairs in
-  `COVERED` and its no-formula test uses `bbob_f24_lunacek`, which F8
-  covers last; F9 then deletes that test with the NotImplementedError
-  path. 2119 tests, 100% coverage.
+- Module `formula` in progress (branch `formula`): F1 to F8 done, so all
+  83 problems have `formula()`, which is now abstract on `Problem`;
+  `tests/test_formula.py` checks every registered problem. 2368 tests,
+  100% coverage; the suite takes 9 to 9.5 min at load 5 to 10.
 
 ## Constraints
 
@@ -62,7 +59,7 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Module `formula`, task F8 (below); `ailigment`'s goal `optbench-symreg`
+Module `formula`, task F9 (below); `ailigment`'s goal `optbench-symreg`
 waits on the module.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
@@ -105,15 +102,8 @@ Tier 2 (by value over risk plus cost; plain formulas first, BBOB last):
 - F6: done (see DESIGN.md results). The twins are in
   `functions/bbob_symbolic.py`.
 - F7: done (see DESIGN.md results).
-- F8. BBOB f15 to f24: Weierstrass's sums, Gallagher's maximum over 101
-  or 21 peaks, Katsuura's rounding, Lunacek's minimum. Risk: medium to
-  high (largest expressions; lambdify at d = 6 must stay fast enough for
-  the suite); about 250 lines. Suite time: 14 s after F6, 39 s after
-  F7 (back to back at load 5; the formula test alone is 16 s without
-  coverage), so F8's ten functions may take it past the one-minute line
-  below; measure before committing and ask if it does.
-- F9. Every class has a formula: `formula()` becomes abstract on the
-  base class and the NotImplementedError path goes; criterion 3 (changed
+- F8: done (see DESIGN.md results).
+- F9 (`formula()` became abstract in F8, see DESIGN.md): criterion 3 (changed
   constants, one problem per file); CODEMAP.md, the README (a draft for
   the user's review: `formula()`, an install line, and a docs link, which
   the standard now asks for; the user chose to fold these into F9 on
@@ -122,9 +112,9 @@ Tier 2 (by value over risk plus cost; plain formulas first, BBOB last):
 
 Verify after each task: the full suite, mypy, pyright, ruff, the timing
 script (sympy must not slow `problem(x)`; it is not on that path), and the
-suite's run time (today about 5 s; the formula test adds one lambdify per
-(problem, d, instance), about 800, so I expect it to grow to tens of
-seconds; if it passes a minute, stop and ask).
+suite's run time (9 to 9.5 min since F8, at load 5 to 10; the user kept
+all 25 (d, instance) pairs per BBOB function on 2026-10-18 on my estimate
+of 3 to 5 min, before the measured 9 min was known).
 
 Tier 3 (not built): simplifying formulas, LaTeX or printing APIs,
 symbolic gradients, evaluating through sympy (the spec's non-goals).

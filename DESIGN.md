@@ -207,7 +207,14 @@ Acceptance criteria:
    `sympy.lambdify` matches `problem(x)` at the 26 points the BBOB test
    already uses (20 in the domain, 5 outside, the optimum), to the
    relative tolerances of `tests/test_bbob.py` (1e-12, and 1e-9 for f16
-   to f19 and f23), absolute 1e-10.
+   to f19 and f23), absolute 1e-10. (Amended by the user, 2026-10-18: a
+   BBOB value is compared with `f_opt` subtracted from both sides, so the
+   tolerance is relative to the function's own size. f19 at d = 5,
+   instance 4, at a point outside the domain, has a core of 58.55 and
+   f_opt -58.48; the formula's error of 4e-10 is 7e-12 of the core but
+   5.5e-9 of the 0.074 left after the offset. The user kept all 25
+   (d, instance) pairs per BBOB function, against a sampled set, knowing
+   the suite grows to minutes.)
 3. It follows the parameters: a problem built with changed constants
    (for example `make("ackley", a=10.0)`) gives a formula that matches its
    own values, tested on one problem per file.
@@ -261,6 +268,18 @@ tests; the BBOB transforms are the largest part.
   `Callable[..., object]` counts as an explicit `Any` under
   `disallow_any_explicit`. Formula tests select problems by (suite, group),
   since the classics share the SFU shape groups.
+- BBOB formulas f15 to f24 (F8, 2026-10-18). Katsuura's numpy code
+  doubles a running fraction 32 times; written that way each step holds
+  the last one twice, so the printed code would hold 2^32 copies of z.
+  The formula writes each step as `frac(2^j z)` on its own, the same
+  number because multiplying a float by a power of 2 is exact. Gallagher's
+  peaks use the same expanded quadratic as `_evaluate` (`[t^2, t]` times
+  the weights, plus a constant), so the rounding stays close at 1e-12.
+  Every problem has a formula after F8, so `formula()` became abstract in
+  F8, not F9: the "no formula yet" path could no longer be covered.
+  Rejected, with the numbers: `lambdify(cse=True)`, which names repeated
+  subexpressions once; it cut Weierstrass at d = 6 from 3.2 s to 1.5 s
+  but took Gallagher 101 from 2.1 s to 35 s.
 - BBOB formulas (F6, 2026-10-18): the symbolic twins of the transforms
   live in `functions/bbob_symbolic.py`, not in `bbob_common.py` as the
   spec says, because `bbob_common.py` was at 386 lines. Each twin returns
@@ -545,7 +564,8 @@ tests; the BBOB transforms are the largest part.
   as the direct cosine does; the values stay within 1.5e-10 of COCO. The
   real triple-angle formula `4c^3 - 3c` was rejected: it multiplies
   errors by up to 9 per term (9^11 is 3e10) and timed 50 ms.
-- BBOB f20 to f24 (2026-10-17) in `functions/bbob_multimodal_weak.py`,
+- BBOB f20 to f24 (2026-10-17) in `functions/bbob_multimodal_weak.py`
+  (split by name range in F8, at 492 lines with the formulas),
   which completes the suite (24 functions). f20's `x_opt` is
   `+-4.2096874637 / 2` with signs from COCO's uniform numbers (below 0.5
   is negative), and its value at `x_opt` is `f_opt` plus 0.01 times the
@@ -705,6 +725,7 @@ optbench, and what was decided:
 
 | What | Measure | Result | Notes |
 |------|---------|--------|-------|
+| Formulas F8: BBOB f15 to f24; `formula()` abstract (`tests/test_formula.py` over every registered problem; BBOB values compared with `f_opt` subtracted) | formula against numpy | all 250 new problem variants equal (1e-12, 1e-9 for f16 to f19 and f23; atol 1e-10) | suite 2368 tests in 9 min 0 s and 9 min 27 s (two runs, load 5 to 10), against 39 s after F7; peak 353 to 371 MB. Without coverage the new cases take 137 s (Gallagher 101: 61 s, Katsuura 26 s, Weierstrass 22 s); under coverage one Gallagher 101 case at d = 6 takes 12 to 54 s. Timing script 0 of 83 over 100 ms |
 | Formulas F7: BBOB f6 to f14 (`tests/test_formula.py`, as F6) | formula against numpy | all 225 new problem variants equal to rtol 1e-12, atol 1e-10; f6's T_osz of a sum of squares tests the bare `sum z_i^2 > 0`, which holds no piecewise | suite 2119 tests: 39 s against F6's 14 s, back to back at load 5; building f7 at d = 6 took 1.0 s until `maximum` built `Max` unevaluated (0.09 s; sympy compared the arguments symbolically); timing script 0 of 83 over 100 ms (3 over at load 8 from another session's browser tests, none of them touched) |
 | Formulas F6: BBOB f1 to f5 and the transform twins (`tests/test_formula.py`, d = 2 to 6 at instances 1 to 5) | formula against numpy | all 125 new problem variants equal to rtol 1e-12, atol 1e-10 | suite 1894 tests, 14.3 s with coverage (about 200 MB peak); timing script 0 of 83 over 100 ms |
 | Formulas F5: the 10 classics (`tests/test_formula.py`, as F4, suite "classic" added) | formula against numpy | all 50 new problem variants equal to rtol 1e-12, atol 1e-10; the facade gains `maximum` (Schwefel 2.21) and `piecewise` (Deceptive's four pieces, chosen in `numpy.select`'s order); Alpine N. 2 is NaN below 0 on both sides, which counts as equal | suite 1765 tests, 6.8 s with coverage; timing script 0 of 83 over 100 ms (Whitley 131 ms at d = 10, the stated exception) |

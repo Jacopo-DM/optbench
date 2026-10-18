@@ -8,34 +8,28 @@ import numpy as np
 import pytest
 
 import optbench
-from optbench import AnyDimension, Group, Problem
+from optbench import AnyDimension, Problem
 from optbench.functions.bbob_common import BbobProblem
 from optbench.symbolic import piecewise
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-# The (suite, group) pairs whose problems have a formula so far; each task
-# of module formula adds its own.
-COVERED = (
-    ("bbob", Group.BBOB_HIGH_CONDITIONING),
-    ("bbob", Group.BBOB_MODERATE_CONDITIONING),
-    ("bbob", Group.BBOB_SEPARABLE),
-    ("classic", Group.BOWL),
-    ("classic", Group.MANY_LOCAL_MINIMA),
-    ("classic", Group.OTHER),
-    ("classic", Group.VALLEY),
-    ("sfu", Group.BOWL),
-    ("sfu", Group.MANY_LOCAL_MINIMA),
-    ("sfu", Group.OTHER),
-    ("sfu", Group.PLATE),
-    ("sfu", Group.STEEP),
-    ("sfu", Group.VALLEY),
-)
 DIMENSIONS = range(1, 7)
 # BBOB problems are checked at these COCO instances (spec criterion 2).
 INSTANCES = range(1, 6)
 RTOL = 1e-12
+# Spec criterion 2: these BBOB functions use test_bbob.py's looser 1e-9;
+# they magnify the last bit of z (Weierstrass's 3^11, Katsuura's 2^32,
+# Schaffers' high powers).
+LOOSE = {
+    "bbob_f16_weierstrass",
+    "bbob_f17_schaffers_f7",
+    "bbob_f18_schaffers_f7_ill",
+    "bbob_f19_griewank_rosenbrock",
+    "bbob_f23_katsuura",
+}
+LOOSE_RTOL = 1e-9
 ATOL = 1e-10
 INSIDE = 20
 OUTSIDE = 5
@@ -60,7 +54,7 @@ def _allowed(problem: AnyDimension, d: int) -> bool:
 
 
 def _problems() -> list[Problem]:
-    """Every problem of ``COVERED``, any-d ones at each allowed d up to 6.
+    """Every registered problem, any-d ones at each allowed d up to 6.
 
     BBOB problems are checked at each of ``INSTANCES`` too.
 
@@ -69,13 +63,8 @@ def _problems() -> list[Problem]:
     list of Problem
         The problems to check, at their default constants.
     """
-    names = [
-        name
-        for suite, group in COVERED
-        for name in optbench.names(group=group, suite=suite)
-    ]
     problems: list[Problem] = []
-    for name in names:
+    for name in optbench.names():
         problem = optbench.make(name)
         if isinstance(problem, BbobProblem):
             problems += [
@@ -137,7 +126,18 @@ def test_the_formula_equals_the_numpy_values(problem: Problem) -> None:
     with np.errstate(invalid="ignore"):
         expected = problem(x)
         values = optbench.evaluate_formula(problem.formula(), x)
-    np.testing.assert_allclose(values, expected, rtol=RTOL, atol=ATOL)
+    # A BBOB value is core + f_opt, a random constant; compare the cores so
+    # the error is measured against the function's own size, not against
+    # what is left when f_opt happens to cancel it (f19, d = 5, instance 4:
+    # 58.55 - 58.48).
+    offset = problem.f_opt if isinstance(problem, BbobProblem) else 0.0
+    rtol = LOOSE_RTOL if problem.name in LOOSE else RTOL
+    np.testing.assert_allclose(
+        values - offset,
+        expected - offset,
+        rtol=rtol,
+        atol=ATOL,
+    )
 
 
 def test_the_variables_are_x1_to_xd() -> None:
@@ -157,11 +157,6 @@ def test_booth_prints_as_the_sfu_page_writes_it() -> None:
     assert str(optbench.make("booth").formula()) == (
         "(x1 + 2.0*x2 - 7.0)**2 + (2.0*x1 + x2 - 5.0)**2"
     )
-
-
-def test_a_problem_without_a_formula_yet_says_so() -> None:
-    with pytest.raises(NotImplementedError, match="no formula yet"):
-        optbench.make("bbob_f24_lunacek").formula()
 
 
 def test_a_piecewise_inside_a_condition_is_refused() -> None:

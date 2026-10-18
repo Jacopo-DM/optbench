@@ -20,11 +20,10 @@ from .bbob_multimodal_adequate import (
     BbobSchaffersF7Ill,
     BbobWeierstrass,
 )
-from .bbob_multimodal_weak import (
+from .bbob_multimodal_weak_katsuura_to_lunacek import BbobKatsuura, BbobLunacek
+from .bbob_multimodal_weak_schwefel_to_gallagher import (
     BbobGallagher21,
     BbobGallagher101,
-    BbobKatsuura,
-    BbobLunacek,
     BbobSchwefel,
 )
 from .bbob_separable import (

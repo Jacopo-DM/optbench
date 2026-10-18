@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (7659 lines, 35 files)
+## `src/optbench` (7856 lines, 36 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -19,8 +19,7 @@ Public interface (`optbench/__init__.py`):
   (a `Minimum` or `None`), class variables `name`, `group`, `url`,
   `references`, `suite` (`"sfu"`, or `"classic"` for functions not on
   the SFU pages). `formula()` returns the function as a sympy `Expr` in
-  `variables(d)` (every SFU function and classic, and BBOB f1 to f14, so
-  far; the other BBOB functions raise NotImplementedError).
+  `variables(d)`, abstract on `Problem`, so every problem has one.
 - `Expr` (a Protocol: a sympy expression with arithmetic), `variables(d)`
   (`x1` to `xd`), `evaluate_formula(formula, points)` (`(n,)` values, by
   `sympy.lambdify`).
@@ -104,7 +103,8 @@ every record); `problem.py` (`Problem`, `AnyDimension`, `Minimum`, `Group`, `box
 `formula_minimum`: a minimum from a formula if its minimisers lie in the
 domain); `symbolic.py` (the typed sympy facade: `Expr`, `Condition` (what
 `Expr < value` gives), `variables`, `total`, `product`, `maximum`,
-`piecewise`, `pi`, `sin`, `cos`, `exp`, `log`, `floor`, `sqrt`, `absolute`,
+`minimum`, `piecewise`, `pi`, `sin`, `cos`, `exp`, `log`, `floor`, `sqrt`,
+`absolute`,
 `evaluate_formula`, which refuses a piecewise whose condition holds
 another piecewise or an `ITE`);
 `functions/`: `bowl_sphere_to_bohachevsky.py`, `bowl_perm_to_trid.py`,
@@ -133,8 +133,9 @@ the shifted coordinate), `asymmetric` (T_asy of coordinates with no
 piecewise), `penalty`, `rastrigin`),
 `bbob_separable.py` (f1 to f5), `bbob_moderate.py` (f6 to f9),
 `bbob_high_conditioning.py` (f10 to f14), `bbob_multimodal_adequate.py`
-(f15 to f19), `bbob_multimodal_weak.py` (f20 to f24, with the cached
-`_gallagher_peaks(seed, d, kind)`, keyed on the f21 or f22 class), `known_minima.py`
+(f15 to f19), `bbob_multimodal_weak_schwefel_to_gallagher.py` (f20 to
+f22, with the cached `_gallagher_peaks(seed, d, kind)`, keyed on the f21
+or f22 class), `bbob_multimodal_weak_katsuura_to_lunacek.py` (f23, f24), `known_minima.py`
 (`KnownMinimum`, `at_defaults` and the minima known only for the published
 constants), `references.py`
 (shared citations), `__init__.py` (the list the registry reads);
@@ -150,7 +151,7 @@ allowed over it), `main` returning the exit status), `baseline.py` (`main`));
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (1898 lines, 18 files)
+## `tests` (1893 lines, 18 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
@@ -160,8 +161,9 @@ handling), `test_bowl.py`, `test_plate.py`, `test_steep.py` and
 `test_bbob.py` (every BBOB function against `cocoex`), `test_many_local_minima.py` (the group's published values,
 constants, minima that follow parameters, refusals),
 `test_problem.py` (`replace`, the stored domain, read-only minima),
-`test_formula.py` (each formula equals its numpy values; the groups
-covered so far, BBOB at instances 1 to 5; the nested-condition refusal),
+`test_formula.py` (each formula equals its numpy values, for every
+registered problem, BBOB at instances 1 to 5 with `f_opt` subtracted;
+the nested-condition refusal),
 `conftest.py` and `memory_guard.py` (a watchdog thread that stops the
 run past 2 GB of peak memory), `test_memory_guard.py`,
 `test_registry_and_tracking.py`, `test_baseline.py`, `test_scripts.py`

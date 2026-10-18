@@ -90,6 +90,7 @@ class _Sympy(Protocol):
     def Add(self, *terms: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
     def Mul(self, *factors: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
     def Max(self, *args: Expr | float, evaluate: bool) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
+    def Min(self, *args: Expr | float, evaluate: bool) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
 
     Piecewise: _PiecewiseType
     ITE: object
@@ -253,6 +254,17 @@ def maximum(args: Iterable[Expr | float]) -> Expr:
         ``sympy.Max`` of the arguments.
     """
     return _sympy().Max(*args, evaluate=False)
+
+
+def minimum(args: Iterable[Expr | float]) -> Expr:
+    """Return the smallest of ``args``, built unevaluated as ``maximum``.
+
+    Returns
+    -------
+    Expr
+        ``sympy.Min`` of the arguments.
+    """
+    return _sympy().Min(*args, evaluate=False)
 
 
 def piecewise(*pieces: tuple[Expr | float, Condition | bool]) -> Expr:
