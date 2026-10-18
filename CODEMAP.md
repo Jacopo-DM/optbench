@@ -151,7 +151,7 @@ allowed over it), `main` returning the exit status), `baseline.py` (`main`));
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (1893 lines, 18 files)
+## `tests` (1946 lines, 18 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
@@ -163,7 +163,8 @@ constants, minima that follow parameters, refusals),
 `test_problem.py` (`replace`, the stored domain, read-only minima),
 `test_formula.py` (each formula equals its numpy values, for every
 registered problem, BBOB at instances 1 to 5 with `f_opt` subtracted;
-the nested-condition refusal),
+the nested-condition refusal; spec criterion 3, changed constants for one
+problem per function file, in `CHANGED`),
 `conftest.py` and `memory_guard.py` (a watchdog thread that stops the
 run past 2 GB of peak memory), `test_memory_guard.py`,
 `test_registry_and_tracking.py`, `test_baseline.py`, `test_scripts.py`

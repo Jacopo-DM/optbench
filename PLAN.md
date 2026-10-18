@@ -33,10 +33,9 @@ other). The approved spec and task list are in DESIGN.md.
   `src` and `tests`; ruff, mypy strict and pyright strict clean.
 - Git (2026-10-18): `main` holds the `formula` spec and task list
   (5a6efef to 4df5b43, from `spec-formula`) and was pushed at 4df5b43 (the
-  user's say-so); `spec-formula` was deleted (the user's say-so). The module's work is on branch `formula` (569f452,
-  186c2ae, b9dbc97, a3c021a, 29d3b65, 44a20c4, 0862e9d, 5337846: F1 to F8; 344cb16 samples the BBOB
-  formula variants), not merged or pushed yet; it merges into
-  `main` when F9 is done. Earlier: `main` was pushed (de53338, 2026-10-17,
+  user's say-so); `spec-formula` was deleted (the user's say-so). Module `formula` (569f452 to the F9 commit on branch `formula`) was
+  fast-forwarded into `main` and `formula` deleted when F9 was done;
+  `main` is not pushed yet (needs the user's say-so). Earlier: `main` was pushed (de53338, 2026-10-17,
   the user's say-so). Every push to `main` from f33326f to fb9bd7e
   failed f23 on Linux by 3.3e-9 relative; summing the rotations in COCO's
   order (DESIGN.md Decisions) fixed it, and CI passed on de53338 (1578
@@ -46,11 +45,10 @@ other). The approved spec and task list are in DESIGN.md.
   setup-uv than the user's template.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
-- Module `formula` in progress (branch `formula`): F1 to F8 done, so all
-  83 problems have `formula()`, which is now abstract on `Problem`;
-  `tests/test_formula.py` checks every registered problem. 1984 tests,
-  100% coverage; the suite takes about 2 min (BBOB formulas sampled at 9
-  of 25 (d, instance) pairs, the user's choice).
+- Module `formula` done (2026-10-18): all 83 problems have `formula()`,
+  abstract on `Problem` (results, decisions and the amended spec in
+  DESIGN.md). 2005 tests, 100% coverage; the suite takes about 2 min at
+  load 4 to 6 (4 min at load 25).
 
 ## Constraints
 
@@ -61,8 +59,8 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Module `formula`, task F9 (below); `ailigment`'s goal `optbench-symreg`
-waits on the module.
+Push `main` with module `formula` (the user's say-so); `ailigment`'s goal
+`optbench-symreg` then starts with its task S1, which pins this commit.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -79,45 +77,9 @@ COCO's Python package as a dev-only dependency are approved too.
    under Decisions, the results row, the rejected approach).
 
 2. done (2026-10-17): the same migration for `ailigment` (its PLAN.md).
-3. in progress (spec and task list approved 2026-10-17): module `formula`
-   (spec in DESIGN.md, "Approved spec: formula"), asked for by
-   `ailigment`'s approved goal `optbench-symreg` (its DESIGN.md).
-
-### Task list: module `formula` (approved by the user, 2026-10-17)
-
-Each task is one commit with every check passing. The equality test
-(criterion 2) is written first and runs over the problems that already
-have a formula, so each task adds its group to it. Every area touched has
-tests pinning its numbers today (the known-minimum and COCO tests), so no
-characterisation tests are needed first.
-
-Tier 1 (walking skeleton):
-
-- F1: done (see DESIGN.md results and decisions).
-
-Tier 2 (by value over risk plus cost; plain formulas first, BBOB last):
-
-- F2: done (see DESIGN.md results).
-- F3: done (see DESIGN.md results).
-- F4: done (see DESIGN.md results).
-- F5: done (see DESIGN.md results).
-- F6: done (see DESIGN.md results). The twins are in
-  `functions/bbob_symbolic.py`.
-- F7: done (see DESIGN.md results).
-- F8: done (see DESIGN.md results).
-- F9 (`formula()` became abstract in F8, see DESIGN.md): criterion 3 (changed
-  constants, one problem per file); CODEMAP.md, the README (a draft for
-  the user's review: `formula()`, an install line, and a docs link, which
-  the standard now asks for; the user chose to fold these into F9 on
-  2026-10-18) and DESIGN.md's
-  results row (suite time before and after). Risk low; about 80 lines.
-
-Verify after each task: the full suite, mypy, pyright, ruff, the timing
-script (sympy must not slow `problem(x)`; it is not on that path), and the
-suite's run time (about 2 min since the BBOB sampling, 2026-10-18).
-
-Tier 3 (not built): simplifying formulas, LaTeX or printing APIs,
-symbolic gradients, evaluating through sympy (the spec's non-goals).
+3. done (2026-10-18, 569f452 to the F9 commit): module `formula` (spec
+   in DESIGN.md, "Approved spec: formula"), asked for by `ailigment`'s
+   approved goal `optbench-symreg` (its DESIGN.md). Not pushed yet.
 
 ## Open questions for the user
 

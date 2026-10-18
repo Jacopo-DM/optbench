@@ -1,4 +1,4 @@
-# optbench
+# [optbench](https://github.com/Jacopo-DM/optbench)
 
 Test functions for optimisation algorithms, written from the formulas on the
 optimisation pages of the Virtual Library of Simulation Experiments by Sonja
@@ -6,6 +6,17 @@ Surjanovic and Derek Bingham (Simon Fraser University,
 https://www.sfu.ca/~ssurjano/optimization.html). Every function evaluates a
 batch of points in one call, takes its constants as keyword arguments with
 the published values as defaults, and knows its domain and global minimum.
+
+## Installation
+
+Python 3.13 or later. The repository is private, so install it from
+GitHub with an account that can read it:
+
+```bash
+uv add git+https://github.com/Jacopo-DM/optbench
+```
+
+## Example
 
 ```python
 import numpy as np
@@ -34,3 +45,27 @@ noiseless suite (`suite="bbob"`, all 24 functions), whose instances equal
 COCO's: `optbench.BbobRastrigin(d=10, instance=3)` is COCO's f3, instance
 3, in 10-D. `optbench.names(group)`
 lists those of one shape group. MIT license.
+
+## Formulas
+
+Every problem returns its function as a sympy expression in the variables
+`x1` to `xd`, built from the same constants as its numpy code, and
+`optbench.evaluate_formula` turns one back into values:
+
+```python
+booth = optbench.make("booth")
+booth.formula()  # (x1 + 2.0*x2 - 7.0)**2 + (2.0*x1 + x2 - 5.0)**2
+x = np.array([[1.0, 3.0], [0.0, 0.0]])
+optbench.evaluate_formula(booth.formula(), x)  # [0., 74.], as booth(x)
+optbench.make("ackley", d=2, a=10.0).formula()  # follows the changed a
+```
+
+sympy is a required dependency. Its printer runs out of memory on a
+piecewise expression nested inside another one's condition, so
+`evaluate_formula` refuses that shape with a ValueError.
+
+## Documentation
+
+There are no built docs yet. Each class's docstring gives its formula,
+constants and sources; `CODEMAP.md` lists the modules and their
+interfaces, and `DESIGN.md` the decisions and the measured results.

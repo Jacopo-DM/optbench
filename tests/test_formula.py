@@ -123,8 +123,34 @@ IDS = [
 ]
 
 
-@pytest.mark.parametrize("problem", PROBLEMS, ids=IDS)
-def test_the_formula_equals_the_numpy_values(problem: Problem) -> None:
+# Spec criterion 3: one problem per function file, with constants changed
+# from the published ones (the spec's example is Ackley with a = 10).
+CHANGED: dict[str, dict[str, float]] = {
+    "ackley": {"a": 10.0},
+    "bbob_f02_ellipsoid": {"conditioning": 1000.0},
+    "bbob_f06_attractive_sector": {"sector": 50.0, "power": 0.8},
+    "bbob_f10_ellipsoid_rotated": {"conditioning": 100.0},
+    "bbob_f15_rastrigin_rotated": {"beta": 0.3, "a": 5.0},
+    "bbob_f20_schwefel": {"coupling": 0.5},
+    "bbob_f23_katsuura": {"conditioning": 10.0},
+    "bohachevsky1": {"a": 0.5, "q": 3.0},
+    "booth": {"a": 3.0},
+    "branin": {"s": 5.0, "t": 0.2},
+    "bukin6": {"scale": 50.0},
+    "de_jong5": {"offset": 0.01},
+    "deceptive": {"beta": 3.0},
+    "dixon_price": {"weight": 3.0},
+    "hartmann4": {"scale": 1.0},
+    "holder_table": {"offset": 2.0},
+    "levy": {"weight": 5.0},
+    "perm0": {"beta": 5.0},
+    "perm_d_beta": {"beta": 2.0},
+    "salomon": {"a": 0.2},
+}
+
+
+def _assert_formula_matches(problem: Problem) -> None:
+    """Check that ``problem``'s formula equals its numpy values."""
     x = _points(problem)
 
     # Outside the domain some functions are undefined (Alpine N. 2 takes
@@ -144,6 +170,27 @@ def test_the_formula_equals_the_numpy_values(problem: Problem) -> None:
         rtol=rtol,
         atol=ATOL,
     )
+
+
+@pytest.mark.parametrize("problem", PROBLEMS, ids=IDS)
+def test_the_formula_equals_the_numpy_values(problem: Problem) -> None:
+    _assert_formula_matches(problem)
+
+
+@pytest.mark.parametrize(("name", "changes"), CHANGED.items())
+def test_the_formula_follows_changed_constants(
+    name: str,
+    changes: dict[str, float],
+) -> None:
+    changed = optbench.make(name, **changes)
+    assert str(changed.formula()) != str(optbench.make(name).formula())
+    _assert_formula_matches(changed)
+
+
+def test_every_function_file_has_a_changed_constants_check() -> None:
+    files = {type(optbench.make(name)).__module__ for name in optbench.names()}
+    checked = {type(optbench.make(name)).__module__ for name in CHANGED}
+    assert checked == files
 
 
 def test_the_variables_are_x1_to_xd() -> None:
