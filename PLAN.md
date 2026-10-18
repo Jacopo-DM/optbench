@@ -31,10 +31,9 @@ other). The approved spec and task list are in DESIGN.md.
   `cocoex` (1e-9 for f16 to f19 and f23, 1e-12 for the rest; DESIGN.md
   results); 83 functions in all, 1578 tests, 100% branch coverage over
   `src` and `tests`; ruff, mypy strict and pyright strict clean.
-- Git (2026-10-18): `main` was pushed at 5bea7d6 and is 3 docs commits
-  ahead of GitHub (5a6efef to 4df5b43: the `formula` spec and task list,
-  merged from `spec-formula`, which still exists and needs the user's
-  say-so to delete). The module's work is on branch `formula` (569f452,
+- Git (2026-10-18): `main` holds the `formula` spec and task list
+  (5a6efef to 4df5b43, from `spec-formula`) and was pushed at 4df5b43 (the
+  user's say-so); `spec-formula` was deleted (the user's say-so). The module's work is on branch `formula` (569f452,
   186c2ae, b9dbc97: F1 to F3), not merged or pushed yet; it merges into
   `main` when F9 is done. Earlier: `main` was pushed (de53338, 2026-10-17,
   the user's say-so). Every push to `main` from f33326f to fb9bd7e
