@@ -61,13 +61,10 @@ from .classics_qing_to_whitley import (
     Schwefel222,
     Whitley,
 )
-from .many_local_minima_any_d import (
+from .many_local_minima_ackley_to_langermann import (
     Ackley,
     Griewank,
     Langermann,
-    Levy,
-    Rastrigin,
-    Schwefel,
 )
 from .many_local_minima_bukin_to_gramacy import (
     Bukin6,
@@ -83,6 +80,7 @@ from .many_local_minima_holder_to_shubert import (
     SchafferN4,
     Shubert,
 )
+from .many_local_minima_levy_to_schwefel import Levy, Rastrigin, Schwefel
 from .other_beale_to_goldstein_price import (
     Beale,
     Branin,

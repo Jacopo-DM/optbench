@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 # of module formula adds its own.
 COVERED = (
     ("sfu", Group.BOWL),
+    ("sfu", Group.MANY_LOCAL_MINIMA),
     ("sfu", Group.PLATE),
     ("sfu", Group.STEEP),
     ("sfu", Group.VALLEY),
@@ -120,4 +121,4 @@ def test_booth_prints_as_the_sfu_page_writes_it() -> None:
 
 def test_a_problem_without_a_formula_yet_says_so() -> None:
     with pytest.raises(NotImplementedError, match="no formula yet"):
-        optbench.make("ackley").formula()
+        optbench.make("beale").formula()

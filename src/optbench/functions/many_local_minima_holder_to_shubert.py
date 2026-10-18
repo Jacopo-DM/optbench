@@ -2,7 +2,8 @@
 
 https://www.sfu.ca/~ssurjano/optimization.html, group "Many Local Minima".
 Bukin to Gramacy and Lee are in ``many_local_minima_bukin_to_gramacy``, and
-the functions for any dimension in ``many_local_minima_any_d``. Minima the
+Ackley to Schwefel in ``many_local_minima_ackley_to_langermann`` and
+``many_local_minima_levy_to_schwefel``. Minima the
 SFU page rounds or omits were found numerically; see ``known_minima``.
 """
 
@@ -14,12 +15,25 @@ from typing import TYPE_CHECKING, ClassVar, override
 import numpy as np
 
 from optbench.problem import Group, Minimum, Problem, box
+from optbench.symbolic import (
+    absolute,
+    cos,
+    exp,
+    pi,
+    product,
+    sin,
+    sqrt,
+    total,
+    variables,
+)
 
 from .known_minima import HOLDER_TABLE, SCHAFFER_N4, SHUBERT, at_defaults
 from .references import GAVANA, HEDAR, WIKIPEDIA
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from optbench.symbolic import Expr
 
 _GROUP = Group.MANY_LOCAL_MINIMA
 _SFU = "https://www.sfu.ca/~ssurjano/"
@@ -64,6 +78,13 @@ class HolderTable(Problem):
         radius = np.sqrt(x1**2 + x2**2)
         growth = np.exp(np.abs(self.offset - radius / math.pi))
         return -np.abs(np.sin(x1) * np.cos(x2) * growth)
+
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        radius = sqrt(x1**2 + x2**2)
+        growth = exp(absolute(self.offset - radius / pi()))
+        return -absolute(sin(x1) * cos(x2) * growth)
 
 
 class LevyN13(Problem):
@@ -123,6 +144,14 @@ class LevyN13(Problem):
         result: NDArray[np.float64] = first + second + third
         return result
 
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        first = sin(self.a * pi() * x1) ** 2
+        second = (x1 - 1) ** 2 * (1 + sin(self.b * pi() * x2) ** 2)
+        third = (x2 - 1) ** 2 * (1 + sin(self.c * pi() * x2) ** 2)
+        return first + second + third
+
 
 class SchafferN2(Problem):
     """Schaffer function N. 2.
@@ -175,6 +204,13 @@ class SchafferN2(Problem):
         bottom = (1 + self.scale * (x1**2 + x2**2)) ** 2
         return 0.5 + top / bottom
 
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        top = sin(x1**2 - x2**2) ** 2 - 0.5
+        bottom = (1 + self.scale * (x1**2 + x2**2)) ** 2
+        return 0.5 + top / bottom
+
 
 class SchafferN4(Problem):
     """Schaffer function N. 4.
@@ -213,6 +249,13 @@ class SchafferN4(Problem):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
         top = np.cos(np.sin(np.abs(x1**2 - x2**2))) ** 2 - 0.5
+        bottom = (1 + self.scale * (x1**2 + x2**2)) ** 2
+        return 0.5 + top / bottom
+
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        top = cos(sin(absolute(x1**2 - x2**2))) ** 2 - 0.5
         bottom = (1 + self.scale * (x1**2 + x2**2)) ** 2
         return 0.5 + top / bottom
 
@@ -261,3 +304,10 @@ class Shubert(Problem):
         i = np.arange(1, self.terms + 1, dtype=np.float64)
         sums = np.sum(i * np.cos((i + 1) * x[:, :, np.newaxis] + i), axis=2)
         return np.prod(sums, axis=1)
+
+    @override
+    def formula(self) -> Expr:
+        return product(
+            total(i * cos((i + 1) * xj + i) for i in range(1, self.terms + 1))
+            for xj in variables(2)
+        )

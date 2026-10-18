@@ -51,7 +51,7 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Module `formula`, task F3 (below); `ailigment`'s goal `optbench-symreg`
+Module `formula`, task F4 (below); `ailigment`'s goal `optbench-symreg`
 waits on the module.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
@@ -88,9 +88,7 @@ Tier 1 (walking skeleton):
 Tier 2 (by value over risk plus cost; plain formulas first, BBOB last):
 
 - F2: done (see DESIGN.md results).
-- F3. many local minima (16, three modules), with the piecewise ones
-  (Bukin N. 6, Cross-in-Tray, Holder table) through sympy `Abs` and
-  `Piecewise`. Risk low; about 200 lines.
+- F3: done (see DESIGN.md results).
 - F4. other (12, three modules): Hartmann and Shekel with their constant
   matrices as numbers, Powell, Perm. Risk low; about 180 lines.
 - F5. classics (10, two modules). Risk low; about 120 lines.

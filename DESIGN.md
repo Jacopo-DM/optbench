@@ -257,10 +257,12 @@ tests; the BBOB transforms are the largest part.
   `Callable[..., object]` counts as an explicit `Any` under
   `disallow_any_explicit`. Formula tests select problems by (suite, group),
   since the classics share the SFU shape groups.
-- Group files over 400 lines are split by name range, as the larger groups
-  already were: adding the formulas took `bowl.py` to 426 lines, so it is
-  now `bowl_sphere_to_bohachevsky.py` and `bowl_perm_to_trid.py`. Later
-  formula tasks split the same way when a file crosses 400.
+- Adding the formulas took `bowl.py` to 426 lines and
+  `many_local_minima_any_d.py` past 400, so they were split by the size
+  rule in CLAUDE.md: `bowl_sphere_to_bohachevsky.py` and
+  `bowl_perm_to_trid.py`; `many_local_minima_ackley_to_langermann.py` and
+  `many_local_minima_levy_to_schwefel.py` (`constant_point`, which both
+  halves use, moved to `problem.py`).
 
 - Written from the published formulas, not ported: the site's MATLAB and R
   code is GPL-2.0 (each file header says "version 2.0 of the License"), and
@@ -684,6 +686,7 @@ optbench, and what was decided:
 
 | What | Measure | Result | Notes |
 |------|---------|--------|-------|
+| Formulas F3: many local minima (16) (`tests/test_formula.py`, as F1) | formula against numpy | all 41 new problem variants equal to rtol 1e-12, atol 1e-10 | suite 1693 tests, 9.4 s without coverage at load average 21; the first formula test pays sympy's import (3.3 s under that load), every other formula test under 0.05 s |
 | Formulas F2: plate (5), steep (3) and valley (4) (`tests/test_formula.py`, as F1) | formula against numpy | all 32 new problem variants equal to rtol 1e-12, atol 1e-10; Booth prints as `(x1 + 2.0*x2 - 7.0)**2 + (2.0*x1 + x2 - 5.0)**2` | suite 1652 tests, about 6 s |
 | Formulas F1: the 9 bowl functions (`tests/test_formula.py`, d = 1 to 6, 26 points each, 2026-10-17) | formula against numpy | all 42 problem variants equal to rtol 1e-12, atol 1e-10 | suite 1578 to 1620 tests, about 5 s either way |
 | Python standard (`python-standard`, template configs, 2026-10-17) | errors before, after | mypy strict 33 to 0; ruff with the template rules 70 to 0 (30 no-self-use, 23 banned-api, 17 magic values); pyright 0 to 0; coverage 100% of `src` and `scripts` to 100% of branches over `src` and `tests` | every value, bound and minimum of 254 problem variants bit-identical before and after (scratch pin); timing 1261 ms in all before, 1270 after (three runs each, minimum per function), median ratio 1.000 |

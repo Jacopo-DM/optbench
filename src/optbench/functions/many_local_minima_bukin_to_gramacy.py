@@ -2,7 +2,8 @@
 
 https://www.sfu.ca/~ssurjano/optimization.html, group "Many Local Minima".
 Holder Table to Shubert are in ``many_local_minima_holder_to_shubert``, and
-the functions for any dimension in ``many_local_minima_any_d``. Minima the
+Ackley to Schwefel in ``many_local_minima_ackley_to_langermann`` and
+``many_local_minima_levy_to_schwefel``. Minima the
 SFU page rounds or omits were found numerically; see ``known_minima``.
 """
 
@@ -14,6 +15,16 @@ from typing import TYPE_CHECKING, ClassVar, override
 import numpy as np
 
 from optbench.problem import Group, Minimum, Problem, box
+from optbench.symbolic import (
+    absolute,
+    cos,
+    exp,
+    pi,
+    sin,
+    sqrt,
+    total,
+    variables,
+)
 
 from .known_minima import (
     CROSS_IN_TRAY,
@@ -25,6 +36,8 @@ from .references import GAVANA, WIKIPEDIA
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from optbench.symbolic import Expr
 
 _GROUP = Group.MANY_LOCAL_MINIMA
 _SFU = "https://www.sfu.ca/~ssurjano/"
@@ -88,6 +101,12 @@ class Bukin6(Problem):
         ridge = np.sqrt(np.abs(x2 - self.curvature * x1**2))
         return self.scale * ridge + self.slope * np.abs(x1 + self.shift)
 
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        ridge = sqrt(absolute(x2 - self.curvature * x1**2))
+        return self.scale * ridge + self.slope * absolute(x1 + self.shift)
+
 
 class CrossInTray(Problem):
     """Cross-in-Tray function: four global minima around a cross.
@@ -130,6 +149,14 @@ class CrossInTray(Problem):
         radius = np.sqrt(x1**2 + x2**2)
         growth = np.exp(np.abs(self.offset - radius / math.pi))
         inner = np.abs(np.sin(x1) * np.sin(x2) * growth) + 1
+        return -self.scale * inner**self.power
+
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        radius = sqrt(x1**2 + x2**2)
+        growth = exp(absolute(self.offset - radius / pi()))
+        inner = absolute(sin(x1) * sin(x2) * growth) + 1
         return -self.scale * inner**self.power
 
 
@@ -181,6 +208,12 @@ class DropWave(Problem):
         top = 1 + np.cos(self.frequency * np.sqrt(squares))
         return -top / (self.curvature * squares + self.offset)
 
+    @override
+    def formula(self) -> Expr:
+        squares = total(xi**2 for xi in variables(2))
+        top = 1 + cos(self.frequency * sqrt(squares))
+        return -top / (self.curvature * squares + self.offset)
+
 
 class Eggholder(Problem):
     """Eggholder function: many deep local minima; the best is on the edge.
@@ -225,6 +258,14 @@ class Eggholder(Problem):
         second = x1 * np.sin(np.sqrt(np.abs(x1 - lifted)))
         return -first - second
 
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        lifted = x2 + self.shift
+        first = lifted * sin(sqrt(absolute(lifted + self.ratio * x1)))
+        second = x1 * sin(sqrt(absolute(x1 - lifted)))
+        return -first - second
+
 
 class GramacyLee2012(Problem):
     """Gramacy and Lee (2012) function, one variable.
@@ -266,4 +307,10 @@ class GramacyLee2012(Problem):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         t = x[:, 0]
         wave = np.sin(self.frequency * math.pi * t) / (self.scale * t)
+        return wave + (t - self.shift) ** self.power
+
+    @override
+    def formula(self) -> Expr:
+        (t,) = variables(1)
+        wave = sin(self.frequency * pi() * t) / (self.scale * t)
         return wave + (t - self.shift) ** self.power

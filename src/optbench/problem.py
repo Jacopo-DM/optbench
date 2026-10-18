@@ -280,6 +280,17 @@ class AnyDimension(Problem):
         return self.d
 
 
+def constant_point(value: float, d: int) -> NDArray[np.float64]:
+    """Return the single point with every coordinate equal to ``value``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Shaped ``(1, d)``.
+    """
+    return np.full((1, d), value)
+
+
 def box(low: float, high: float, d: int) -> NDArray[np.float64]:
     """Return the same interval for every dimension.
 

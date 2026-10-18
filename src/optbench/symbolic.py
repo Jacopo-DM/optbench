@@ -51,8 +51,10 @@ class _Sympy(Protocol):
     def sin(self, x: Expr | float, /) -> Expr: ...
     def cos(self, x: Expr | float, /) -> Expr: ...
     def exp(self, x: Expr | float, /) -> Expr: ...
+    def sqrt(self, x: Expr | float, /) -> Expr: ...
     def Abs(self, x: Expr | float, /) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
     def Add(self, *terms: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
+    def Mul(self, *factors: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
     def lambdify(
         self,
         args: tuple[Expr, ...],
@@ -100,6 +102,17 @@ def total(terms: Iterable[Expr | float]) -> Expr:
     return _sympy().Add(*terms)
 
 
+def product(factors: Iterable[Expr | float]) -> Expr:
+    """Return the product of ``factors`` as one sympy expression.
+
+    Returns
+    -------
+    Expr
+        The product.
+    """
+    return _sympy().Mul(*factors)
+
+
 def pi() -> Expr:
     """Return sympy's exact pi.
 
@@ -142,6 +155,17 @@ def exp(x: Expr | float) -> Expr:
         The exponential.
     """
     return _sympy().exp(x)
+
+
+def sqrt(x: Expr | float) -> Expr:
+    """Return the square root of ``x``.
+
+    Returns
+    -------
+    Expr
+        The square root.
+    """
+    return _sympy().sqrt(x)
 
 
 def absolute(x: Expr | float) -> Expr:

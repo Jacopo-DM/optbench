@@ -86,7 +86,7 @@ Before every commit run format, lint, both type checks and the tests above.
 - Keep each file under 400 lines; split a group module before it grows past,
   alphabetically, naming the parts after their first and last function
   (`many_local_minima_bukin_to_gramacy.py`) or after what they share
-  (`many_local_minima_any_d.py`).
+  (`bbob_multimodal_weak.py`).
 - No abstraction without two real call sites today. Delete replaced code
   outright: no shims or old and new versions side by side.
 - Indentation in Python files, docstrings and comments included, is always a

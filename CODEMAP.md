@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (6738 lines, 33 files)
+## `src/optbench` (6956 lines, 34 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -19,7 +19,8 @@ Public interface (`optbench/__init__.py`):
   (a `Minimum` or `None`), class variables `name`, `group`, `url`,
   `references`, `suite` (`"sfu"`, or `"classic"` for functions not on
   the SFU pages). `formula()` returns the function as a sympy `Expr` in
-  `variables(d)` (the SFU bowl, plate, steep and valley groups so far;
+  `variables(d)` (the SFU bowl, plate, steep, valley and many-local-minima
+  groups so far;
   the others raise NotImplementedError).
 - `Expr` (a Protocol: a sympy expression with arithmetic), `variables(d)`
   (`x1` to `xd`), `evaluate_formula(formula, points)` (`(n,)` values, by
@@ -100,13 +101,17 @@ Depends on: numpy, pydantic, sympy (imported on first use, only by
 
 Files: `model.py` (`Model`, the frozen, `extra="forbid"` pydantic base of
 every record); `problem.py` (`Problem`, `AnyDimension`, `Minimum`, `Group`, `box`,
+`constant_point` (the one point with every coordinate equal),
 `formula_minimum`: a minimum from a formula if its minimisers lie in the
 domain); `symbolic.py` (the typed sympy facade: `Expr`, `variables`,
-`total`, `pi`, `sin`, `cos`, `exp`, `absolute`, `evaluate_formula`);
+`total`, `product`, `pi`, `sin`, `cos`, `exp`, `sqrt`, `absolute`,
+`evaluate_formula`);
 `functions/`: `bowl_sphere_to_bohachevsky.py`, `bowl_perm_to_trid.py`,
 `plate.py`, `steep.py`, `valley.py`,
 `other_beale_to_goldstein_price.py`, `other_hartmann.py`,
-`other_perm_to_styblinski_tang.py`, `many_local_minima_any_d.py`,
+`other_perm_to_styblinski_tang.py`,
+`many_local_minima_ackley_to_langermann.py`,
+`many_local_minima_levy_to_schwefel.py`,
 `many_local_minima_bukin_to_gramacy.py`,
 `many_local_minima_holder_to_shubert.py`,
 `classics_alpine_to_himmelblau.py`, `classics_qing_to_whitley.py`,
@@ -139,7 +144,7 @@ allowed over it), `main` returning the exit status), `baseline.py` (`main`));
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (1744 lines, 15 files)
+## `tests` (1745 lines, 15 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
@@ -156,5 +161,4 @@ covered so far),
 
 ## Size checks (400 lines per file)
 
-No file over 400 lines; the largest is
-`functions/many_local_minima_any_d.py` (389).
+No file over 400 lines; the largest is `functions/bbob_common.py` (386).
