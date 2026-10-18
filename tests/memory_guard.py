@@ -46,13 +46,23 @@ def stop() -> None:
     os._exit(EXIT_STATUS)
 
 
-def watch() -> None:
-    """Wait until the peak passes ``LIMIT``, then ``stop``."""
-    while peak_memory() <= LIMIT:
+def watch(limit: int) -> None:
+    """Wait until the peak passes ``limit`` bytes, then ``stop``.
+
+    The limit is an argument, not read from ``LIMIT`` on each check, so a
+    test that calls ``watch`` with a small limit cannot trip the guard
+    already running in the same process.
+    """
+    while peak_memory() <= limit:
         time.sleep(INTERVAL)
     stop()
 
 
 def start() -> None:
-    """Run ``watch`` in a daemon thread."""
-    threading.Thread(target=watch, name="memory_guard", daemon=True).start()
+    """Run ``watch`` with ``LIMIT`` in a daemon thread."""
+    threading.Thread(
+        target=watch,
+        args=(LIMIT,),
+        name="memory_guard",
+        daemon=True,
+    ).start()

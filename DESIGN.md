@@ -298,6 +298,12 @@ tests; the BBOB transforms are the largest part.
   (CLAUDE.md, things that bite). numpy evaluates every piece of a
   piecewise, so `evaluate_formula` silences divide and invalid warnings
   from the pieces not chosen (log(0) at the optimum, log of a negative).
+- `memory_guard.watch` takes its limit as an argument (2026-10-18). It
+  used to read the module's `LIMIT` on every check, so the test that
+  patched `LIMIT` to 0 could, if the running guard woke during that test,
+  make the guard call the patched `stop` and end its thread for the rest
+  of the run. ailigment's `benchmarks.memory_guard` was written this way
+  from the start.
 - Adding the formulas took `bowl.py` to 426 lines and
   `many_local_minima_any_d.py` past 400, so they were split by the size
   rule in CLAUDE.md: `bowl_sphere_to_bohachevsky.py` and

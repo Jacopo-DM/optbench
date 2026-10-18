@@ -17,9 +17,8 @@ def test_watch_stops_once_the_peak_passes_the_limit(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     stopped: list[bool] = []
-    monkeypatch.setattr(memory_guard, "LIMIT", 0)
     monkeypatch.setattr(memory_guard, "stop", lambda: stopped.append(True))
-    memory_guard.watch()
+    memory_guard.watch(0)
     assert stopped == [True]
 
 
