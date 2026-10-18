@@ -36,7 +36,8 @@ other). The approved spec and task list are in DESIGN.md.
   user's say-so); `spec-formula` was deleted (the user's say-so). Module `formula` (569f452 to 0cea41b, then 690f912) was
   fast-forwarded into `main`, pushed at 690f912 and `formula` deleted
   (the user's say-so, 2026-10-18); CI passed on Linux (2005 tests, 100%
-  coverage, 2 min 15 s for the tests). Earlier: `main` was pushed (de53338, 2026-10-17,
+  coverage, 2 min 15 s for the tests). 78cd59c and the notes commit after it are on
+  `main` but not pushed. Earlier: `main` was pushed (de53338, 2026-10-17,
   the user's say-so). Every push to `main` from f33326f to fb9bd7e
   failed f23 on Linux by 3.3e-9 relative; summing the rotations in COCO's
   order (DESIGN.md Decisions) fixed it, and CI passed on de53338 (1578
@@ -90,7 +91,10 @@ None.
 
 - BBOB f16 takes about 93 ms per 100,000 points at d = 10, close to the
   0.1 s budget; under heavier load it may cross it (103 ms on 2026-10-17
-  with another test suite running, old and new code alike). T_osz (shared by seven
+  with another test suite running, old and new code alike). On 2026-10-18,
+  at load 8 from another session's browser tests, f21 (108 ms), f23
+  (134 ms) and f16 (147 ms) were over too, with no change to their code;
+  rerun at lower load, all 83 passed. T_osz (shared by seven
   BBOB functions) and the rotations are 37 ms of that; speeding up T_osz
   would help them all.
 - Power Sum's recommended b vector is given for d = 4 only (other b give
