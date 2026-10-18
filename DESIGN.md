@@ -252,7 +252,11 @@ tests; the BBOB transforms are the largest part.
   arithmetic the formulas use, and the facade grows a function only when a
   formula needs it (F1 needed `cos` and `absolute`, not `sin`). sympy's
   `pi` is used where the numpy code uses `math.pi`, so the formula is
-  exact; `lambdify` turns it back into the same float. A function that
+  exact; `lambdify` turns it back into the same float. The same holds for
+  `exp(1)` (Ackley's `e`) and `sqrt(i)` (Griewank). A caller comparing a
+  formula with one built from float constants (ailigment's exact match)
+  must turn these exact constants into floats first, or `pi - 3.14159`
+  never simplifies to 0. A function that
   takes any arguments is typed as a Protocol with `*columns`, since
   `Callable[..., object]` counts as an explicit `Any` under
   `disallow_any_explicit`. Formula tests select problems by (suite, group),
