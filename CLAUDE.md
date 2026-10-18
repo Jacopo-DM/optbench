@@ -17,7 +17,7 @@ All commands run from the repo root with uv (Python 3.13).
 | Lint as the Stop hook and CI do | `uv run ruff format --check && uv run ruff check --no-fix` |
 | Type check (strict, no `Any`; the one the Stop hook runs) | `uv run mypy .` |
 | Type check as the editor does (strict, `pyrightconfig.json`) | `uv run pyright` |
-| Tests, with 100% branch coverage over `src` and `tests` enforced by `pytest.ini`, under the 2 GB memory watchdog (about 15 s) | `uv run pytest` |
+| Tests, with 100% branch coverage over `src` and `tests` enforced by `pytest.ini`, under the 2 GB memory watchdog (about 40 s, more under load) | `uv run pytest` |
 | Run every pre-commit hook (the same checks through `uv run --locked`; installed with `uv run pre-commit install`) | `uv run pre-commit run --all-files` |
 | One test file quickly, no coverage | `uv run pytest tests/test_x.py -k name --no-cov` |
 | Time every function on 100,000 points, spec criterion 2 (about 5 s; table, `__data__/timing.csv`, exit status 1 if any is over 0.1 s, except the stated exceptions in `src/optbench/scripts/timing.py`) | `uv run python -m optbench.scripts.timing [--points N] [--repeats K]` |

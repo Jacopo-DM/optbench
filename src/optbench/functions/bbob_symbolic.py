@@ -48,6 +48,20 @@ def shifted(x_opt: NDArray[np.float64]) -> list[Expr]:
     ]
 
 
+def rotated(matrix: NDArray[np.float64], x: Sequence[Expr]) -> list[Expr]:
+    """Return ``matrix`` applied to ``x``, as ``bbob_common.rotate``.
+
+    Returns
+    -------
+    list of Expr
+        ``z_i = sum_j matrix[i, j] x_j``, one per row.
+    """
+    return [
+        total(m * xj for m, xj in zip(row, x, strict=True))
+        for row in matrix.tolist()
+    ]
+
+
 def _wave(log_size: Expr, c1: float, c2: float) -> Expr:
     return log_size + 0.049 * (sin(c1 * log_size) + sin(c2 * log_size))
 
@@ -107,6 +121,27 @@ def oscillate_asymmetric(x: Sequence[Expr], beta: float) -> list[Expr]:
             piecewise((raised, xi > 0), (negative, xi < 0), (0.0, True)),
         )
     return result
+
+
+def asymmetric(x: Sequence[Expr], beta: float) -> list[Expr]:
+    """T_asy, as ``bbob_common.asymmetric``, for ``x`` with no piecewise.
+
+    A piecewise ``x`` would put a piecewise in a condition (see
+    ``oscillate_pieces``); after T_osz use ``oscillate_asymmetric``.
+
+    Returns
+    -------
+    list of Expr
+        Positive coordinates raised to ``1 + beta i / (d - 1) sqrt(x_i)``.
+    """
+    d = len(x)
+    return [
+        piecewise(
+            (xi ** (1 + beta * (i / (d - 1)) * sqrt(xi)), xi > 0),
+            (xi, True),
+        )
+        for i, xi in enumerate(x)
+    ]
 
 
 def penalty(x: Sequence[Expr]) -> Expr:

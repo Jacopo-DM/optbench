@@ -9,16 +9,30 @@ seed and ``Q`` the one from the seed plus 1,000,000.
 
 from __future__ import annotations
 
+import itertools
 from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
 from optbench.problem import Group, Minimum
+from optbench.symbolic import (
+    absolute,
+    floor,
+    maximum,
+    piecewise,
+    total,
+    variables,
+)
 
 from . import bbob_common as bbob
+from . import bbob_symbolic as sym
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from numpy.typing import NDArray
+
+    from optbench.symbolic import Expr
 
 _GROUP = Group.BBOB_MODERATE_CONDITIONING
 
@@ -63,6 +77,25 @@ class BbobAttractiveSector(bbob.BbobRotated):
         s = np.where(z * self.x_opt > 0, self.sector, 1.0)
         squares = np.sum((s * z) ** 2, axis=1)
         return bbob.oscillate(squares) ** self.power + self.f_opt
+
+    @override
+    def formula(self) -> Expr:
+        scaling = bbob.scaling(self.conditioning, self.d)
+        linear = bbob.linear_map(self.q, scaling, self.r)
+        z = sym.rotated(linear, sym.shifted(self.x_opt))
+        weighted = [
+            piecewise((self.sector * zi, zi * c > 0), (zi, True))
+            for zi, c in zip(z, self.x_opt.tolist(), strict=True)
+        ]
+        squares = total(wi**2 for wi in weighted)
+
+        # T_osz of a sum of squares: its positive piece, or 0 where every
+        # z_i is 0. The condition tests z itself, which holds no piecewise.
+        positive, _ = sym.oscillate_pieces(squares)
+        moved = total(zi**2 for zi in z) > 0
+        return (
+            piecewise((positive**self.power, moved), (0.0, True)) + self.f_opt
+        )
 
 
 class BbobStepEllipsoid(bbob.BbobRotated):
@@ -120,6 +153,28 @@ class BbobStepEllipsoid(bbob.BbobRotated):
         boundary = self.penalty * bbob.penalty(x)
         return self.scale * np.maximum(floor, ellipsoid) + boundary + self.f_opt
 
+    @override
+    def formula(self) -> Expr:
+        scaling = bbob.scaling(self.conditioning, self.d)
+        z_hat = sym.rotated(
+            scaling[:, np.newaxis] * self.r,
+            sym.shifted(self.x_opt),
+        )
+        rounded = [
+            piecewise(
+                (floor(zi + 0.5), absolute(zi) > _WHOLE_STEPS),
+                (floor(self.step * zi + 0.5) / self.step, True),
+            )
+            for zi in z_hat
+        ]
+        z = sym.rotated(self.q, rounded)
+        weights = (bbob.scaling(self.weight, self.d) ** 2).tolist()
+        ellipsoid = total(zi**2 * w for zi, w in zip(z, weights, strict=True))
+        slope = absolute(z_hat[0]) * self.slope
+        boundary = self.penalty * sym.penalty(variables(self.d))
+        largest = maximum((slope, ellipsoid))
+        return self.scale * largest + boundary + self.f_opt
+
 
 def _rosenbrock(z: NDArray[np.float64], a: float) -> NDArray[np.float64]:
     """Rosenbrock's ``sum_i a (z_i^2 - z_{i+1})^2 + (z_i - 1)^2``, per point.
@@ -131,6 +186,20 @@ def _rosenbrock(z: NDArray[np.float64], a: float) -> NDArray[np.float64]:
     """
     head, tail = z[:, :-1], z[:, 1:]
     return np.sum(a * (head**2 - tail) ** 2 + (head - 1) ** 2, axis=1)
+
+
+def _rosenbrock_formula(z: Sequence[Expr], a: float) -> Expr:
+    """Return the symbolic twin of ``_rosenbrock``.
+
+    Returns
+    -------
+    Expr
+        The sum over consecutive pairs.
+    """
+    return total(
+        a * (head**2 - tail) ** 2 + (head - 1) ** 2
+        for head, tail in itertools.pairwise(z)
+    )
 
 
 class BbobRosenbrock(bbob.BbobProblem):
@@ -168,6 +237,12 @@ class BbobRosenbrock(bbob.BbobProblem):
         z = bbob.rosenbrock_scale(self.d) * (x - self.x_opt) + 1
         return _rosenbrock(z, self.a) + self.f_opt
 
+    @override
+    def formula(self) -> Expr:
+        scale = bbob.rosenbrock_scale(self.d)
+        z = [scale * xi + 1 for xi in sym.shifted(self.x_opt)]
+        return _rosenbrock_formula(z, self.a) + self.f_opt
+
 
 class BbobRosenbrockRotated(bbob.BbobRotated):
     """BBOB f9, rotated Rosenbrock.
@@ -203,3 +278,9 @@ class BbobRosenbrockRotated(bbob.BbobRotated):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         z = bbob.rosenbrock_scale(self.d) * bbob.rotate(x, self.r) + 0.5
         return _rosenbrock(z, self.a) + self.f_opt
+
+    @override
+    def formula(self) -> Expr:
+        scale = bbob.rosenbrock_scale(self.d)
+        z = [scale * zi + 0.5 for zi in sym.rotated(self.r, variables(self.d))]
+        return _rosenbrock_formula(z, self.a) + self.f_opt

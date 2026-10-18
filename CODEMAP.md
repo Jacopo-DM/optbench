@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (7484 lines, 35 files)
+## `src/optbench` (7659 lines, 35 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -19,7 +19,7 @@ Public interface (`optbench/__init__.py`):
   (a `Minimum` or `None`), class variables `name`, `group`, `url`,
   `references`, `suite` (`"sfu"`, or `"classic"` for functions not on
   the SFU pages). `formula()` returns the function as a sympy `Expr` in
-  `variables(d)` (every SFU function and classic, and BBOB f1 to f5, so
+  `variables(d)` (every SFU function and classic, and BBOB f1 to f14, so
   far; the other BBOB functions raise NotImplementedError).
 - `Expr` (a Protocol: a sympy expression with arithmetic), `variables(d)`
   (`x1` to `xd`), `evaluate_formula(formula, points)` (`(n,)` values, by
@@ -104,7 +104,7 @@ every record); `problem.py` (`Problem`, `AnyDimension`, `Minimum`, `Group`, `box
 `formula_minimum`: a minimum from a formula if its minimisers lie in the
 domain); `symbolic.py` (the typed sympy facade: `Expr`, `Condition` (what
 `Expr < value` gives), `variables`, `total`, `product`, `maximum`,
-`piecewise`, `pi`, `sin`, `cos`, `exp`, `log`, `sqrt`, `absolute`,
+`piecewise`, `pi`, `sin`, `cos`, `exp`, `log`, `floor`, `sqrt`, `absolute`,
 `evaluate_formula`, which refuses a piecewise whose condition holds
 another piecewise or an `ITE`);
 `functions/`: `bowl_sphere_to_bohachevsky.py`, `bowl_perm_to_trid.py`,
@@ -127,9 +127,10 @@ base class `BbobProblem` with `instance`, `seed`, `x_opt`, `f_opt`,
 `minimum`, and its subclass `BbobRotated` with `r` (rotation from the
 seed) and `q` (from the seed plus `SECOND_ROTATION`, 1,000,000)),
 `bbob_symbolic.py` (symbolic twins of the transforms, one expression per
-coordinate: `shifted(x_opt)`, `oscillate_pieces`, `oscillate`,
-`oscillate_asymmetric` (T_asy after T_osz, its conditions on the shifted
-coordinate), `penalty`, `rastrigin`),
+coordinate: `shifted(x_opt)`, `rotated(matrix, x)`, `oscillate_pieces`,
+`oscillate`, `oscillate_asymmetric` (T_asy after T_osz, its conditions on
+the shifted coordinate), `asymmetric` (T_asy of coordinates with no
+piecewise), `penalty`, `rastrigin`),
 `bbob_separable.py` (f1 to f5), `bbob_moderate.py` (f6 to f9),
 `bbob_high_conditioning.py` (f10 to f14), `bbob_multimodal_adequate.py`
 (f15 to f19), `bbob_multimodal_weak.py` (f20 to f24, with the cached
@@ -149,7 +150,7 @@ allowed over it), `main` returning the exit status), `baseline.py` (`main`));
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (1896 lines, 18 files)
+## `tests` (1898 lines, 18 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,

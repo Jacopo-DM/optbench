@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 # The (suite, group) pairs whose problems have a formula so far; each task
 # of module formula adds its own.
 COVERED = (
+    ("bbob", Group.BBOB_HIGH_CONDITIONING),
+    ("bbob", Group.BBOB_MODERATE_CONDITIONING),
     ("bbob", Group.BBOB_SEPARABLE),
     ("classic", Group.BOWL),
     ("classic", Group.MANY_LOCAL_MINIMA),

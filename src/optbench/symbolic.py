@@ -84,11 +84,12 @@ class _Sympy(Protocol):
     def cos(self, x: Expr | float, /) -> Expr: ...
     def exp(self, x: Expr | float, /) -> Expr: ...
     def log(self, x: Expr | float, /) -> Expr: ...
+    def floor(self, x: Expr | float, /) -> Expr: ...
     def sqrt(self, x: Expr | float, /) -> Expr: ...
     def Abs(self, x: Expr | float, /) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
     def Add(self, *terms: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
     def Mul(self, *factors: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
-    def Max(self, *args: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
+    def Max(self, *args: Expr | float, evaluate: bool) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
 
     Piecewise: _PiecewiseType
     ITE: object
@@ -206,6 +207,17 @@ def log(x: Expr | float) -> Expr:
     return _sympy().log(x)
 
 
+def floor(x: Expr | float) -> Expr:
+    """Return the largest integer not above ``x``.
+
+    Returns
+    -------
+    Expr
+        The floor.
+    """
+    return _sympy().floor(x)
+
+
 def sqrt(x: Expr | float) -> Expr:
     """Return the square root of ``x``.
 
@@ -231,12 +243,16 @@ def absolute(x: Expr | float) -> Expr:
 def maximum(args: Iterable[Expr | float]) -> Expr:
     """Return the largest of ``args`` as one sympy expression.
 
+    It is built unevaluated: sympy otherwise compares the arguments
+    symbolically, which took 0.9 of the 1.0 s needed to build BBOB f7 at
+    d = 6, and numpy picks the largest value anyway.
+
     Returns
     -------
     Expr
         ``sympy.Max`` of the arguments.
     """
-    return _sympy().Max(*args)
+    return _sympy().Max(*args, evaluate=False)
 
 
 def piecewise(*pieces: tuple[Expr | float, Condition | bool]) -> Expr:

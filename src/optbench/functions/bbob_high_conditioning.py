@@ -15,11 +15,15 @@ from typing import TYPE_CHECKING, ClassVar, override
 import numpy as np
 
 from optbench.problem import Group, Minimum
+from optbench.symbolic import absolute, sqrt, total
 
 from . import bbob_common as bbob
+from . import bbob_symbolic as sym
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from optbench.symbolic import Expr
 
 _GROUP = Group.BBOB_HIGH_CONDITIONING
 
@@ -54,6 +58,15 @@ class BbobEllipsoidRotated(bbob.BbobRotated):
         weights = bbob.scaling(self.conditioning, self.d) ** 2
         return bbob.weighted(z**2, weights) + self.f_opt
 
+    @override
+    def formula(self) -> Expr:
+        z = sym.oscillate(sym.rotated(self.q, sym.shifted(self.x_opt)))
+        weights = (bbob.scaling(self.conditioning, self.d) ** 2).tolist()
+        return (
+            total(zi**2 * w for zi, w in zip(z, weights, strict=True))
+            + self.f_opt
+        )
+
 
 class BbobDiscus(bbob.BbobRotated):
     """BBOB f11, discus: one direction far steeper than the rest.
@@ -85,6 +98,12 @@ class BbobDiscus(bbob.BbobRotated):
         squares = z**2
         rest = np.sum(squares[:, 1:], axis=1)
         return self.conditioning * squares[:, 0] + rest + self.f_opt
+
+    @override
+    def formula(self) -> Expr:
+        z = sym.oscillate(sym.rotated(self.q, sym.shifted(self.x_opt)))
+        rest = total(zi**2 for zi in z[1:])
+        return self.conditioning * z[0] ** 2 + rest + self.f_opt
 
 
 class BbobBentCigar(bbob.BbobRotated):
@@ -126,6 +145,13 @@ class BbobBentCigar(bbob.BbobRotated):
         rest = np.sum(squares[:, 1:], axis=1)
         return squares[:, 0] + self.conditioning * rest + self.f_opt
 
+    @override
+    def formula(self) -> Expr:
+        rotated = sym.rotated(self.q, sym.shifted(self.x_opt))
+        z = sym.rotated(self.q, sym.asymmetric(rotated, self.beta))
+        rest = total(zi**2 for zi in z[1:])
+        return z[0] ** 2 + self.conditioning * rest + self.f_opt
+
 
 class BbobSharpRidge(bbob.BbobRotated):
     """BBOB f13, sharp ridge.
@@ -162,6 +188,14 @@ class BbobSharpRidge(bbob.BbobRotated):
         ridge = np.sqrt(np.sum(z[:, 1:] ** 2, axis=1))
         return z[:, 0] ** 2 + self.a * ridge + self.f_opt
 
+    @override
+    def formula(self) -> Expr:
+        scaling = bbob.scaling(self.conditioning, self.d)
+        linear = bbob.linear_map(self.q, scaling, self.r)
+        z = sym.rotated(linear, sym.shifted(self.x_opt))
+        ridge = sqrt(total(zi**2 for zi in z[1:]))
+        return z[0] ** 2 + self.a * ridge + self.f_opt
+
 
 class BbobDifferentPowers(bbob.BbobRotated):
     """BBOB f14, different powers.
@@ -195,3 +229,12 @@ class BbobDifferentPowers(bbob.BbobRotated):
         ramp = np.arange(self.d, dtype=np.float64) / (self.d - 1)
         powers = np.abs(z) ** (2 + self.spread * ramp)
         return np.sqrt(np.sum(powers, axis=1)) + self.f_opt
+
+    @override
+    def formula(self) -> Expr:
+        z = sym.rotated(self.q, sym.shifted(self.x_opt))
+        powers = (
+            absolute(zi) ** (2 + self.spread * (i / (self.d - 1)))
+            for i, zi in enumerate(z)
+        )
+        return sqrt(total(powers)) + self.f_opt
