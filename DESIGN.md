@@ -261,6 +261,21 @@ tests; the BBOB transforms are the largest part.
   `Callable[..., object]` counts as an explicit `Any` under
   `disallow_any_explicit`. Formula tests select problems by (suite, group),
   since the classics share the SFU shape groups.
+- BBOB formulas (F6, 2026-10-18): the symbolic twins of the transforms
+  live in `functions/bbob_symbolic.py`, not in `bbob_common.py` as the
+  spec says, because `bbob_common.py` was at 386 lines. Each twin returns
+  one expression per coordinate, so a `formula()` reads like its
+  `_evaluate`. T_osz keeps the sign of its input, so a transform after it
+  (T_asy, f4's skew) tests the shifted coordinate itself and each
+  coordinate is one three-piece piecewise (`oscillate_pieces`,
+  `oscillate_asymmetric`). Rejected, with the numbers: composing the
+  twins as written (`asymmetric(oscillate(x))`), whose condition
+  `T_osz(x) > 0` sympy turned into an `ITE`; `lambdify` on f3 at d = 2
+  then grew to 160 GB before macOS killed it. `evaluate_formula` refuses
+  that shape since, and every pytest run has a 2 GB memory watchdog
+  (CLAUDE.md, things that bite). numpy evaluates every piece of a
+  piecewise, so `evaluate_formula` silences divide and invalid warnings
+  from the pieces not chosen (log(0) at the optimum, log of a negative).
 - Adding the formulas took `bowl.py` to 426 lines and
   `many_local_minima_any_d.py` past 400, so they were split by the size
   rule in CLAUDE.md: `bowl_sphere_to_bohachevsky.py` and
@@ -690,6 +705,7 @@ optbench, and what was decided:
 
 | What | Measure | Result | Notes |
 |------|---------|--------|-------|
+| Formulas F6: BBOB f1 to f5 and the transform twins (`tests/test_formula.py`, d = 2 to 6 at instances 1 to 5) | formula against numpy | all 125 new problem variants equal to rtol 1e-12, atol 1e-10 | suite 1894 tests, 14.3 s with coverage (about 200 MB peak); timing script 0 of 83 over 100 ms |
 | Formulas F5: the 10 classics (`tests/test_formula.py`, as F4, suite "classic" added) | formula against numpy | all 50 new problem variants equal to rtol 1e-12, atol 1e-10; the facade gains `maximum` (Schwefel 2.21) and `piecewise` (Deceptive's four pieces, chosen in `numpy.select`'s order); Alpine N. 2 is NaN below 0 on both sides, which counts as equal | suite 1765 tests, 6.8 s with coverage; timing script 0 of 83 over 100 ms (Whitley 131 ms at d = 10, the stated exception) |
 | Formulas F4: other (12) (`tests/test_formula.py`, as F1; any-d problems at each d that `replace` accepts, so Powell only at d = 4) | formula against numpy | all 22 new problem variants equal to rtol 1e-12, atol 1e-10; Hartmann and Shekel carry their constant matrices as float numbers | suite 1715 tests, 7.6 s with coverage |
 | Formulas F3: many local minima (16) (`tests/test_formula.py`, as F1) | formula against numpy | all 41 new problem variants equal to rtol 1e-12, atol 1e-10 | suite 1693 tests, 9.4 s without coverage at load average 21; the first formula test pays sympy's import (3.3 s under that load), every other formula test under 0.05 s |

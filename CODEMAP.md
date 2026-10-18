@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (7222 lines, 34 files)
+## `src/optbench` (7484 lines, 35 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -19,8 +19,8 @@ Public interface (`optbench/__init__.py`):
   (a `Minimum` or `None`), class variables `name`, `group`, `url`,
   `references`, `suite` (`"sfu"`, or `"classic"` for functions not on
   the SFU pages). `formula()` returns the function as a sympy `Expr` in
-  `variables(d)` (every SFU function and classic so far; the BBOB
-  functions raise NotImplementedError).
+  `variables(d)` (every SFU function and classic, and BBOB f1 to f5, so
+  far; the other BBOB functions raise NotImplementedError).
 - `Expr` (a Protocol: a sympy expression with arithmetic), `variables(d)`
   (`x1` to `xd`), `evaluate_formula(formula, points)` (`(n,)` values, by
   `sympy.lambdify`).
@@ -104,8 +104,9 @@ every record); `problem.py` (`Problem`, `AnyDimension`, `Minimum`, `Group`, `box
 `formula_minimum`: a minimum from a formula if its minimisers lie in the
 domain); `symbolic.py` (the typed sympy facade: `Expr`, `Condition` (what
 `Expr < value` gives), `variables`, `total`, `product`, `maximum`,
-`piecewise`, `pi`, `sin`, `cos`, `exp`, `sqrt`, `absolute`,
-`evaluate_formula`);
+`piecewise`, `pi`, `sin`, `cos`, `exp`, `log`, `sqrt`, `absolute`,
+`evaluate_formula`, which refuses a piecewise whose condition holds
+another piecewise or an `ITE`);
 `functions/`: `bowl_sphere_to_bohachevsky.py`, `bowl_perm_to_trid.py`,
 `plate.py`, `steep.py`, `valley.py`,
 `other_beale_to_goldstein_price.py`, `other_hartmann.py`,
@@ -125,6 +126,10 @@ diagonal of Lambda^alpha), `penalty` (f_pen); `rastrigin(z, a)`; and the
 base class `BbobProblem` with `instance`, `seed`, `x_opt`, `f_opt`,
 `minimum`, and its subclass `BbobRotated` with `r` (rotation from the
 seed) and `q` (from the seed plus `SECOND_ROTATION`, 1,000,000)),
+`bbob_symbolic.py` (symbolic twins of the transforms, one expression per
+coordinate: `shifted(x_opt)`, `oscillate_pieces`, `oscillate`,
+`oscillate_asymmetric` (T_asy after T_osz, its conditions on the shifted
+coordinate), `penalty`, `rastrigin`),
 `bbob_separable.py` (f1 to f5), `bbob_moderate.py` (f6 to f9),
 `bbob_high_conditioning.py` (f10 to f14), `bbob_multimodal_adequate.py`
 (f15 to f19), `bbob_multimodal_weak.py` (f20 to f24, with the cached
@@ -144,7 +149,7 @@ allowed over it), `main` returning the exit status), `baseline.py` (`main`));
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (1765 lines, 15 files)
+## `tests` (1896 lines, 18 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
@@ -155,7 +160,9 @@ handling), `test_bowl.py`, `test_plate.py`, `test_steep.py` and
 constants, minima that follow parameters, refusals),
 `test_problem.py` (`replace`, the stored domain, read-only minima),
 `test_formula.py` (each formula equals its numpy values; the groups
-covered so far),
+covered so far, BBOB at instances 1 to 5; the nested-condition refusal),
+`conftest.py` and `memory_guard.py` (a watchdog thread that stops the
+run past 2 GB of peak memory), `test_memory_guard.py`,
 `test_registry_and_tracking.py`, `test_baseline.py`, `test_scripts.py`
 (both scripts on small budgets in a temporary folder). Depends on: `optbench` (with `optbench.scripts`), numpy, pytest, `cocoex` (dev only).
 

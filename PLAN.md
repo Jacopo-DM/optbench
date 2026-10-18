@@ -34,7 +34,7 @@ other). The approved spec and task list are in DESIGN.md.
 - Git (2026-10-18): `main` holds the `formula` spec and task list
   (5a6efef to 4df5b43, from `spec-formula`) and was pushed at 4df5b43 (the
   user's say-so); `spec-formula` was deleted (the user's say-so). The module's work is on branch `formula` (569f452,
-  186c2ae, b9dbc97, a3c021a and the F5 commit: F1 to F5), not merged or pushed yet; it merges into
+  186c2ae, b9dbc97, a3c021a, 29d3b65 and the F6 commit: F1 to F6), not merged or pushed yet; it merges into
   `main` when F9 is done. Earlier: `main` was pushed (de53338, 2026-10-17,
   the user's say-so). Every push to `main` from f33326f to fb9bd7e
   failed f23 on Linux by 3.3e-9 relative; summing the rotations in COCO's
@@ -45,12 +45,13 @@ other). The approved spec and task list are in DESIGN.md.
   setup-uv than the user's template.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
-- Module `formula` in progress (branch `formula`): F1 to F5 done, so 59
-  of the 83 problems have `formula()` (every SFU function and classic);
+- Module `formula` in progress (branch `formula`): F1 to F6 done, so 64
+  of the 83 problems have `formula()` (every SFU function and classic,
+  BBOB f1 to f5);
   `tests/test_formula.py` lists the covered (suite, group) pairs in
   `COVERED` and its no-formula test uses `bbob_f24_lunacek`, which F8
   covers last; F9 then deletes that test with the NotImplementedError
-  path. 1765 tests, 100% coverage.
+  path. 1894 tests, 100% coverage.
 
 ## Constraints
 
@@ -61,7 +62,7 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Module `formula`, task F6 (below); `ailigment`'s goal `optbench-symreg`
+Module `formula`, task F7 (below); `ailigment`'s goal `optbench-symreg`
 waits on the module.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
@@ -101,11 +102,9 @@ Tier 2 (by value over risk plus cost; plain formulas first, BBOB last):
 - F3: done (see DESIGN.md results).
 - F4: done (see DESIGN.md results).
 - F5: done (see DESIGN.md results).
-- F6. BBOB transforms as symbolic twins in `bbob_common.py` (T_osz,
-  T_asy, Lambda, the rotations as number matrices, f_pen, the shift by
-  `x_opt`), and the separable f1 to f5. Risk: medium (T_osz is piecewise
-  in sign and log; the twins must match COCO's order of operations to the
-  tolerances); about 250 lines.
+- F6: done (see DESIGN.md results). The twins are in
+  `functions/bbob_symbolic.py`; the rotation twin (number matrices) is
+  not written yet, since f1 to f5 have none, so F7 adds it.
 - F7. BBOB f6 to f14. Risk medium (rotations and conditioning); about
   150 lines.
 - F8. BBOB f15 to f24: Weierstrass's sums, Gallagher's maximum over 101

@@ -12,12 +12,16 @@ from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 
+from optbench.symbolic import piecewise, total, variables
+
 from . import bbob_common as bbob
+from . import bbob_symbolic as sym
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from optbench.problem import Minimum
+    from optbench.symbolic import Expr
 
 
 class BbobSphere(bbob.BbobProblem):
@@ -31,6 +35,10 @@ class BbobSphere(bbob.BbobProblem):
         z = x - self.x_opt
         result: NDArray[np.float64] = np.einsum("ij,ij->i", z, z) + self.f_opt
         return result
+
+    @override
+    def formula(self) -> Expr:
+        return total(zi**2 for zi in sym.shifted(self.x_opt)) + self.f_opt
 
 
 class BbobEllipsoid(bbob.BbobProblem):
@@ -61,6 +69,15 @@ class BbobEllipsoid(bbob.BbobProblem):
         z = bbob.oscillate(x - self.x_opt)
         weights = bbob.scaling(self.conditioning, self.d) ** 2
         return bbob.weighted(z**2, weights) + self.f_opt
+
+    @override
+    def formula(self) -> Expr:
+        z = sym.oscillate(sym.shifted(self.x_opt))
+        weights = (bbob.scaling(self.conditioning, self.d) ** 2).tolist()
+        return (
+            total(zi**2 * w for zi, w in zip(z, weights, strict=True))
+            + self.f_opt
+        )
 
 
 class BbobRastrigin(bbob.BbobProblem):
@@ -98,6 +115,13 @@ class BbobRastrigin(bbob.BbobProblem):
         z = bbob.asymmetric(bbob.oscillate(x - self.x_opt), self.beta)
         z *= bbob.scaling(self.conditioning, self.d)
         return bbob.rastrigin(z, self.a) + self.f_opt
+
+    @override
+    def formula(self) -> Expr:
+        raw = sym.oscillate_asymmetric(sym.shifted(self.x_opt), self.beta)
+        scales = bbob.scaling(self.conditioning, self.d).tolist()
+        z = [zi * s for zi, s in zip(raw, scales, strict=True)]
+        return sym.rastrigin(z, self.a) + self.f_opt
 
 
 class BbobBucheRastrigin(bbob.BbobProblem):
@@ -158,6 +182,25 @@ class BbobBucheRastrigin(bbob.BbobProblem):
         boundary = self.penalty * bbob.penalty(x)
         return bbob.rastrigin(z, self.a) + boundary + self.f_opt
 
+    @override
+    def formula(self) -> Expr:
+        scales = bbob.scaling(self.conditioning, self.d).tolist()
+        z: list[Expr] = []
+        for i, (xi, s) in enumerate(
+            zip(sym.shifted(self.x_opt), scales, strict=True),
+        ):
+            positive, negative = sym.oscillate_pieces(xi)
+            skew = self.skew if i % 2 == 0 else 1.0
+            z.append(
+                piecewise(
+                    (positive * s * skew, xi > 0),
+                    (negative * s, xi < 0),
+                    (0.0, True),
+                ),
+            )
+        boundary = self.penalty * sym.penalty(variables(self.d))
+        return sym.rastrigin(z, self.a) + boundary + self.f_opt
+
 
 class BbobLinearSlope(bbob.BbobProblem):
     """BBOB f5, linear slope towards a corner of the domain.
@@ -201,3 +244,15 @@ class BbobLinearSlope(bbob.BbobProblem):
         # Beyond the corner (x_i x_opt_i >= 5^2) the slope is flat.
         z = np.where(x * corner < corner * corner, x, corner)
         return np.sum(5 * np.abs(slopes) - slopes * z, axis=1) + self.f_opt
+
+    @override
+    def formula(self) -> Expr:
+        corner = self.x_opt.tolist()
+        slopes = (
+            np.sign(self.x_opt) * bbob.scaling(self.conditioning, self.d)
+        ).tolist()
+        terms = (
+            5 * abs(s) - s * piecewise((xi, xi * c < c * c), (c, True))
+            for xi, c, s in zip(variables(self.d), corner, slopes, strict=True)
+        )
+        return total(terms) + self.f_opt

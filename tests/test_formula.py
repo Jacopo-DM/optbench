@@ -9,6 +9,8 @@ import pytest
 
 import optbench
 from optbench import AnyDimension, Group, Problem
+from optbench.functions.bbob_common import BbobProblem
+from optbench.symbolic import piecewise
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -16,6 +18,7 @@ if TYPE_CHECKING:
 # The (suite, group) pairs whose problems have a formula so far; each task
 # of module formula adds its own.
 COVERED = (
+    ("bbob", Group.BBOB_SEPARABLE),
     ("classic", Group.BOWL),
     ("classic", Group.MANY_LOCAL_MINIMA),
     ("classic", Group.OTHER),
@@ -28,6 +31,8 @@ COVERED = (
     ("sfu", Group.VALLEY),
 )
 DIMENSIONS = range(1, 7)
+# BBOB problems are checked at these COCO instances (spec criterion 2).
+INSTANCES = range(1, 6)
 RTOL = 1e-12
 ATOL = 1e-10
 INSIDE = 20
@@ -55,6 +60,8 @@ def _allowed(problem: AnyDimension, d: int) -> bool:
 def _problems() -> list[Problem]:
     """Every problem of ``COVERED``, any-d ones at each allowed d up to 6.
 
+    BBOB problems are checked at each of ``INSTANCES`` too.
+
     Returns
     -------
     list of Problem
@@ -68,7 +75,14 @@ def _problems() -> list[Problem]:
     problems: list[Problem] = []
     for name in names:
         problem = optbench.make(name)
-        if isinstance(problem, AnyDimension):
+        if isinstance(problem, BbobProblem):
+            problems += [
+                problem.replace(d=d, instance=k)
+                for d in DIMENSIONS
+                if _allowed(problem, d)
+                for k in INSTANCES
+            ]
+        elif isinstance(problem, AnyDimension):
             problems += [
                 problem.replace(d=d) for d in DIMENSIONS if _allowed(problem, d)
             ]
@@ -105,7 +119,11 @@ def _points(problem: Problem) -> NDArray[np.float64]:
 
 
 PROBLEMS = _problems()
-IDS = [f"{p.name}-d{p.dimension}" for p in PROBLEMS]
+IDS = [
+    f"{p.name}-d{p.dimension}"
+    + (f"-i{p.instance}" if isinstance(p, BbobProblem) else "")
+    for p in PROBLEMS
+]
 
 
 @pytest.mark.parametrize("problem", PROBLEMS, ids=IDS)
@@ -142,3 +160,12 @@ def test_booth_prints_as_the_sfu_page_writes_it() -> None:
 def test_a_problem_without_a_formula_yet_says_so() -> None:
     with pytest.raises(NotImplementedError, match="no formula yet"):
         optbench.make("bbob_f24_lunacek").formula()
+
+
+def test_a_piecewise_inside_a_condition_is_refused() -> None:
+    # Turning this into numpy code made sympy grow to 160 GB (BBOB f3).
+    (x1,) = optbench.variables(1)
+    inner = piecewise((x1, x1 > 0), (-x1, True))
+    outer = piecewise((x1, inner > 1), (0.0, True))
+    with pytest.raises(ValueError, match="exhaust memory"):
+        optbench.evaluate_formula(outer, np.zeros((2, 1)))

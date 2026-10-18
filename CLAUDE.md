@@ -17,7 +17,7 @@ All commands run from the repo root with uv (Python 3.13).
 | Lint as the Stop hook and CI do | `uv run ruff format --check && uv run ruff check --no-fix` |
 | Type check (strict, no `Any`; the one the Stop hook runs) | `uv run mypy .` |
 | Type check as the editor does (strict, `pyrightconfig.json`) | `uv run pyright` |
-| Tests, with 100% branch coverage over `src` and `tests` enforced by `pytest.ini` (about 4 s) | `uv run pytest` |
+| Tests, with 100% branch coverage over `src` and `tests` enforced by `pytest.ini`, under the 2 GB memory watchdog (about 15 s) | `uv run pytest` |
 | Run every pre-commit hook (the same checks through `uv run --locked`; installed with `uv run pre-commit install`) | `uv run pre-commit run --all-files` |
 | One test file quickly, no coverage | `uv run pytest tests/test_x.py -k name --no-cov` |
 | Time every function on 100,000 points, spec criterion 2 (about 5 s; table, `__data__/timing.csv`, exit status 1 if any is over 0.1 s, except the stated exceptions in `src/optbench/scripts/timing.py`) | `uv run python -m optbench.scripts.timing [--points N] [--repeats K]` |
@@ -110,6 +110,20 @@ Before every commit run format, lint, both type checks and the tests above.
 
 ## Things that bite
 
+- sympy can take the whole machine's memory. One BBOB f3 formula at d = 2
+  whose piecewise conditions held another piecewise (T_asy testing the
+  sign of T_osz; sympy rewrites that as an `ITE` condition) grew to 160 GB
+  inside `lambdify` on 2026-10-18 before macOS killed it, with only exit
+  status 137 to show. `evaluate_formula` now refuses such a formula with a
+  ValueError; write the condition on the inner piecewise's own variable
+  (`functions/bbob_symbolic.py` shows how). Every pytest run starts
+  `tests/memory_guard.py` from `tests/conftest.py`, which stops the
+  process with tracebacks (exit status 3) once its peak memory passes
+  2 GB; the suite peaks near 200 MB. Any sympy experiment outside pytest
+  starts the guard first: begin the script with `import sys;
+  sys.path.insert(0, "tests"); import memory_guard; memory_guard.start()`
+  and run it from the repo root. macOS ignores `ulimit -v` and
+  `RLIMIT_AS`, so a hard limit is not available.
 - Ruff's typing-only-import rules (TC001 to TC003) move an import that is
   used only in annotations under `if TYPE_CHECKING:` when the module has
   `from __future__ import annotations`. Pydantic reads field annotations

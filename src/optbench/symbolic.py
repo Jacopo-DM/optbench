@@ -35,10 +35,37 @@ class Expr(Protocol):
     def __rpow__(self, other: float, /) -> Expr: ...
     def __neg__(self) -> Expr: ...
     def __lt__(self, other: Expr | float, /) -> Condition: ...
+    def __gt__(self, other: Expr | float, /) -> Condition: ...
+    def atoms(self, kind: _PiecewiseType, /) -> set[_Pieces]: ...
 
 
 class Condition(Protocol):
     """A sympy relation such as ``x1 < 0.5``, for ``piecewise``."""
+
+    def has(self, *kinds: object) -> bool: ...
+
+
+class _PiecewiseType(Protocol):
+    """``sympy.Piecewise``: builds a piecewise expression."""
+
+    def __call__(
+        self,
+        *pieces: tuple[Expr | float, Condition | bool],
+    ) -> Expr: ...
+
+
+class _Piece(Protocol):
+    """One ``(value, condition)`` pair of a built piecewise expression."""
+
+    @property
+    def cond(self) -> Condition: ...
+
+
+class _Pieces(Protocol):
+    """A built piecewise expression, read as its pairs."""
+
+    @property
+    def args(self) -> tuple[_Piece, ...]: ...
 
 
 class _Lambdified(Protocol):
@@ -56,15 +83,16 @@ class _Sympy(Protocol):
     def sin(self, x: Expr | float, /) -> Expr: ...
     def cos(self, x: Expr | float, /) -> Expr: ...
     def exp(self, x: Expr | float, /) -> Expr: ...
+    def log(self, x: Expr | float, /) -> Expr: ...
     def sqrt(self, x: Expr | float, /) -> Expr: ...
     def Abs(self, x: Expr | float, /) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
     def Add(self, *terms: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
     def Mul(self, *factors: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
     def Max(self, *args: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
-    def Piecewise(  # ruff: ignore[invalid-function-name]  # sympy's own name
-        self,
-        *pieces: tuple[Expr | float, Condition | bool],
-    ) -> Expr: ...
+
+    Piecewise: _PiecewiseType
+    ITE: object
+
     def lambdify(
         self,
         args: tuple[Expr, ...],
@@ -167,6 +195,17 @@ def exp(x: Expr | float) -> Expr:
     return _sympy().exp(x)
 
 
+def log(x: Expr | float) -> Expr:
+    """Return the natural logarithm of ``x``.
+
+    Returns
+    -------
+    Expr
+        The logarithm.
+    """
+    return _sympy().log(x)
+
+
 def sqrt(x: Expr | float) -> Expr:
     """Return the square root of ``x``.
 
@@ -216,11 +255,41 @@ def piecewise(*pieces: tuple[Expr | float, Condition | bool]) -> Expr:
     return _sympy().Piecewise(*pieces)
 
 
+def _refuse_nested_conditions(formula: Expr) -> None:
+    """Refuse a piecewise inside another piecewise's condition.
+
+    sympy rewrites a comparison of a piecewise as an ``ITE`` (if-then-else)
+    condition, and turning that into numpy code grows without bound: one
+    BBOB f3 formula at d = 2 (T_asy testing the sign of T_osz) took 160 GB
+    before macOS killed it.
+
+    Raises
+    ------
+    ValueError
+        If a condition of any piecewise holds an ``ITE`` or a piecewise.
+    """
+    sympy = _sympy()
+    for pieces in formula.atoms(sympy.Piecewise):
+        if any(
+            piece.cond.has(sympy.ITE, sympy.Piecewise) for piece in pieces.args
+        ):
+            msg = (
+                "a piecewise condition holds another piecewise; sympy would "
+                "exhaust memory turning it into numpy code. Test the inner "
+                "piecewise's own variable instead."
+            )
+            raise ValueError(msg)
+
+
 def evaluate_formula(
     formula: Expr,
     points: NDArray[np.float64],
 ) -> NDArray[np.float64]:
     """Evaluate a formula at a batch of points with numpy.
+
+    It refuses a piecewise whose condition holds another piecewise, which
+    sympy cannot turn into numpy code without exhausting memory (see
+    ``_refuse_nested_conditions``).
 
     Parameters
     ----------
@@ -234,9 +303,15 @@ def evaluate_formula(
     numpy.ndarray
         One value per point, shaped ``(n,)``.
     """
+    _refuse_nested_conditions(formula)
     n, d = points.shape
     function = _sympy().lambdify(variables(d), formula, modules="numpy")
-    values = np.asarray(function(*points.T), dtype=np.float64)
+
+    # numpy computes every piece of a piecewise formula at every point, so
+    # the pieces not chosen may take log(0) or sqrt(-1); only chosen values
+    # reach the result.
+    with np.errstate(divide="ignore", invalid="ignore"):
+        values = np.asarray(function(*points.T), dtype=np.float64)
 
     # A formula with no variable left gives one number; spread it out.
     return np.broadcast_to(values, (n,)).copy()
