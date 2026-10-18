@@ -9,8 +9,7 @@ the published values as defaults, and knows its domain and global minimum.
 
 ## Installation
 
-Python 3.13 or later. The repository is private, so install it from
-GitHub with an account that can read it:
+Python 3.13 or later. Install it from GitHub:
 
 ```bash
 uv add git+https://github.com/Jacopo-DM/optbench

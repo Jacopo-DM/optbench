@@ -13,6 +13,8 @@ other). The approved spec and task list are in DESIGN.md.
   commits, so the branch `tier1-skeleton` simply became `main`).
 - Private GitHub repo `Jacopo-DM/optbench` created and `main` pushed
   (2026-10-16, the user's say-so).
+- Made public on 2026-10-18 (the user's choice), so ailigment's CI can
+  install optbench as a git dependency without credentials.
 - Tier 2, the functions: all six SFU groups are done, 49 functions, on
   `main` and pushed (ced98e3, 2026-10-17): 500 tests, coverage 100%, ruff and
   pyright clean, and every function evaluates 100,000 points in under 55 ms.
