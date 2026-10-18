@@ -16,6 +16,10 @@ if TYPE_CHECKING:
 # The (suite, group) pairs whose problems have a formula so far; each task
 # of module formula adds its own.
 COVERED = (
+    ("classic", Group.BOWL),
+    ("classic", Group.MANY_LOCAL_MINIMA),
+    ("classic", Group.OTHER),
+    ("classic", Group.VALLEY),
     ("sfu", Group.BOWL),
     ("sfu", Group.MANY_LOCAL_MINIMA),
     ("sfu", Group.OTHER),
@@ -107,12 +111,13 @@ IDS = [f"{p.name}-d{p.dimension}" for p in PROBLEMS]
 @pytest.mark.parametrize("problem", PROBLEMS, ids=IDS)
 def test_the_formula_equals_the_numpy_values(problem: Problem) -> None:
     x = _points(problem)
-    np.testing.assert_allclose(
-        optbench.evaluate_formula(problem.formula(), x),
-        problem(x),
-        rtol=RTOL,
-        atol=ATOL,
-    )
+
+    # Outside the domain some functions are undefined (Alpine N. 2 takes
+    # sqrt(x) below 0); both sides then give NaN, which counts as equal.
+    with np.errstate(invalid="ignore"):
+        expected = problem(x)
+        values = optbench.evaluate_formula(problem.formula(), x)
+    np.testing.assert_allclose(values, expected, rtol=RTOL, atol=ATOL)
 
 
 def test_the_variables_are_x1_to_xd() -> None:
@@ -136,4 +141,4 @@ def test_booth_prints_as_the_sfu_page_writes_it() -> None:
 
 def test_a_problem_without_a_formula_yet_says_so() -> None:
     with pytest.raises(NotImplementedError, match="no formula yet"):
-        optbench.make("qing").formula()
+        optbench.make("bbob_f24_lunacek").formula()

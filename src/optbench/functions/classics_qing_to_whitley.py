@@ -20,11 +20,22 @@ from optbench.problem import (
     box,
     formula_minimum,
 )
+from optbench.symbolic import (
+    absolute,
+    cos,
+    maximum,
+    product,
+    sqrt,
+    total,
+    variables,
+)
 
 from .references import GAVANA, JAMIL_YANG
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from optbench.symbolic import Expr
 
 _SUITE = "classic"
 _GAVANA = "https://infinity77.net/global_optimization/test_functions_nd_"
@@ -59,6 +70,13 @@ class Qing(AnyDimension):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         i = np.arange(1, self.d + 1, dtype=np.float64)
         return np.sum((x**2 - i) ** 2, axis=1)
+
+    @override
+    def formula(self) -> Expr:
+        return total(
+            (xi**2 - float(i)) ** 2
+            for i, xi in enumerate(variables(self.d), start=1)
+        )
 
 
 class Salomon(AnyDimension):
@@ -99,6 +117,11 @@ class Salomon(AnyDimension):
         )
         return result
 
+    @override
+    def formula(self) -> Expr:
+        radius = sqrt(total(xi**2 for xi in variables(self.d)))
+        return 1 - cos(self.frequency * radius) + self.a * radius
+
 
 class Schwefel221(AnyDimension):
     """Schwefel function 2.21, ``f(x) = max_i |x_i|``. No constants."""
@@ -122,6 +145,10 @@ class Schwefel221(AnyDimension):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         return np.max(np.abs(x), axis=1)
+
+    @override
+    def formula(self) -> Expr:
+        return maximum(absolute(xi) for xi in variables(self.d))
 
 
 class Schwefel222(AnyDimension):
@@ -150,6 +177,11 @@ class Schwefel222(AnyDimension):
             size, axis=1
         )
         return result
+
+    @override
+    def formula(self) -> Expr:
+        size = [absolute(xi) for xi in variables(self.d)]
+        return total(size) + product(size)
 
 
 class Whitley(AnyDimension):
@@ -197,3 +229,11 @@ class Whitley(AnyDimension):
         )
         terms = y**2 / self.divisor - np.cos(y) + 1
         return np.sum(terms, axis=(1, 2))
+
+    @override
+    def formula(self) -> Expr:
+        x = variables(self.d)
+        ys = [
+            self.a * (xi**2 - xj) ** 2 + (1 - xj) ** 2 for xi in x for xj in x
+        ]
+        return total(y**2 / self.divisor - cos(y) + 1 for y in ys)

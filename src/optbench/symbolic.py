@@ -34,6 +34,11 @@ class Expr(Protocol):
     def __pow__(self, other: Expr | float, /) -> Expr: ...
     def __rpow__(self, other: float, /) -> Expr: ...
     def __neg__(self) -> Expr: ...
+    def __lt__(self, other: Expr | float, /) -> Condition: ...
+
+
+class Condition(Protocol):
+    """A sympy relation such as ``x1 < 0.5``, for ``piecewise``."""
 
 
 class _Lambdified(Protocol):
@@ -55,6 +60,11 @@ class _Sympy(Protocol):
     def Abs(self, x: Expr | float, /) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
     def Add(self, *terms: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
     def Mul(self, *factors: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
+    def Max(self, *args: Expr | float) -> Expr: ...  # ruff: ignore[invalid-function-name]  # sympy's own name
+    def Piecewise(  # ruff: ignore[invalid-function-name]  # sympy's own name
+        self,
+        *pieces: tuple[Expr | float, Condition | bool],
+    ) -> Expr: ...
     def lambdify(
         self,
         args: tuple[Expr, ...],
@@ -177,6 +187,33 @@ def absolute(x: Expr | float) -> Expr:
         The absolute value.
     """
     return _sympy().Abs(x)
+
+
+def maximum(args: Iterable[Expr | float]) -> Expr:
+    """Return the largest of ``args`` as one sympy expression.
+
+    Returns
+    -------
+    Expr
+        ``sympy.Max`` of the arguments.
+    """
+    return _sympy().Max(*args)
+
+
+def piecewise(*pieces: tuple[Expr | float, Condition | bool]) -> Expr:
+    """Return the first piece whose condition holds, as ``numpy.select``.
+
+    Parameters
+    ----------
+    *pieces
+        ``(value, condition)`` pairs; the last condition is usually ``True``.
+
+    Returns
+    -------
+    Expr
+        ``sympy.Piecewise`` of the pieces.
+    """
+    return _sympy().Piecewise(*pieces)
 
 
 def evaluate_formula(

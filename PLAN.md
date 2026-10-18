@@ -34,7 +34,7 @@ other). The approved spec and task list are in DESIGN.md.
 - Git (2026-10-18): `main` holds the `formula` spec and task list
   (5a6efef to 4df5b43, from `spec-formula`) and was pushed at 4df5b43 (the
   user's say-so); `spec-formula` was deleted (the user's say-so). The module's work is on branch `formula` (569f452,
-  186c2ae, b9dbc97, a3c021a: F1 to F4), not merged or pushed yet; it merges into
+  186c2ae, b9dbc97, a3c021a and the F5 commit: F1 to F5), not merged or pushed yet; it merges into
   `main` when F9 is done. Earlier: `main` was pushed (de53338, 2026-10-17,
   the user's say-so). Every push to `main` from f33326f to fb9bd7e
   failed f23 on Linux by 3.3e-9 relative; summing the rotations in COCO's
@@ -45,11 +45,12 @@ other). The approved spec and task list are in DESIGN.md.
   setup-uv than the user's template.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
-- Module `formula` in progress (branch `formula`): F1 to F4 done, so 49
-  of the 83 problems have `formula()` (every SFU group);
+- Module `formula` in progress (branch `formula`): F1 to F5 done, so 59
+  of the 83 problems have `formula()` (every SFU function and classic);
   `tests/test_formula.py` lists the covered (suite, group) pairs in
-  `COVERED` and its no-formula test uses `qing`, which F5 covers, so F5
-  moves that test to a BBOB function. 1715 tests, 100% coverage.
+  `COVERED` and its no-formula test uses `bbob_f24_lunacek`, which F8
+  covers last; F9 then deletes that test with the NotImplementedError
+  path. 1765 tests, 100% coverage.
 
 ## Constraints
 
@@ -60,7 +61,7 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Module `formula`, task F5 (below); `ailigment`'s goal `optbench-symreg`
+Module `formula`, task F6 (below); `ailigment`'s goal `optbench-symreg`
 waits on the module.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
@@ -99,7 +100,7 @@ Tier 2 (by value over risk plus cost; plain formulas first, BBOB last):
 - F2: done (see DESIGN.md results).
 - F3: done (see DESIGN.md results).
 - F4: done (see DESIGN.md results).
-- F5. classics (10, two modules). Risk low; about 120 lines.
+- F5: done (see DESIGN.md results).
 - F6. BBOB transforms as symbolic twins in `bbob_common.py` (T_osz,
   T_asy, Lambda, the rotations as number matrices, f_pen, the shift by
   `x_opt`), and the separable f1 to f5. Risk: medium (T_osz is piecewise

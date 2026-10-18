@@ -20,12 +20,24 @@ from optbench.problem import (
     box,
     formula_minimum,
 )
+from optbench.symbolic import (
+    cos,
+    exp,
+    piecewise,
+    product,
+    sin,
+    sqrt,
+    total,
+    variables,
+)
 
 from .known_minima import BIRD, HIMMELBLAU, at_defaults
 from .references import BEYER_FINCK, GAVANA, JAMIL_YANG, WIKIPEDIA
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from optbench.symbolic import Expr
 
 _SUITE = "classic"
 _GAVANA = "https://infinity77.net/global_optimization/test_functions_nd_"
@@ -89,6 +101,10 @@ class AlpineN2(AnyDimension):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         return -np.prod(np.sqrt(x) * np.sin(x), axis=1)
 
+    @override
+    def formula(self) -> Expr:
+        return -product(sqrt(xi) * sin(xi) for xi in variables(self.d))
+
 
 class Bird(Problem):
     """Bird function.
@@ -127,6 +143,15 @@ class Bird(Problem):
             + (x1 - x2) ** 2
         )
         return result
+
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        return (
+            sin(x1) * exp((1 - cos(x2)) ** 2)
+            + cos(x2) * exp((1 - sin(x1)) ** 2)
+            + (x1 - x2) ** 2
+        )
 
 
 class Deceptive(AnyDimension):
@@ -200,6 +225,21 @@ class Deceptive(AnyDimension):
         g = np.select(conditions, pieces[:3], default=pieces[3])
         return -(np.mean(g, axis=1) ** self.beta)
 
+    @override
+    def formula(self) -> Expr:
+        g = [
+            piecewise(
+                (-xi / a + 0.8, xi < 0.8 * a),
+                (5 * xi / a - 4, xi < a),
+                (5 * (xi - a) / (a - 1) + 1, xi < (1 + 4 * a) / 5),
+                ((xi - 1) / (1 - a) + 0.8, True),
+            )
+            for xi, a in zip(
+                variables(self.d), self._peaks().tolist(), strict=True
+            )
+        ]
+        return -((total(g) / self.d) ** self.beta)
+
 
 class HappyCat(AnyDimension):
     """HappyCat function, a curved groove around the sphere ``|x|^2 = d``.
@@ -248,6 +288,13 @@ class HappyCat(AnyDimension):
         )
         return result
 
+    @override
+    def formula(self) -> Expr:
+        x = variables(self.d)
+        squares = total(xi**2 for xi in x)
+        groove = ((squares - self.d) ** 2) ** self.alpha
+        return groove + (squares / 2 + total(x)) / self.d + 0.5
+
 
 class Himmelblau(Problem):
     """Himmelblau's function, ``f(x) = (x1^2 + x2 - a)^2 + (x1 + x2^2 - b)^2``.
@@ -285,4 +332,9 @@ class Himmelblau(Problem):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
+        return (x1**2 + x2 - self.a) ** 2 + (x1 + x2**2 - self.b) ** 2
+
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
         return (x1**2 + x2 - self.a) ** 2 + (x1 + x2**2 - self.b) ** 2

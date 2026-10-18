@@ -690,6 +690,7 @@ optbench, and what was decided:
 
 | What | Measure | Result | Notes |
 |------|---------|--------|-------|
+| Formulas F5: the 10 classics (`tests/test_formula.py`, as F4, suite "classic" added) | formula against numpy | all 50 new problem variants equal to rtol 1e-12, atol 1e-10; the facade gains `maximum` (Schwefel 2.21) and `piecewise` (Deceptive's four pieces, chosen in `numpy.select`'s order); Alpine N. 2 is NaN below 0 on both sides, which counts as equal | suite 1765 tests, 6.8 s with coverage; timing script 0 of 83 over 100 ms (Whitley 131 ms at d = 10, the stated exception) |
 | Formulas F4: other (12) (`tests/test_formula.py`, as F1; any-d problems at each d that `replace` accepts, so Powell only at d = 4) | formula against numpy | all 22 new problem variants equal to rtol 1e-12, atol 1e-10; Hartmann and Shekel carry their constant matrices as float numbers | suite 1715 tests, 7.6 s with coverage |
 | Formulas F3: many local minima (16) (`tests/test_formula.py`, as F1) | formula against numpy | all 41 new problem variants equal to rtol 1e-12, atol 1e-10 | suite 1693 tests, 9.4 s without coverage at load average 21; the first formula test pays sympy's import (3.3 s under that load), every other formula test under 0.05 s |
 | Formulas F2: plate (5), steep (3) and valley (4) (`tests/test_formula.py`, as F1) | formula against numpy | all 32 new problem variants equal to rtol 1e-12, atol 1e-10; Booth prints as `(x1 + 2.0*x2 - 7.0)**2 + (2.0*x1 + x2 - 5.0)**2` | suite 1652 tests, about 6 s |
