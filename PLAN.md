@@ -33,10 +33,10 @@ other). The approved spec and task list are in DESIGN.md.
   `src` and `tests`; ruff, mypy strict and pyright strict clean.
 - Git (2026-10-18): `main` holds the `formula` spec and task list
   (5a6efef to 4df5b43, from `spec-formula`) and was pushed at 4df5b43 (the
-  user's say-so); `spec-formula` was deleted (the user's say-so). Module `formula` (569f452 to 0cea41b and this docs fix, branch
-  `formula`) was fast-forwarded into `main` when F9 was done; `main` is
-  not pushed yet and `formula` not deleted (each needs the user's
-  say-so). Earlier: `main` was pushed (de53338, 2026-10-17,
+  user's say-so); `spec-formula` was deleted (the user's say-so). Module `formula` (569f452 to 0cea41b, then 690f912) was
+  fast-forwarded into `main`, pushed at 690f912 and `formula` deleted
+  (the user's say-so, 2026-10-18); CI passed on Linux (2005 tests, 100%
+  coverage, 2 min 15 s for the tests). Earlier: `main` was pushed (de53338, 2026-10-17,
   the user's say-so). Every push to `main` from f33326f to fb9bd7e
   failed f23 on Linux by 3.3e-9 relative; summing the rotations in COCO's
   order (DESIGN.md Decisions) fixed it, and CI passed on de53338 (1578
@@ -60,8 +60,8 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Push `main` with module `formula` (the user's say-so); `ailigment`'s goal
-`optbench-symreg` then starts with its task S1, which pins this commit.
+`ailigment`'s goal `optbench-symreg`, task S1, which pins optbench at
+690f912 (its PLAN.md). No optbench module is open.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 
@@ -80,7 +80,7 @@ COCO's Python package as a dev-only dependency are approved too.
 2. done (2026-10-17): the same migration for `ailigment` (its PLAN.md).
 3. done (2026-10-18, 569f452 to 0cea41b): module `formula` (spec
    in DESIGN.md, "Approved spec: formula"), asked for by `ailigment`'s
-   approved goal `optbench-symreg` (its DESIGN.md). Not pushed yet.
+   approved goal `optbench-symreg` (its DESIGN.md). Pushed at 690f912.
 
 ## Open questions for the user
 
