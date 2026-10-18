@@ -34,7 +34,8 @@ other). The approved spec and task list are in DESIGN.md.
 - Git (2026-10-18): `main` holds the `formula` spec and task list
   (5a6efef to 4df5b43, from `spec-formula`) and was pushed at 4df5b43 (the
   user's say-so); `spec-formula` was deleted (the user's say-so). The module's work is on branch `formula` (569f452,
-  186c2ae, b9dbc97, a3c021a, 29d3b65, 44a20c4, 0862e9d and the F8 commit: F1 to F8), not merged or pushed yet; it merges into
+  186c2ae, b9dbc97, a3c021a, 29d3b65, 44a20c4, 0862e9d, 5337846: F1 to F8; 344cb16 samples the BBOB
+  formula variants), not merged or pushed yet; it merges into
   `main` when F9 is done. Earlier: `main` was pushed (de53338, 2026-10-17,
   the user's say-so). Every push to `main` from f33326f to fb9bd7e
   failed f23 on Linux by 3.3e-9 relative; summing the rotations in COCO's
