@@ -47,8 +47,9 @@ other). The approved spec and task list are in DESIGN.md.
   modules in that repo (see its PLAN.md).
 - Module `formula` in progress (branch `formula`): F1 to F8 done, so all
   83 problems have `formula()`, which is now abstract on `Problem`;
-  `tests/test_formula.py` checks every registered problem. 2368 tests,
-  100% coverage; the suite takes 9 to 9.5 min at load 5 to 10.
+  `tests/test_formula.py` checks every registered problem. 1984 tests,
+  100% coverage; the suite takes about 2 min (BBOB formulas sampled at 9
+  of 25 (d, instance) pairs, the user's choice).
 
 ## Constraints
 
@@ -112,9 +113,7 @@ Tier 2 (by value over risk plus cost; plain formulas first, BBOB last):
 
 Verify after each task: the full suite, mypy, pyright, ruff, the timing
 script (sympy must not slow `problem(x)`; it is not on that path), and the
-suite's run time (9 to 9.5 min since F8, at load 5 to 10; the user kept
-all 25 (d, instance) pairs per BBOB function on 2026-10-18 on my estimate
-of 3 to 5 min, before the measured 9 min was known).
+suite's run time (about 2 min since the BBOB sampling, 2026-10-18).
 
 Tier 3 (not built): simplifying formulas, LaTeX or printing APIs,
 symbolic gradients, evaluating through sympy (the spec's non-goals).

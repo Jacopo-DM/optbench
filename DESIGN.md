@@ -212,9 +212,12 @@ Acceptance criteria:
    tolerance is relative to the function's own size. f19 at d = 5,
    instance 4, at a point outside the domain, has a core of 58.55 and
    f_opt -58.48; the formula's error of 4e-10 is 7e-12 of the core but
-   5.5e-9 of the 0.074 left after the offset. The user kept all 25
-   (d, instance) pairs per BBOB function, against a sampled set, knowing
-   the suite grows to minutes.)
+   5.5e-9 of the 0.074 left after the offset. The user first kept all
+   25 (d, instance) pairs per BBOB function on my estimate of 3 to 5
+   minutes; measured at 9 to 9.5 minutes, the user chose a sample on
+   2026-10-18: every d at instance 1, and every instance at d = 3, 9 of
+   the 25 pairs. The instance changes only `x_opt`, `f_opt` and the
+   rotations, not the code path.)
 3. It follows the parameters: a problem built with changed constants
    (for example `make("ackley", a=10.0)`) gives a formula that matches its
    own values, tested on one problem per file.
@@ -725,6 +728,7 @@ optbench, and what was decided:
 
 | What | Measure | Result | Notes |
 |------|---------|--------|-------|
+| BBOB formula sampling (`tests/test_formula.py`: every d at instance 1, every instance at d = 3; the user's choice, 2026-10-18) | suite time | 9 min 27 s to 1 min 50 s (load 3 to 6), 2368 to 1984 tests; peak 353 to 292 MB; the slowest case is Gallagher 101 at d = 6, 10 s under coverage |
 | Formulas F8: BBOB f15 to f24; `formula()` abstract (`tests/test_formula.py` over every registered problem; BBOB values compared with `f_opt` subtracted) | formula against numpy | all 250 new problem variants equal (1e-12, 1e-9 for f16 to f19 and f23; atol 1e-10) | suite 2368 tests in 9 min 0 s and 9 min 27 s (two runs, load 5 to 10), against 39 s after F7; peak 353 to 371 MB. Without coverage the new cases take 137 s (Gallagher 101: 61 s, Katsuura 26 s, Weierstrass 22 s); under coverage one Gallagher 101 case at d = 6 takes 12 to 54 s. Timing script 0 of 83 over 100 ms |
 | Formulas F7: BBOB f6 to f14 (`tests/test_formula.py`, as F6) | formula against numpy | all 225 new problem variants equal to rtol 1e-12, atol 1e-10; f6's T_osz of a sum of squares tests the bare `sum z_i^2 > 0`, which holds no piecewise | suite 2119 tests: 39 s against F6's 14 s, back to back at load 5; building f7 at d = 6 took 1.0 s until `maximum` built `Max` unevaluated (0.09 s; sympy compared the arguments symbolically); timing script 0 of 83 over 100 ms (3 over at load 8 from another session's browser tests, none of them touched) |
 | Formulas F6: BBOB f1 to f5 and the transform twins (`tests/test_formula.py`, d = 2 to 6 at instances 1 to 5) | formula against numpy | all 125 new problem variants equal to rtol 1e-12, atol 1e-10 | suite 1894 tests, 14.3 s with coverage (about 200 MB peak); timing script 0 of 83 over 100 ms |

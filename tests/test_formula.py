@@ -16,8 +16,12 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
 DIMENSIONS = range(1, 7)
-# BBOB problems are checked at these COCO instances (spec criterion 2).
+# BBOB problems are checked at every allowed d for instance 1, and at every
+# one of INSTANCES for d = EVERY_INSTANCE_D (spec criterion 2, as the user
+# amended it): the instance changes only x_opt, f_opt and the rotations,
+# not the code path, and all 25 pairs made the suite take 9 minutes.
 INSTANCES = range(1, 6)
+EVERY_INSTANCE_D = 3
 RTOL = 1e-12
 # Spec criterion 2: these BBOB functions use test_bbob.py's looser 1e-9;
 # they magnify the last bit of z (Weierstrass's 3^11, Katsuura's 2^32,
@@ -56,7 +60,8 @@ def _allowed(problem: AnyDimension, d: int) -> bool:
 def _problems() -> list[Problem]:
     """Every registered problem, any-d ones at each allowed d up to 6.
 
-    BBOB problems are checked at each of ``INSTANCES`` too.
+    BBOB problems are checked at instance 1, and at each of ``INSTANCES``
+    for ``d = EVERY_INSTANCE_D``.
 
     Returns
     -------
@@ -72,6 +77,7 @@ def _problems() -> list[Problem]:
                 for d in DIMENSIONS
                 if _allowed(problem, d)
                 for k in INSTANCES
+                if k == 1 or d == EVERY_INSTANCE_D
             ]
         elif isinstance(problem, AnyDimension):
             problems += [
