@@ -12,12 +12,15 @@ from typing import TYPE_CHECKING, ClassVar, override
 import numpy as np
 
 from optbench.problem import Group, Minimum, Problem, box
+from optbench.symbolic import exp, total, variables
 
 from .known_minima import HARTMANN_3, HARTMANN_4, HARTMANN_6, at_defaults
 from .references import DIXON_SZEGO, HEDAR, PICHENY
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from optbench.symbolic import Expr
 
 _GROUP = Group.OTHER
 _SFU = "https://www.sfu.ca/~ssurjano/"
@@ -111,6 +114,31 @@ class _Hartmann(Problem):
         bumps: NDArray[np.float64] = np.exp(-exponents) @ np.asarray(self.alpha)
         return bumps
 
+    def _bumps_formula(self) -> Expr:
+        """Return ``g(x)`` as a sympy expression.
+
+        Returns
+        -------
+        Expr
+            The sum of the weighted bumps.
+        """
+        x = variables(self.dimension)
+        return total(
+            alpha
+            * exp(
+                -total(
+                    w * (xj - c) ** 2
+                    for xj, w, c in zip(x, widths, centres, strict=True)
+                ),
+            )
+            for alpha, widths, centres in zip(
+                self.alpha,
+                self.a,
+                self.p,
+                strict=True,
+            )
+        )
+
 
 class Hartmann3(_Hartmann):
     """Hartmann 3-D function, ``f(x) = -g(x)``: four local minima."""
@@ -128,6 +156,10 @@ class Hartmann3(_Hartmann):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         return -self._bumps(x)
+
+    @override
+    def formula(self) -> Expr:
+        return -self._bumps_formula()
 
 
 class Hartmann4(_Hartmann):
@@ -161,6 +193,10 @@ class Hartmann4(_Hartmann):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         return (self.offset - self._bumps(x)) / self.scale
 
+    @override
+    def formula(self) -> Expr:
+        return (self.offset - self._bumps_formula()) / self.scale
+
 
 class Hartmann6(_Hartmann):
     """Hartmann 6-D function, ``f(x) = -g(x)``: six local minima."""
@@ -181,3 +217,7 @@ class Hartmann6(_Hartmann):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         return -self._bumps(x)
+
+    @override
+    def formula(self) -> Expr:
+        return -self._bumps_formula()

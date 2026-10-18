@@ -18,11 +18,14 @@ from optbench.problem import (
     box,
     formula_minimum,
 )
+from optbench.symbolic import total, variables
 
 from .references import GAVANA, HEDAR, LAGUNA_MARTI, MOLGA
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from optbench.symbolic import Expr
 
 _GROUP = Group.OTHER
 _SFU = "https://www.sfu.ca/~ssurjano/"
@@ -72,6 +75,19 @@ class PermDBeta(AnyDimension):
             weights,
         )
         return np.sum(inner**2, axis=1)
+
+    @override
+    def formula(self) -> Expr:
+        x = variables(self.d)
+        js = [float(j) for j in range(1, self.d + 1)]
+        return total(
+            total(
+                (j**i + self.beta) * ((xj / j) ** i - 1)
+                for j, xj in zip(js, x, strict=True)
+            )
+            ** 2
+            for i in range(1, self.d + 1)
+        )
 
 
 class Powell(AnyDimension):
@@ -127,6 +143,23 @@ class Powell(AnyDimension):
             + self.e * (x1 - x4) ** 4
         )
         return np.sum(blocks, axis=1)
+
+    @override
+    def formula(self) -> Expr:
+        x = variables(self.d)
+        return total(
+            (x1 + self.a * x2) ** 2
+            + self.b * (x3 - x4) ** 2
+            + (x2 - self.c * x3) ** 4
+            + self.e * (x1 - x4) ** 4
+            for x1, x2, x3, x4 in zip(
+                x[0::4],
+                x[1::4],
+                x[2::4],
+                x[3::4],
+                strict=True,
+            )
+        )
 
 
 _SHEKEL_BETA = (0.1, 0.2, 0.2, 0.4, 0.4, 0.6, 0.3, 0.7, 0.5, 0.5)
@@ -230,6 +263,21 @@ class Shekel(Problem):
         wells: NDArray[np.float64] = 1 / (squares + beta)
         return -wells.sum(axis=1)
 
+    @override
+    def formula(self) -> Expr:
+        x = variables(self.dimension)
+        return -total(
+            1
+            / (
+                total(
+                    (xj - row[i]) ** 2
+                    for xj, row in zip(x, self.c, strict=True)
+                )
+                + self.beta[i]
+            )
+            for i in range(self.m)
+        )
+
 
 class StyblinskiTang(AnyDimension):
     """Styblinski-Tang function.
@@ -288,3 +336,9 @@ class StyblinskiTang(AnyDimension):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         return self.scale * np.sum(self._quartic(x), axis=1)
+
+    @override
+    def formula(self) -> Expr:
+        return self.scale * total(
+            xi**4 - self.a * xi**2 + self.b * xi for xi in variables(self.d)
+        )

@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optbench/__init__.py`.
 
-## `src/optbench` (6956 lines, 34 files)
+## `src/optbench` (7093 lines, 34 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -19,9 +19,8 @@ Public interface (`optbench/__init__.py`):
   (a `Minimum` or `None`), class variables `name`, `group`, `url`,
   `references`, `suite` (`"sfu"`, or `"classic"` for functions not on
   the SFU pages). `formula()` returns the function as a sympy `Expr` in
-  `variables(d)` (the SFU bowl, plate, steep, valley and many-local-minima
-  groups so far;
-  the others raise NotImplementedError).
+  `variables(d)` (every SFU group so far; the classics and BBOB
+  functions raise NotImplementedError).
 - `Expr` (a Protocol: a sympy expression with arithmetic), `variables(d)`
   (`x1` to `xd`), `evaluate_formula(formula, points)` (`(n,)` values, by
   `sympy.lambdify`).
@@ -144,7 +143,7 @@ allowed over it), `main` returning the exit status), `baseline.py` (`main`));
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (1745 lines, 15 files)
+## `tests` (1760 lines, 15 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,

@@ -45,12 +45,11 @@ other). The approved spec and task list are in DESIGN.md.
   setup-uv than the user's template.
 - `ailigment` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
-- Module `formula` in progress (branch `formula`): F1 to F3 done, so 37
-  of the 83 problems have `formula()` (the SFU bowl, plate, steep, valley
-  and many-local-minima groups); `tests/test_formula.py` lists the covered
-  (suite, group) pairs in `COVERED` and its no-formula test uses Beale,
-  which F4 covers, so F4 moves that test to a classic (e.g. `qing`, F5)
-  and F5 to a BBOB function. 1693 tests, 100% coverage.
+- Module `formula` in progress (branch `formula`): F1 to F4 done, so 49
+  of the 83 problems have `formula()` (every SFU group);
+  `tests/test_formula.py` lists the covered (suite, group) pairs in
+  `COVERED` and its no-formula test uses `qing`, which F5 covers, so F5
+  moves that test to a BBOB function. 1715 tests, 100% coverage.
 
 ## Constraints
 
@@ -61,7 +60,7 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Module `formula`, task F4 (below); `ailigment`'s goal `optbench-symreg`
+Module `formula`, task F5 (below); `ailigment`'s goal `optbench-symreg`
 waits on the module.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
@@ -99,8 +98,7 @@ Tier 2 (by value over risk plus cost; plain formulas first, BBOB last):
 
 - F2: done (see DESIGN.md results).
 - F3: done (see DESIGN.md results).
-- F4. other (12, three modules): Hartmann and Shekel with their constant
-  matrices as numbers, Powell, Perm. Risk low; about 180 lines.
+- F4: done (see DESIGN.md results).
 - F5. classics (10, two modules). Risk low; about 120 lines.
 - F6. BBOB transforms as symbolic twins in `bbob_common.py` (T_osz,
   T_asy, Lambda, the rotations as number matrices, f_pen, the shift by

@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 COVERED = (
     ("sfu", Group.BOWL),
     ("sfu", Group.MANY_LOCAL_MINIMA),
+    ("sfu", Group.OTHER),
     ("sfu", Group.PLATE),
     ("sfu", Group.STEEP),
     ("sfu", Group.VALLEY),
@@ -30,6 +31,21 @@ OUTSIDE = 5
 # Points outside the domain reach this far past its edges, as a share of
 # each side's width.
 REACH = 0.3
+
+
+def _allowed(problem: AnyDimension, d: int) -> bool:
+    """Whether ``problem`` takes ``d`` variables (Powell needs multiples of 4).
+
+    Returns
+    -------
+    bool
+        False when ``replace(d=d)`` refuses ``d``.
+    """
+    try:
+        problem.replace(d=d)
+    except ValueError:
+        return False
+    return True
 
 
 def _problems() -> list[Problem]:
@@ -49,9 +65,8 @@ def _problems() -> list[Problem]:
     for name in names:
         problem = optbench.make(name)
         if isinstance(problem, AnyDimension):
-            smallest = type(problem).smallest_dimension
             problems += [
-                problem.replace(d=d) for d in DIMENSIONS if d >= smallest
+                problem.replace(d=d) for d in DIMENSIONS if _allowed(problem, d)
             ]
         else:
             problems.append(problem)
@@ -121,4 +136,4 @@ def test_booth_prints_as_the_sfu_page_writes_it() -> None:
 
 def test_a_problem_without_a_formula_yet_says_so() -> None:
     with pytest.raises(NotImplementedError, match="no formula yet"):
-        optbench.make("beale").formula()
+        optbench.make("qing").formula()

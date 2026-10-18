@@ -12,12 +12,15 @@ from typing import TYPE_CHECKING, ClassVar, override
 import numpy as np
 
 from optbench.problem import Group, Minimum, Problem, box, formula_minimum
+from optbench.symbolic import cos, sin, total, variables
 
 from .known_minima import FORRESTER_2008, GOLDSTEIN_PRICE, at_defaults
 from .references import DIXON_SZEGO, HEDAR, MOLGA, PICHENY
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from optbench.symbolic import Expr
 
 _GROUP = Group.OTHER
 _SFU = "https://www.sfu.ca/~ssurjano/"
@@ -76,10 +79,17 @@ class Beale(Problem):
     @override
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         x1, x2 = x[:, 0], x[:, 1]
-        total = np.zeros(len(x))
+        value = np.zeros(len(x))
         for k, c in enumerate(self.c, start=1):
-            total += (c - x1 + x1 * x2**k) ** 2
-        return total
+            value += (c - x1 + x1 * x2**k) ** 2
+        return value
+
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        return total(
+            (c - x1 + x1 * x2**k) ** 2 for k, c in enumerate(self.c, start=1)
+        )
 
 
 class Branin(Problem):
@@ -156,6 +166,12 @@ class Branin(Problem):
         square = (x2 - self.b * x1**2 + self.c * x1 - self.r) ** 2
         return self.a * square + self.s * (1 - self.t) * np.cos(x1) + self.s
 
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        square = (x2 - self.b * x1**2 + self.c * x1 - self.r) ** 2
+        return self.a * square + self.s * (1 - self.t) * cos(x1) + self.s
+
 
 class Colville(Problem):
     """Colville function, four variables.
@@ -213,6 +229,19 @@ class Colville(Problem):
             + self.e * u * v
         )
 
+    @override
+    def formula(self) -> Expr:
+        x1, x2, x3, x4 = variables(4)
+        u, v = x2 - 1, x4 - 1
+        return (
+            self.a * (x1**2 - x2) ** 2
+            + (x1 - 1) ** 2
+            + (x3 - 1) ** 2
+            + self.b * (x3**2 - x4) ** 2
+            + self.c * (u**2 + v**2)
+            + self.e * u * v
+        )
+
 
 class Forrester2008(Problem):
     """Forrester et al. (2008) function, one variable.
@@ -254,6 +283,11 @@ class Forrester2008(Problem):
     def _evaluate(self, x: NDArray[np.float64]) -> NDArray[np.float64]:
         t = x[:, 0]
         return (self.a * t - self.b) ** 2 * np.sin(self.c * t - self.e)
+
+    @override
+    def formula(self) -> Expr:
+        (t,) = variables(1)
+        return (self.a * t - self.b) ** 2 * sin(self.c * t - self.e)
 
 
 class GoldsteinPrice(Problem):
@@ -310,3 +344,12 @@ class GoldsteinPrice(Problem):
         second = self.b + (2 * x1 - 3 * x2) ** 2 * (np.asarray(self.q) @ terms)
         result: NDArray[np.float64] = first * second
         return result
+
+    @override
+    def formula(self) -> Expr:
+        x1, x2 = variables(2)
+        terms: tuple[Expr | float, ...] = (1.0, x1, x1**2, x2, x1 * x2, x2**2)
+        p = total(w * term for w, term in zip(self.p, terms, strict=True))
+        q = total(w * term for w, term in zip(self.q, terms, strict=True))
+        first = self.a + (x1 + x2 + 1) ** 2 * p
+        return first * (self.b + (2 * x1 - 3 * x2) ** 2 * q)
