@@ -64,7 +64,7 @@ other). The approved specs are in DESIGN.md, the task list below.
   below. The housekeeping after it (61a6f30 to ea00dd8: CLAUDE.md copies of
   global rules out, this file's tasks, CODEMAP.md's top-level folders,
   virtualenv 21.14.13 for four advisories) is merged into `main` and pushed
-  at ea00dd8 (the user's say-so); CI passed on it. `main` is the only branch.
+  at ea00dd8 (the user's say-so); CI passed on it.
 - Compliance pass (task 4) merged into `main`, pushed at 693876d (the
   user's say-so, 2026-10-23); CI passed on it. Dependabot's PR #2 (the
   uv-pre-commit hook 0.13.1 to 0.13.4) gained a commit setting CI's uv to
@@ -86,11 +86,8 @@ No optibench module is open.
 
 ## Baseline (2026-10-23, at 693876d)
 
-`uv run --locked ruff format --check` and `ruff check --no-fix` pass;
-`mypy .` and `pyright` find no errors; `pytest` passes 2009 tests at 100%
-branch coverage in 1 min 50 s; `ty check` (advisory) reports the 2
-findings under Known problems; the timing script has 0 of 83 problems over
-the 100 ms budget (Whitley 135 ms, its stated exception).
+Every check in CLAUDE.md passes; the counts are in DESIGN.md's Results,
+row "Python compliance". `pytest` takes 1 min 50 s at load 4 to 6.
 
 ## Tasks (approved modules, 2026-10-17)
 
