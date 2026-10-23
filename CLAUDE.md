@@ -11,24 +11,30 @@ All commands run from the repo root with uv (Python 3.13).
 
 | Purpose | Command |
 |---------|---------|
-| Install or rebuild the environment (numpy, pydantic, sympy; dev group: pytest, pytest-cov, hypothesis, mypy, pyright, ty, ruff, pillow, pre-commit, coco-experiment, which has no Python 3.13 wheel and is compiled from its source archive with Xcode's compiler) | `uv sync` |
+| Install or rebuild the environment (numpy, pydantic, sympy; dev group: pytest, pytest-cov, hypothesis, mypy, pyright, ty, ruff, pillow, pre-commit, nbclient, nbformat, ipykernel, coco-experiment, which has no Python 3.13 wheel and is compiled from its source archive with Xcode's compiler) | `uv sync` |
 | Format | `uv run ruff format` |
 | Lint (auto-fixes, unsafe fixes included: read the diff) | `uv run ruff check` |
 | Lint as the Stop hook and CI do | `uv run ruff format --check && uv run ruff check --no-fix` |
 | Type check (strict, no `Any`; the one the Stop hook runs) | `uv run mypy .` |
 | Type check as the editor does (strict, `pyrightconfig.json`) | `uv run pyright` |
+| Advisory type check (`ty.toml`; never blocks, 2 known numpy-stub findings in PLAN.md) | `uv run --locked ty check` |
 | Tests, with 100% branch coverage over `src` and `tests` enforced by `pytest.ini`, under the 2 GB memory watchdog (about 2 min at load 4 to 6, most of it the formula test's sympy work; run one file with the command below while working) | `uv run pytest` |
-| Run every pre-commit hook (the same checks through `uv run --locked`; installed with `uv run pre-commit install`) | `uv run pre-commit run --all-files` |
+| Run every pre-commit hook (the same checks through `uv run --locked`; `uv run pre-commit install` installs the pre-commit and pre-push hooks, and pre-push runs `tools/run_notebooks.py`, which finds no notebooks yet) | `uv run pre-commit run --all-files` |
 | One test file quickly, no coverage | `uv run pytest tests/test_x.py -k name --no-cov` |
 | Time every function on 100,000 points, spec criterion 2 (about 5 s; table, `__data__/timing.csv`, exit status 1 if any is over 0.1 s, except the stated exceptions in `src/optibench/scripts/timing.py`) | `uv run python -m optibench.scripts.timing [--points N] [--repeats K]` |
 | Run the random-search baseline on every function, 10 seeds of 10,000 points (about 1 s; table, curves in `__data__/baseline/`) | `uv run python -m optibench.scripts.baseline [--budget N] [--seeds K]` |
 
-`mypy.ini`, `ruff.toml`, `pytest.ini`, `pyrightconfig.json`, `.gitignore`
-(below its PROJECT section) and `tools/compress_images.py` are copies of the
-user's templates in `~/Functions/_rsync/python/`: never edit them to get a
+`mypy.ini`, `ruff.toml`, `pytest.ini`, `pyrightconfig.json`, `ty.toml`,
+`.pre-commit-config.yaml`, `.github/`, `.gitignore` (below its PROJECT
+section), `tools/compress_images.py` and `tools/run_notebooks.py` are copies
+of the user's templates in `~/Functions/_rsync/`: never edit them to get a
 check through (the Stop hook compares them with the templates); refresh
 them with `rsync-sync pull python` in a clean tree and read the diff (it
-also copies `main.py`, which this library deletes).
+also copies `main.py`, which this library deletes). One approved exception
+(the user, 2026-10-23): `ci.yml` keeps setup-uv v10.3.0, which Dependabot
+brought in, over the template's v9.0.0; put that line back after a refresh.
+The `.gitignore` ignores `.typings/` as the template does, but the `cocoex`
+stub there stays tracked; a new file there needs `git add -f`.
 
 Before every commit run format, lint, both type checks and the tests above.
 

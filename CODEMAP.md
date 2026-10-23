@@ -172,14 +172,17 @@ run past 2 GB of peak memory), `test_memory_guard.py`,
 
 ## Other top-level folders
 
-`tools/compress_images.py` (469 lines, a copy of the user's template):
+`tools/compress_images.py` (483 lines, a copy of the user's template):
 compresses PNG and JPEG images under `docs/` and `examples/` and strips
-their metadata; run by pre-commit. `.github/`: `workflows/ci.yml` (format,
-lint, mypy and pytest on Linux) and `dependabot.yml`. `.typings/`: the
+their metadata; run by pre-commit. `tools/run_notebooks.py` (495, the
+template's): runs `tests/functional/*.ipynb` (none yet) at commit and
+push. `.github/`: `workflows/ci.yml` (format, lint, mypy and pytest on
+Linux) and `dependabot.yml` (actions, uv and pre-commit, weekly, grouped). `.typings/`: the
 `cocoex` stub (CLAUDE.md ignore list).
 
 ## Size checks (400 lines per file)
 
 No file of this repo's own over 400 lines; the largest is
-`functions/bbob_common.py` (386). `tools/compress_images.py` (469) is the
-template's copy and is not split here.
+`functions/bbob_common.py` (386). `tools/compress_images.py` (483) and
+`tools/run_notebooks.py` (495) are the template's copies and are not split
+here.

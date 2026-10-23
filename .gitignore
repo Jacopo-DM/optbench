@@ -154,6 +154,8 @@ dmypy.json
 .pyre/
 # pytype static type analyzer
 .pytype/
+# type stubs for pyright and mypy (pyrightconfig.json stubPath)
+.typings/
 # Cython debug symbols
 cython_debug/
 # PyCharm

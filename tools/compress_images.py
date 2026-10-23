@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.13"
-# dependencies = ["pillow"]
+# dependencies = ["pillow==13.0.0"]
 # ///
 """Compress PNG and JPEG images and strip their metadata.
 
@@ -18,12 +18,13 @@ What it does to each image:
 
 * strips all metadata: EXIF, GPS, XMP, text chunks, comments, DPI, thumbnails;
 * applies the EXIF orientation first, so the picture stays upright;
-* converts a non-sRGB colour profile (macOS screenshots are Display P3) to sRGB
-  before dropping it, so colours do not shift;
-* PNG: lossless re-encode, and a lossy 256-colour palette version when it stays
-  close to the original (PSNR of ``MIN_PSNR_DB`` or better); keeps the smaller;
-* animated PNG: every frame is re-encoded losslessly and the animation (frame
-  timing, loop count) is kept; there is no palette step;
+* converts a non-sRGB colour profile (macOS screenshots are Display P3) to
+    sRGB before dropping it, so colours do not shift;
+* PNG: lossless re-encode, and a lossy 256-colour palette version when it
+    stays close to the original (PSNR of ``MIN_PSNR_DB`` or better); keeps the
+    smaller;
+* animated PNG: every frame is re-encoded losslessly and the animation
+    (frame timing, loop count) is kept; there is no palette step;
 * JPEG: re-encode at quality ``JPEG_QUALITY``, optimised and progressive.
 
 A file is rewritten only when it carried metadata or the result is at least
@@ -142,10 +143,21 @@ def _to_srgb(image: Image.Image) -> Image.Image:
     converted = ImageCms.profileToProfile(
         image,
         source,
-        ImageCms.createProfile("sRGB"),
+        _srgb(),
         outputMode=image.mode,
     )
     return image if converted is None else converted
+
+
+def _srgb() -> ImageCms.ImageCmsProfile:
+    """Return Pillow's built-in sRGB profile.
+
+    Returns
+    -------
+    ImageCms.ImageCmsProfile
+        The profile to convert into.
+    """
+    return ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB"))  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]  # Pillow's stubs leave createProfile's return type unknown
 
 
 def _clean(image: Image.Image) -> Image.Image:
@@ -444,7 +456,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     int
         0 normally; with ``--check``, 1 when any file would change.
     """
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(
+        description=(__doc__ or "").partition("\n")[0]
+    )
     parser.add_argument("paths", nargs="+", type=Path)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
