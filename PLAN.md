@@ -54,9 +54,10 @@ other). The approved spec and task list are in DESIGN.md.
   DESIGN.md). 2005 tests, 100% coverage; the suite takes about 2 min at
   load 4 to 6 (4 min at load 25).
 - Renamed from `optbench` to `optibench` (2026-10-23, the user's request):
-  distribution and import name, on `main`, not pushed. The GitHub repo is
-  still `Jacopo-DM/optbench` and the local folder keeps its old name, so
-  the README's links point to the new address before it exists.
+  distribution and import name (a705f51). The GitHub repo is now
+  `Jacopo-DM/optibench` (the old URL redirects), `origin` points at it,
+  and `main` was pushed at a705f51 (the user's say-so). The local folder
+  keeps its old name.
 
 ## Constraints
 
@@ -67,11 +68,9 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-Finish the rename, each step on the user's say-so: rename the GitHub repo
-(`gh repo rename optibench`, which redirects the old URL), point `origin`
-at the new URL and push `main`. Then `ailigment` moves its pin
-(690f912, still the package `optbench`) and its imports to `optibench`.
-After that, `ailigment`'s goal `optbench-symreg`, task S1 (its PLAN.md).
+`ailigment` moves its pin (690f912, still the package `optbench`), its
+dependency name and its imports to `optibench`. After that,
+`ailigment`'s goal `optbench-symreg`, task S1 (its PLAN.md).
 No optibench module is open.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
