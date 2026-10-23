@@ -64,8 +64,7 @@ other). The approved spec and task list are in DESIGN.md.
   below. The housekeeping after it (61a6f30 to ea00dd8: CLAUDE.md copies of
   global rules out, this file's tasks, CODEMAP.md's top-level folders,
   virtualenv 21.14.13 for four advisories) is merged into `main` and pushed
-  at ea00dd8 (the user's say-so); its CI run was still going when last
-  checked. `main` is the only branch.
+  at ea00dd8 (the user's say-so); CI passed on it. `main` is the only branch.
 
 ## Constraints
 
