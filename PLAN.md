@@ -105,7 +105,7 @@ COCO's Python package as a dev-only dependency are approved too.
 3. done (2026-10-18, 569f452 to 0cea41b): module `formula` (spec
    in DESIGN.md, "Approved spec: formula"), asked for by `ailigment`'s
    approved goal `optbench-symreg` (its DESIGN.md). Pushed at 690f912.
-4. done (2026-10-23, branch `python-compliance`, e2b3b49 to cdca896):
+4. done (2026-10-23, branch `python-compliance`, e2b3b49 to 6635487):
    `/zz-08-python-compliance` passes all 22 checks; the user's decisions
    are in DESIGN.md ("Python compliance pass").
 5. open (audit, 2026-10-23, about 1 h): the state-file layout of
