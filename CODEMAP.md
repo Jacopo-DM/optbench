@@ -170,6 +170,16 @@ run past 2 GB of peak memory), `test_memory_guard.py`,
 `test_registry_and_tracking.py`, `test_baseline.py`, `test_scripts.py`
 (both scripts on small budgets in a temporary folder). Depends on: `optibench` (with `optibench.scripts`), numpy, pytest, `cocoex` (dev only).
 
+## Other top-level folders
+
+`tools/compress_images.py` (469 lines, a copy of the user's template):
+compresses PNG and JPEG images under `docs/` and `examples/` and strips
+their metadata; run by pre-commit. `.github/`: `workflows/ci.yml` (format,
+lint, mypy and pytest on Linux) and `dependabot.yml`. `.typings/`: the
+`cocoex` stub (CLAUDE.md ignore list).
+
 ## Size checks (400 lines per file)
 
-No file over 400 lines; the largest is `functions/bbob_common.py` (386).
+No file of this repo's own over 400 lines; the largest is
+`functions/bbob_common.py` (386). `tools/compress_images.py` (469) is the
+template's copy and is not split here.
