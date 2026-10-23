@@ -57,7 +57,7 @@ other). The approved spec and task list are in DESIGN.md.
   distribution and import name (a705f51). The GitHub repo is now
   `Jacopo-DM/optibench` (the old URL redirects), `origin` points at it,
   and `main` was pushed at a705f51 (the user's say-so). The local folder
-  keeps its old name.
+  is now `1xx_projects/optibench` too, with its `.venv` rebuilt.
 
 ## Constraints
 

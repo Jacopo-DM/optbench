@@ -66,9 +66,10 @@ multi-objective problems; plotting; GPU arrays; the optimisers themselves
 in `ailigment/benchmarks/` and get their own specs.
 
 Constraints: a separate uv project at
-`/Users/jmdm/Documents/projects/code/1xx_projects/optbench`, private GitHub
-repo `Jacopo-DM/optibench`; Python >=3.13 (same
-interpreter as `ailigment`, which pulls it in); numpy; dev tools as in
+`/Users/jmdm/Documents/projects/code/1xx_projects/optibench` (named
+`optbench` until 2026-10-23), private GitHub repo
+`Jacopo-DM/optibench`; Python >=3.13 (same interpreter as `ailigment`,
+which pulls it in); numpy; dev tools as in
 `ailigment` (ruff, pyright strict, pytest); its own four state files and
 module READMEs; feature branches and the user-level git rules.
 
@@ -256,9 +257,10 @@ tests; the BBOB transforms are the largest part.
 - Name (2026-10-23, the user's request): the library was renamed from
   `optbench` to `optibench`, the import name too, because a package
   installed under one name and imported under another misleads readers,
-  and `ailigment` was its only user. Two old names stay on purpose: the
-  local folder (renaming it would orphan the per-folder Claude state) and
-  `ailigment`'s goal `optbench-symreg`, which belongs to that repo.
+  and `ailigment` was its only user. The local folder was renamed too, with
+  its per-folder Claude state (skill runs, audit record, project folder).
+  One old name stays on purpose: `ailigment`'s goal `optbench-symreg`,
+  which belongs to that repo.
 
 - Module `formula` (2026-10-17): sympy is reached only through
   `symbolic.py`, typed as Protocols behind one `cast` of the imported
