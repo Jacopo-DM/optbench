@@ -7,7 +7,7 @@ optimisation pages of the SFU Virtual Library of Simulation Experiments, for
 testing optimisation algorithms (CGP-based ones from `ailigment`, and any
 other). The approved spec and task list are in DESIGN.md.
 
-## Current state (2026-10-17)
+## Current state (2026-10-23)
 
 - Tier 1 (walking skeleton) done and on `main` (4133d55; `main` had no
   commits, so the branch `tier1-skeleton` simply became `main`).
@@ -91,6 +91,16 @@ COCO's Python package as a dev-only dependency are approved too.
 3. done (2026-10-18, 569f452 to 0cea41b): module `formula` (spec
    in DESIGN.md, "Approved spec: formula"), asked for by `ailigment`'s
    approved goal `optbench-symreg` (its DESIGN.md). Pushed at 690f912.
+4. open (audit, 2026-10-23, about 1 to 2 h): bring the repo up to the
+   current Python template with `/zz-08-python-compliance`: `ty.toml`,
+   `tools/run_notebooks.py`, the newer pre-commit config with its pre-push
+   hook, `ty` and `hypothesis` as dev dependencies, the scripts' argparse
+   arguments parsed into pydantic, and `.vscode/`.
+5. open (audit, 2026-10-23, about 1 h): the state-file layout of
+   `/zz-01-project-setup`: Baseline and Tasks sections in PLAN.md, Specs
+   and Gotchas in DESIGN.md.
+6. open (the user, 2026-10-23: yes, later): a Sphinx docs site on GitHub
+   Pages with `/zz-09-python-docs`.
 
 ## Open questions for the user
 
