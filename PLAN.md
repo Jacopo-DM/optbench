@@ -68,8 +68,8 @@ other). The approved specs are in DESIGN.md, the task list below.
 - Compliance pass (task 4) merged into `main`, pushed at 693876d (the
   user's say-so, 2026-10-23); CI passed on it. Dependabot's PR #2 (the
   uv-pre-commit hook 0.13.1 to 0.13.4) gained a commit setting CI's uv to
-  0.13.4 too (2026-10-24, the user's go-ahead), to be merged by rebase
-  once its CI passes.
+  0.13.4 too (2026-10-24, the user's go-ahead); CI passed and it was
+  merged by rebase (af12724).
 
 Next step: `ailigment` moves its pin (690f912, still the package
 `optbench`), its dependency name and its imports to `optibench` at 693876d;
