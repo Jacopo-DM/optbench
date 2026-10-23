@@ -716,9 +716,11 @@ tests; the BBOB transforms are the largest part.
   template's `.typings/` ignore line and keep the tracked `cocoex` stub;
   keep setup-uv v10.3.0 in `ci.yml` over the template's v9.0.0 (CLAUDE.md);
   parse the scripts' flags with a pydantic `Arguments` model (no range
-  limits added: the flags take the same values as before, and text that
-  is not an integer now raises `ValidationError` instead of argparse's
-  usage error), and make `timing.py`'s rows `Timing` records; add the
+  limits added; the flags accept what `int()` accepts, as with argparse's
+  `type=int`, and text it refuses now raises `ValidationError` instead of
+  argparse's usage error; pydantic's own integer parsing would also take
+  `"5.0"`, which the review caught, so `scripts/common.Integer` parses
+  with `int()`), and make `timing.py`'s rows `Timing` records; add the
   Hypothesis profile and boundary tests for `make` and both scripts'
   arguments; add the `.vscode/` template files.
 

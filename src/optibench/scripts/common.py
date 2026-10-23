@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Annotated
+
+from pydantic import BeforeValidator
 
 import optibench
 from optibench import Problem
@@ -11,6 +14,24 @@ from optibench import Problem
 D = 10
 
 DATA = Path("__data__")
+
+
+def _integer(value: object) -> object:
+    """Read flag text with ``int``, as argparse's ``type=int`` did.
+
+    Pydantic's own parsing also takes ``"5.0"``, which the flags never
+    accepted.
+
+    Returns
+    -------
+    object
+        The integer for text, anything else unchanged.
+    """
+    return int(value) if isinstance(value, str) else value
+
+
+# A flag's integer value; text ``int`` refuses raises ValidationError.
+Integer = Annotated[int, BeforeValidator(_integer)]
 
 
 def every_problem(d: int = D) -> list[Problem]:

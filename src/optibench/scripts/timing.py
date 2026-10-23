@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from optibench.model import Model
-from optibench.scripts.common import DATA, every_problem
+from optibench.scripts.common import DATA, Integer, every_problem
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -38,8 +38,8 @@ EXCEPTIONS = frozenset({"whitley"})
 class Arguments(Model):
     """The command-line arguments, parsed from their text."""
 
-    points: int = POINTS
-    repeats: int = REPEATS
+    points: Integer = POINTS
+    repeats: Integer = REPEATS
 
 
 class Timing(Model):

@@ -81,6 +81,7 @@ def test_baseline_writes_one_curve_per_seed(data: Path) -> None:
 
 @given(st.text(), st.text())
 @example("100", "2")
+@example("0.0", "1")
 def test_timing_arguments_parse_or_raise_validation_error(
     points: str,
     repeats: str,
@@ -97,6 +98,7 @@ def test_timing_arguments_parse_or_raise_validation_error(
 
 @given(st.text(), st.text())
 @example("50", "2")
+@example("5.0", "1")
 def test_baseline_arguments_parse_or_raise_validation_error(
     budget: str,
     seeds: str,

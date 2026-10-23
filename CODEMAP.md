@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optibench/__init__.py`.
 
-## `src/optibench` (7906 lines, 36 files)
+## `src/optibench` (7927 lines, 36 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -141,7 +141,8 @@ constants), `references.py`
 (shared citations), `__init__.py` (the list the registry reads);
 `registry.py`; `tracking.py`; `baseline.py` (`random_search`);
 `scripts/` (command-line tools run as `python -m optibench.scripts.<name>`,
-never imported by the package: `common.py` (`D = 10`, `DATA = __data__`,
+never imported by the package: `common.py` (`D = 10`, `DATA = __data__`, `Integer`
+(a flag's value, read with `int()` as argparse did),
 `every_problem(d)`: every registered problem with free dimensions at `d`,
 Powell at the largest multiple of 4 up to it), `timing.py`
 (`Arguments` and `parse_arguments(argv)`, the `Timing` row,
@@ -153,7 +154,7 @@ allowed over it), `main` returning the exit status), `baseline.py`
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (2039 lines, 18 files)
+## `tests` (2041 lines, 18 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,

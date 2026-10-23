@@ -17,7 +17,7 @@ import numpy as np
 
 from optibench import random_search
 from optibench.model import Model
-from optibench.scripts.common import DATA, every_problem
+from optibench.scripts.common import DATA, Integer, every_problem
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -29,8 +29,8 @@ SEEDS = 10
 class Arguments(Model):
     """The command-line arguments, parsed from their text."""
 
-    budget: int = BUDGET
-    seeds: int = SEEDS
+    budget: Integer = BUDGET
+    seeds: Integer = SEEDS
 
 
 def parse_arguments(argv: Sequence[str] | None = None) -> Arguments:
