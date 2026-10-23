@@ -89,11 +89,7 @@ Before every commit run format, lint, both type checks and the tests above.
   (`bbob_separable.py`).
 - No abstraction without two real call sites today. Delete replaced code
   outright: no shims or old and new versions side by side.
-- Indentation in Python files, docstrings and comments included, is always a
-  multiple of 4 spaces. Check with
-  `grep -rnE '^( {4})* {1,3}[^ ]' --include='*.py' src tests`.
 - Put one blank line before every comment that introduces a block of code.
-- Docstrings follow the numpy convention (see ruff.toml); line length is 80.
 - Typed Python, pyright strict, numpy for data, one seeded
   `numpy.random.Generator` in tests.
 
