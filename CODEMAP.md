@@ -178,7 +178,9 @@ their metadata; run by pre-commit. `tools/run_notebooks.py` (495, the
 template's): runs `tests/functional/*.ipynb` (none yet) at commit and
 push. `.github/`: `workflows/ci.yml` (format, lint, mypy and pytest on
 Linux) and `dependabot.yml` (actions, uv and pre-commit, weekly, grouped). `.typings/`: the
-`cocoex` stub (CLAUDE.md ignore list).
+`cocoex` stub (CLAUDE.md ignore list). `.vscode/`: the user's template
+`settings.json`, `tasks.json` and `extensions.json` (`snippets.json` and
+`project-words.txt` are local, git-ignored).
 
 ## Size checks (400 lines per file)
 
