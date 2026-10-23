@@ -1,9 +1,12 @@
 # DESIGN.md
 
 Reasoning and reference that stays true after a task is done: the approved
-spec, decisions with their reasons, rejected approaches, and results.
+specs, decisions with their reasons, rejected approaches, results and
+gotchas.
 
-## Approved spec (the user, 2026-10-16)
+## Specs
+
+### Approved spec (the user, 2026-10-16)
 
 The user's request, made in the `ailigment` repo on 2026-10-16: "a separate
 benchmarking library which lets me test optimisation algorithms like the
@@ -105,7 +108,7 @@ Task list (approved 2026-10-16 with the spec):
   baseline and a timing script for criterion 2.
 - Tier 3, not built: the non-goals above.
 
-## Approved spec: bbob and classics (the user, 2026-10-17)
+### Approved spec: bbob and classics (the user, 2026-10-17)
 
 The user reviewed other collections of test functions on 2026-10-17 (see
 "Other sources of test functions" below) and approved these two modules.
@@ -122,7 +125,7 @@ Answers to the questions asked with the specs:
   dev-only dependency; run time stays numpy and pydantic only. Hand-copied values were
   rejected as too thin a check.
 
-### Module `bbob` (build): the 24 noiseless COCO/BBOB functions
+#### Module `bbob` (build): the 24 noiseless COCO/BBOB functions
 
 Goal: the BBOB 2009 noiseless suite in optibench, so optimisers (CGP-evolved
 ones included) can be compared with published COCO results.
@@ -173,7 +176,7 @@ Source: RR-6829, the PDF at
 https://inria.hal.science/inria-00362633/document (573,076 bytes; download
 approved 2026-10-17), and COCO's code for the instance generation.
 
-### Module `classics` (build): ten well-known functions not on the SFU pages
+#### Module `classics` (build): ten well-known functions not on the SFU pages
 
 Each from its formula in Jamil and Yang (2013) and Gavana's AMPGO pages,
 with every constant a field, its minimum and the criterion-6 tests:
@@ -186,7 +189,7 @@ the alpha vector). `suite = "classic"`, and each in the SFU shape group that
 fits it. One commit; the minima are checked numerically as for SFU.
 
 
-## Approved spec: formula (the user, 2026-10-17)
+### Approved spec: formula (the user, 2026-10-17)
 
 Kind: build (new behaviour). Goal: every optibench problem returns its
 formula as a sympy expression. Users: `ailigment`'s `optbench-symreg`,
@@ -252,7 +255,7 @@ from the parameters).
 Estimated size: about 83 formulas and a facade, roughly 1500 lines with
 tests; the BBOB transforms are the largest part.
 
-## Decisions and reasons
+## Decisions
 
 - Name (2026-10-23, the user's request): the library was renamed from
   `optbench` to `optibench`, the import name too, because a package
@@ -718,13 +721,11 @@ tests; the BBOB transforms are the largest part.
   parse the scripts' flags with a pydantic `Arguments` model (no range
   limits added; the flags accept what `int()` accepts, as with argparse's
   `type=int`, and text it refuses now raises `ValidationError` instead of
-  argparse's usage error; pydantic's own integer parsing would also take
-  `"5.0"`, which the review caught, so `scripts/common.Integer` parses
-  with `int()`), and make `timing.py`'s rows `Timing` records; add the
-  Hypothesis profile and boundary tests for `make` and both scripts'
-  arguments; add the `.vscode/` template files.
+  argparse's usage error; see Gotchas), and make `timing.py`'s rows
+  `Timing` records; add the Hypothesis profile and boundary tests for
+  `make` and both scripts' arguments; add the `.vscode/` template files.
 
-## Other sources of test functions (reviewed 2026-10-17)
+### Other sources of test functions (reviewed 2026-10-17)
 
 The user shared a list of other collections on 2026-10-17. What each offers
 optibench, and what was decided:
@@ -812,3 +813,15 @@ optibench, and what was decided:
 | Random-search baseline, BBOB f1 to f5 by `scripts.baseline` (instance 1, d = 10, 10 seeds of 10,000 points) | median final value (f_opt) | f1 92.29 (79.48); f2 62435 (-209.88); f3 -339.4 (-462.09); f4 -290.2 (-462.09); f5 47.19 (-9.21) | |
 | Random-search baseline, the ten classics by `scripts.baseline` (as the row below) | median final value (minimum) | Alpine N. 2 -1563 (-30491); Bird -106.59 (-106.76); Deceptive -0.494 (-1); Happy Cat 250 (0); Himmelblau 0.026 (0); Qing 3.3e9 (0); Salomon 7.8 (0); Schwefel 2.21 37 (0); Schwefel 2.22 1.7e8 (0); Whitley 2.6e6 (0) | |
 | Random-search baseline, all 49 by `scripts.baseline` (10 seeds of 10,000 points, d = 10 where free, Powell d = 8, 2026-10-17) | median final value minus the minimum | 1-D: about 1e-6 (Forrester, Gramacy and Lee); 2-D: 1e-4 to 10 (Cross-in-Tray 3e-4, Branin 4e-3, Eggholder 16); d = 10: Sphere 13, Rastrigin 72, Rosenbrock 1.1e4, Perm 0 2e14, Perm d, beta 2e15 | the reference an optimiser must beat at the same budget; Michalewicz d = 10 reaches -4.8 of -9.66, Shekel -3.2 of -10.54 |
+
+## Gotchas
+
+- Pydantic's lax integer parsing takes integral decimal text (`"5.0"`,
+  `"0.0"`), which `int()` and argparse's `type=int` refuse. Flags parsed
+  into a model therefore go through `scripts/common.Integer`, which calls
+  `int()`; a Hypothesis test found `"0.0"` only after about 20,000
+  examples, so it is pinned with `@example` (2026-10-23).
+- `git commit` with pre-commit stashes unstaged files for the hook run and
+  restores them after. A test run going in the background at that moment
+  sees the files without the unstaged edits, so commit only after a
+  background run has finished (2026-10-23).

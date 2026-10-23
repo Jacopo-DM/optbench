@@ -1,13 +1,13 @@
 # PLAN.md
 
-## Goal
+## Goals
 
 A library of optimisation test functions with known answers, built from the
 optimisation pages of the SFU Virtual Library of Simulation Experiments, for
 testing optimisation algorithms (CGP-based ones from `ailigment`, and any
-other). The approved spec and task list are in DESIGN.md.
+other). The approved specs are in DESIGN.md, the task list below.
 
-## Current state (2026-10-23)
+## Current state (2026-10-24)
 
 - Tier 1 (walking skeleton) done and on `main` (4133d55; `main` had no
   commits, so the branch `tier1-skeleton` simply became `main`).
@@ -65,19 +65,16 @@ other). The approved spec and task list are in DESIGN.md.
   global rules out, this file's tasks, CODEMAP.md's top-level folders,
   virtualenv 21.14.13 for four advisories) is merged into `main` and pushed
   at ea00dd8 (the user's say-so); CI passed on it. `main` is the only branch.
+- Compliance pass (task 4) merged into `main`, pushed at 693876d (the
+  user's say-so, 2026-10-23); CI passed on it. Dependabot's PR #2 (the
+  uv-pre-commit hook 0.13.1 to 0.13.4) gained a commit setting CI's uv to
+  0.13.4 too (2026-10-24, the user's go-ahead), to be merged by rebase
+  once its CI passes.
 
-## Constraints
-
-- See CLAUDE.md rules: no import of `ailigment`, numpy and pydantic only at
-  run time,
-  formulas not GPL code.
-- Python >=3.13 to match `ailigment`.
-
-## Next step
-
-`ailigment` moves its pin (690f912, still the package `optbench`), its
-dependency name and its imports to `optibench`. That is work in the
-`ailigment` repo (226 uses in 18 files on 2026-10-23): `pyproject.toml`
+Next step: `ailigment` moves its pin (690f912, still the package
+`optbench`), its dependency name and its imports to `optibench` at 693876d;
+a separate session in that repo started on it on 2026-10-24. That is work in
+the `ailigment` repo (226 uses in 18 files on 2026-10-23): `pyproject.toml`
 lines 49 and 54, the imports, the old folder path in its PLAN.md:382, and
 names of its own that hold the old word (`src/benchmarks/optbench_symreg.py`
 and `optbench_table.py`, `tests/test_optbench_symreg.py` and
@@ -87,7 +84,15 @@ branch `cgp-engine` that day, so check it for other work first. After that,
 `ailigment`'s goal `optbench-symreg`, task S1 (its PLAN.md).
 No optibench module is open.
 
-## Next steps in priority order (approved modules, 2026-10-17)
+## Baseline (2026-10-23, at 693876d)
+
+`uv run --locked ruff format --check` and `ruff check --no-fix` pass;
+`mypy .` and `pyright` find no errors; `pytest` passes 2009 tests at 100%
+branch coverage in 1 min 50 s; `ty check` (advisory) reports the 2
+findings under Known problems; the timing script has 0 of 83 problems over
+the 100 ms budget (Whitley 135 ms, its stated exception).
+
+## Tasks (approved modules, 2026-10-17)
 
 The user approved both specs (now in DESIGN.md, "Approved spec: bbob and
 classics") and their task lists on 2026-10-17, with the order: classics,
@@ -108,13 +113,15 @@ COCO's Python package as a dev-only dependency are approved too.
 4. done (2026-10-23, branch `python-compliance`, e2b3b49 to 6635487):
    `/zz-08-python-compliance` passes all 22 checks; the user's decisions
    are in DESIGN.md ("Python compliance pass").
-5. open (audit, 2026-10-23, about 1 h): the state-file layout of
-   `/zz-01-project-setup`: Baseline and Tasks sections in PLAN.md, Specs
+5. done (2026-10-24, branch `state-layout`): the state-file layout of
+   `/zz-01-project-setup`: Goals, Baseline and Tasks sections in PLAN.md
+   (Constraints dropped: its dependency rule was a stale copy of
+   CLAUDE.md's, its Python version a copy of DESIGN.md's decision); Specs
    and Gotchas in DESIGN.md.
 6. open (the user, 2026-10-23: yes, later): a Sphinx docs site on GitHub
    Pages with `/zz-09-python-docs`.
 
-## Open questions for the user
+## Open questions
 
 None.
 
