@@ -11,7 +11,7 @@ All commands run from the repo root with uv (Python 3.13).
 
 | Purpose | Command |
 |---------|---------|
-| Install or rebuild the environment (numpy, pydantic; dev group: pytest, pytest-cov, mypy, pyright, ruff, pillow, coco-experiment, which has no Python 3.13 wheel and is compiled from its source archive with Xcode's compiler) | `uv sync` |
+| Install or rebuild the environment (numpy, pydantic, sympy; dev group: pytest, pytest-cov, hypothesis, mypy, pyright, ty, ruff, pillow, pre-commit, coco-experiment, which has no Python 3.13 wheel and is compiled from its source archive with Xcode's compiler) | `uv sync` |
 | Format | `uv run ruff format` |
 | Lint (auto-fixes, unsafe fixes included: read the diff) | `uv run ruff check` |
 | Lint as the Stop hook and CI do | `uv run ruff format --check && uv run ruff check --no-fix` |
