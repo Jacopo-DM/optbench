@@ -30,9 +30,12 @@ section), `tools/compress_images.py` and `tools/run_notebooks.py` are copies
 of the user's templates in `~/Functions/_rsync/`: never edit them to get a
 check through (the Stop hook compares them with the templates); refresh
 them with `rsync-sync pull python` in a clean tree and read the diff (it
-also copies `main.py`, which this library deletes). One approved exception
-(the user, 2026-10-23): `ci.yml` keeps setup-uv v10.3.0, which Dependabot
-brought in, over the template's v9.0.0; put that line back after a refresh.
+also copies `main.py`, which this library deletes). Approved
+exceptions, both from Dependabot (the user, 2026-10-23 and 2026-10-24):
+`ci.yml` keeps setup-uv v10.3.0 over the template's v9.0.0, and uv 0.13.4
+(the uv-pre-commit `rev` in `.pre-commit-config.yaml` and `version` in
+`ci.yml`, kept equal) over the template's 0.13.1; put those lines back
+after a refresh.
 The `.gitignore` ignores `.typings/` as the template does, but the `cocoex`
 stub there stays tracked; a new file there needs `git add -f`.
 
