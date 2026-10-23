@@ -260,7 +260,16 @@ tests; the BBOB transforms are the largest part.
   and `ailigment` was its only user. The local folder was renamed too, with
   its per-folder Claude state (skill runs, audit record, project folder).
   One old name stays on purpose: `ailigment`'s goal `optbench-symreg`,
-  which belongs to that repo.
+  which belongs to that repo. Moving the folder breaks two things that
+  hold its absolute path: `.venv` (rebuild it: delete it, then
+  `uv sync --locked`) and `.git/hooks/pre-commit`, whose `INSTALL_PYTHON`
+  line named the old `.venv`, so the first commit failed with "`pre-commit`
+  not found" until `uv run --locked pre-commit install` rewrote it. The
+  per-folder Claude state is keyed by the path too:
+  `~/.claude/state/skill-runs.json` keys, the audit record in
+  `~/.claude/state/audits/` and the folder in `~/.claude/projects/`. The
+  Legion's clone moved to `~/projects/optibench` the same day (origin
+  `git@github.com:Jacopo-DM/optibench.git`; it has no `.venv`).
 
 - Module `formula` (2026-10-17): sympy is reached only through
   `symbolic.py`, typed as Protocols behind one `cast` of the imported
@@ -738,6 +747,12 @@ optibench, and what was decided:
 - A `check_dimension` helper and an `as_array` helper in `problem.py`
   (Tier 1): each had one real call site, so the checks stay inline until a
   second one exists.
+- Renaming only the distribution (installed as `optibench`, imported as
+  `optbench`) or only the GitHub repo (2026-10-23): the two names would
+  mislead every reader for a saving of about an hour; see Decisions, Name.
+- Keeping the local folder as `optbench` after the rename (2026-10-23,
+  first plan): it spared moving the per-folder Claude state, but the user
+  wanted nothing left under the old name, so the folder moved too.
 
 ## Results
 

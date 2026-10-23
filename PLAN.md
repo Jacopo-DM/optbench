@@ -58,6 +58,14 @@ other). The approved spec and task list are in DESIGN.md.
   `Jacopo-DM/optibench` (the old URL redirects), `origin` points at it,
   and `main` was pushed at a705f51 (the user's say-so). The local folder
   is now `1xx_projects/optibench` too, with its `.venv` rebuilt.
+- Audit (`/zz-11-audit`, 2026-10-23): a fresh clone installs, passes 2005
+  tests at 100% coverage and builds a wheel with `py.typed`; the README
+  example runs; gitleaks finds nothing. Its shortfalls are tasks 4 to 6
+  below. The housekeeping after it (61a6f30 to ea00dd8: CLAUDE.md copies of
+  global rules out, this file's tasks, CODEMAP.md's top-level folders,
+  virtualenv 21.14.13 for four advisories) is merged into `main` and pushed
+  at ea00dd8 (the user's say-so); its CI run was still going when last
+  checked. `main` is the only branch.
 
 ## Constraints
 
@@ -69,7 +77,14 @@ other). The approved spec and task list are in DESIGN.md.
 ## Next step
 
 `ailigment` moves its pin (690f912, still the package `optbench`), its
-dependency name and its imports to `optibench`. After that,
+dependency name and its imports to `optibench`. That is work in the
+`ailigment` repo (226 uses in 18 files on 2026-10-23): `pyproject.toml`
+lines 49 and 54, the imports, the old folder path in its PLAN.md:382, and
+names of its own that hold the old word (`src/benchmarks/optbench_symreg.py`
+and `optbench_table.py`, `tests/test_optbench_symreg.py` and
+`test_optbench_table.py`, `tests/functional/symreg.ipynb`, the goal
+`optbench-symreg`); whether those get renamed is the user's call. It was on
+branch `cgp-engine` that day, so check it for other work first. After that,
 `ailigment`'s goal `optbench-symreg`, task S1 (its PLAN.md).
 No optibench module is open.
 
@@ -95,7 +110,14 @@ COCO's Python package as a dev-only dependency are approved too.
    current Python template with `/zz-08-python-compliance`: `ty.toml`,
    `tools/run_notebooks.py`, the newer pre-commit config with its pre-push
    hook, `ty` and `hypothesis` as dev dependencies, the scripts' argparse
-   arguments parsed into pydantic, and `.vscode/`.
+   arguments parsed into pydantic, and `.vscode/`. Found on 2026-10-23:
+   the template `ruff.toml` has a per-file ignore for
+   `tests/functional/*.ipynb` this copy lacks; the template
+   `tools/compress_images.py` pins `pillow==13.0.0` and fixes the 2-space
+   docstring indents at lines 22 to 26; the template `.gitignore` now
+   ignores `.typings/`, which this repo tracks (the `cocoex` stub), so
+   that line needs a decision before the refresh; `ci.yml` differs from
+   the template only in the newer setup-uv pin (above).
 5. open (audit, 2026-10-23, about 1 h): the state-file layout of
    `/zz-01-project-setup`: Baseline and Tasks sections in PLAN.md, Specs
    and Gotchas in DESIGN.md.
@@ -116,6 +138,11 @@ None.
   rerun at lower load, all 83 passed. T_osz (shared by seven
   BBOB functions) and the rotations are 37 ms of that; speeding up T_osz
   would help them all.
+- `uv run --locked ty check` (advisory) reports 2 `not-iterable` errors,
+  at `functions/other_perm_to_styblinski_tang.py:320` and
+  `functions/steep.py:205`: unpacking `(low, high)` from rows of
+  `self.bounds`, which ty types as `float64`. numpy's stubs cause it;
+  mypy and pyright pass those lines. Left as they are (2026-10-23).
 - Power Sum's recommended b vector is given for d = 4 only (other b give
   other dimensions, with an unknown minimum). Langermann's constants are for
   d = 2; other dimensions work when the caller passes `a`
