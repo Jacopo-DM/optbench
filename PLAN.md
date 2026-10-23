@@ -105,18 +105,9 @@ COCO's Python package as a dev-only dependency are approved too.
 3. done (2026-10-18, 569f452 to 0cea41b): module `formula` (spec
    in DESIGN.md, "Approved spec: formula"), asked for by `ailigment`'s
    approved goal `optbench-symreg` (its DESIGN.md). Pushed at 690f912.
-4. open (audit, 2026-10-23, about 1 to 2 h): bring the repo up to the
-   current Python template with `/zz-08-python-compliance`: `ty.toml`,
-   `tools/run_notebooks.py`, the newer pre-commit config with its pre-push
-   hook, `ty` and `hypothesis` as dev dependencies, the scripts' argparse
-   arguments parsed into pydantic, and `.vscode/`. Found on 2026-10-23:
-   the template `ruff.toml` has a per-file ignore for
-   `tests/functional/*.ipynb` this copy lacks; the template
-   `tools/compress_images.py` pins `pillow==13.0.0` and fixes the 2-space
-   docstring indents at lines 22 to 26; the template `.gitignore` now
-   ignores `.typings/`, which this repo tracks (the `cocoex` stub), so
-   that line needs a decision before the refresh; `ci.yml` differs from
-   the template only in the newer setup-uv pin (above).
+4. done (2026-10-23, branch `python-compliance`, e2b3b49 to cdca896):
+   `/zz-08-python-compliance` passes all 22 checks; the user's decisions
+   are in DESIGN.md ("Python compliance pass").
 5. open (audit, 2026-10-23, about 1 h): the state-file layout of
    `/zz-01-project-setup`: Baseline and Tasks sections in PLAN.md, Specs
    and Gotchas in DESIGN.md.

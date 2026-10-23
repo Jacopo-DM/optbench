@@ -708,6 +708,19 @@ tests; the BBOB transforms are the largest part.
     synthesise for `Model` has no fields. `cocoex` has no stubs: the tests
     `cast` its `Suite` to a `Protocol` (mypy) and `.typings/cocoex` holds a
     minimal stub (pyright), with no config change.
+- Python compliance pass (`/zz-08-python-compliance`, branch
+  `python-compliance`, 2026-10-23; the user's answers): refresh the
+  template files now; add nbclient, nbformat and ipykernel as dev
+  dependencies so the template's `tools/run_notebooks.py` type-checks and
+  its pre-push hook runs, though there are no notebooks yet; take the
+  template's `.typings/` ignore line and keep the tracked `cocoex` stub;
+  keep setup-uv v10.3.0 in `ci.yml` over the template's v9.0.0 (CLAUDE.md);
+  parse the scripts' flags with a pydantic `Arguments` model (no range
+  limits added: the flags take the same values as before, and text that
+  is not an integer now raises `ValidationError` instead of argparse's
+  usage error), and make `timing.py`'s rows `Timing` records; add the
+  Hypothesis profile and boundary tests for `make` and both scripts'
+  arguments; add the `.vscode/` template files.
 
 ## Other sources of test functions (reviewed 2026-10-17)
 
@@ -768,6 +781,7 @@ optibench, and what was decided:
 | Formulas F3: many local minima (16) (`tests/test_formula.py`, as F1) | formula against numpy | all 41 new problem variants equal to rtol 1e-12, atol 1e-10 | suite 1693 tests, 9.4 s without coverage at load average 21; the first formula test pays sympy's import (3.3 s under that load), every other formula test under 0.05 s |
 | Formulas F2: plate (5), steep (3) and valley (4) (`tests/test_formula.py`, as F1) | formula against numpy | all 32 new problem variants equal to rtol 1e-12, atol 1e-10; Booth prints as `(x1 + 2.0*x2 - 7.0)**2 + (2.0*x1 + x2 - 5.0)**2` | suite 1652 tests, about 6 s |
 | Formulas F1: the 9 bowl functions (`tests/test_formula.py`, d = 1 to 6, 26 points each, 2026-10-17) | formula against numpy | all 42 problem variants equal to rtol 1e-12, atol 1e-10 | suite 1578 to 1620 tests, about 5 s either way |
+| Python compliance (`python-compliance`, 2026-10-23) | checks after | `/zz-08-python-compliance` 13 of 22 checks met before, 22 after; 2009 tests, 100% coverage; ruff, mypy and pyright clean; ty 2 advisory findings, as before | `timing` 0 of 83 over budget (Whitley 135 ms, the stated exception); baseline and timing give the same table and CSV columns as before |
 | Python standard (`python-standard`, template configs, 2026-10-17) | errors before, after | mypy strict 33 to 0; ruff with the template rules 70 to 0 (30 no-self-use, 23 banned-api, 17 magic values); pyright 0 to 0; coverage 100% of `src` and `scripts` to 100% of branches over `src` and `tests` | every value, bound and minimum of 254 problem variants bit-identical before and after (scratch pin); timing 1261 ms in all before, 1270 after (three runs each, minimum per function), median ratio 1.000 |
 | Batch speed, Tier 1 functions (100,000 points, CPU time, min of 5, Apple silicon under load, 2026-10-16) | ms per call | Sphere (d = 10) 0.5; Branin 1.6; Shekel (m = 10) 7.3 | spec criterion 2 asks for under 100 ms |
 | Batch speed, "many local minima" group (100,000 points, d = 10 where free, CPU time, min of 5, load average 5 to 9, 2026-10-16) | ms per call | Ackley 11.0; Bukin N. 6 0.3; Cross-in-Tray 2.9; Drop-Wave 1.5; Eggholder 2.0; Gramacy and Lee 1.8; Griewank 10.4; Holder Table 2.1; Langermann 13.2; Levy 13.0; Levy N. 13 2.8; Rastrigin 9.8; Schaffer N. 2 1.1; Schaffer N. 4 1.7; Schwefel 9.6; Shubert 14.5 | all under the 100 ms budget |
