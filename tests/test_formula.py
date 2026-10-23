@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-import optbench
-from optbench import AnyDimension, Problem
-from optbench.functions.bbob_common import BbobProblem
-from optbench.symbolic import piecewise
+import optibench
+from optibench import AnyDimension, Problem
+from optibench.functions.bbob_common import BbobProblem
+from optibench.symbolic import piecewise
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -69,8 +69,8 @@ def _problems() -> list[Problem]:
         The problems to check, at their default constants.
     """
     problems: list[Problem] = []
-    for name in optbench.names():
-        problem = optbench.make(name)
+    for name in optibench.names():
+        problem = optibench.make(name)
         if isinstance(problem, BbobProblem):
             problems += [
                 problem.replace(d=d, instance=k)
@@ -157,7 +157,7 @@ def _assert_formula_matches(problem: Problem) -> None:
     # sqrt(x) below 0); both sides then give NaN, which counts as equal.
     with np.errstate(invalid="ignore"):
         expected = problem(x)
-        values = optbench.evaluate_formula(problem.formula(), x)
+        values = optibench.evaluate_formula(problem.formula(), x)
     # A BBOB value is core + f_opt, a random constant; compare the cores so
     # the error is measured against the function's own size, not against
     # what is left when f_opt happens to cancel it (f19, d = 5, instance 4:
@@ -182,40 +182,42 @@ def test_the_formula_follows_changed_constants(
     name: str,
     changes: dict[str, float],
 ) -> None:
-    changed = optbench.make(name, **changes)
-    assert str(changed.formula()) != str(optbench.make(name).formula())
+    changed = optibench.make(name, **changes)
+    assert str(changed.formula()) != str(optibench.make(name).formula())
     _assert_formula_matches(changed)
 
 
 def test_every_function_file_has_a_changed_constants_check() -> None:
-    files = {type(optbench.make(name)).__module__ for name in optbench.names()}
-    checked = {type(optbench.make(name)).__module__ for name in CHANGED}
+    files = {
+        type(optibench.make(name)).__module__ for name in optibench.names()
+    }
+    checked = {type(optibench.make(name)).__module__ for name in CHANGED}
     assert checked == files
 
 
 def test_the_variables_are_x1_to_xd() -> None:
-    assert [str(v) for v in optbench.variables(3)] == ["x1", "x2", "x3"]
-    assert [str(v) for v in optbench.variables(1)] == ["x1"]
+    assert [str(v) for v in optibench.variables(3)] == ["x1", "x2", "x3"]
+    assert [str(v) for v in optibench.variables(1)] == ["x1"]
 
 
 def test_a_constant_formula_gives_one_value_per_point() -> None:
     # A formula with no variable left (here 0 * x1) still gives (n,) values.
-    (x1,) = optbench.variables(1)
-    values = optbench.evaluate_formula(0 * x1 + 2.5, np.zeros((4, 1)))
+    (x1,) = optibench.variables(1)
+    values = optibench.evaluate_formula(0 * x1 + 2.5, np.zeros((4, 1)))
     np.testing.assert_array_equal(values, [2.5] * 4)
 
 
 def test_booth_prints_as_the_sfu_page_writes_it() -> None:
     # The constants are float fields, so they print with a decimal point.
-    assert str(optbench.make("booth").formula()) == (
+    assert str(optibench.make("booth").formula()) == (
         "(x1 + 2.0*x2 - 7.0)**2 + (2.0*x1 + x2 - 5.0)**2"
     )
 
 
 def test_a_piecewise_inside_a_condition_is_refused() -> None:
     # Turning this into numpy code made sympy grow to 160 GB (BBOB f3).
-    (x1,) = optbench.variables(1)
+    (x1,) = optibench.variables(1)
     inner = piecewise((x1, x1 > 0), (-x1, True))
     outer = piecewise((x1, inner > 1), (0.0, True))
     with pytest.raises(ValueError, match="exhaust memory"):
-        optbench.evaluate_formula(outer, np.zeros((2, 1)))
+        optibench.evaluate_formula(outer, np.zeros((2, 1)))

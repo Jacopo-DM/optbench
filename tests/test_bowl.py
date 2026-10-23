@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from optbench import (
+from optibench import (
     Bohachevsky1,
     Bohachevsky2,
     Bohachevsky3,
@@ -19,7 +19,7 @@ from optbench import (
 )
 
 if TYPE_CHECKING:
-    from optbench import Problem
+    from optibench import Problem
 
 
 def test_published_constants() -> None:

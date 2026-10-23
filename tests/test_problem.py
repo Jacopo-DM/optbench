@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from optbench import Branin, Sphere
+from optibench import Branin, Sphere
 
 
 def test_replace_makes_a_checked_variant() -> None:

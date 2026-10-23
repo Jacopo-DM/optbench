@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-import optbench
-from optbench import (
+import optibench
+from optibench import (
     Ackley,
     Bukin6,
     CrossInTray,
@@ -31,7 +31,7 @@ from optbench import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from optbench import Problem
+    from optibench import Problem
 
 # SFU's published minimum values (rounded as printed there), where it gives
 # one, with the number of minimisers it lists.
@@ -193,7 +193,7 @@ def test_bad_parameters_are_refused(
 
 
 def test_langermann_takes_other_dimensions() -> None:
-    problem = optbench.make("langermann", m=1, c=(2.0,), a=((1.0, 2.0, 3.0),))
+    problem = optibench.make("langermann", m=1, c=(2.0,), a=((1.0, 2.0, 3.0),))
     point = np.array([[1.0, 2.0, 3.0]])
     assert problem.dimension == point.shape[1]
     assert problem(point)[0] == pytest.approx(2.0)

@@ -8,10 +8,10 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from optbench import DeJong5, Easom, Michalewicz
+from optibench import DeJong5, Easom, Michalewicz
 
 if TYPE_CHECKING:
-    from optbench import Problem
+    from optibench import Problem
 
 
 def test_published_constants() -> None:

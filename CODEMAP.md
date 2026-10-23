@@ -5,13 +5,13 @@ here; reasons live in DESIGN.md. Line counts are Python source lines at the
 commit this file was last regenerated.
 
 One language (Python 3.13, uv). No cross-language boundary and no data
-files. Other code imports the package only through `optbench/__init__.py`.
+files. Other code imports the package only through `optibench/__init__.py`.
 
-## `src/optbench` (7856 lines, 36 files)
+## `src/optibench` (7856 lines, 36 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
-Public interface (`optbench/__init__.py`):
+Public interface (`optibench/__init__.py`):
 - `Problem`: abstract frozen pydantic model (base `model.Model`). Call it
   with `(n, d)` points to get `(n,)` values. `replace(**changes)` returns a
   checked variant; `domain` is stored as a tuple of `(low, high)` rows. `dimension`, `bounds` (the `domain` field or
@@ -140,7 +140,7 @@ or f22 class), `bbob_multimodal_weak_katsuura_to_lunacek.py` (f23, f24), `known_
 constants), `references.py`
 (shared citations), `__init__.py` (the list the registry reads);
 `registry.py`; `tracking.py`; `baseline.py` (`random_search`);
-`scripts/` (command-line tools run as `python -m optbench.scripts.<name>`,
+`scripts/` (command-line tools run as `python -m optibench.scripts.<name>`,
 never imported by the package: `common.py` (`D = 10`, `DATA = __data__`,
 `every_problem(d)`: every registered problem with free dimensions at `d`,
 Powell at the largest multiple of 4 up to it), `timing.py`
@@ -151,7 +151,7 @@ allowed over it), `main` returning the exit status), `baseline.py` (`main`));
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (1946 lines, 18 files)
+## `tests` (1957 lines, 18 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
@@ -168,7 +168,7 @@ problem per function file, in `CHANGED`),
 `conftest.py` and `memory_guard.py` (a watchdog thread that stops the
 run past 2 GB of peak memory), `test_memory_guard.py`,
 `test_registry_and_tracking.py`, `test_baseline.py`, `test_scripts.py`
-(both scripts on small budgets in a temporary folder). Depends on: `optbench` (with `optbench.scripts`), numpy, pytest, `cocoex` (dev only).
+(both scripts on small budgets in a temporary folder). Depends on: `optibench` (with `optibench.scripts`), numpy, pytest, `cocoex` (dev only).
 
 ## Size checks (400 lines per file)
 

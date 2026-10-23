@@ -1,5 +1,5 @@
 [project]
-name = "optbench"
+name = "optibench"
 version = "0.1.0"
 description = "Test functions for optimisation algorithms, from the SFU Virtual Library of Simulation Experiments"
 readme = "README.md"

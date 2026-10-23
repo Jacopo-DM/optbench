@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from optbench import DixonPrice, Rosenbrock, SixHumpCamel, ThreeHumpCamel
+from optibench import DixonPrice, Rosenbrock, SixHumpCamel, ThreeHumpCamel
 
 if TYPE_CHECKING:
-    from optbench import Problem
+    from optibench import Problem
 
 # A value this far above zero is clearly not Dixon-Price's minimum.
 NOT_A_MINIMUM = 0.1

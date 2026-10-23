@@ -2,7 +2,7 @@
 
 Read PLAN.md first in every session, then DESIGN.md for the approved spec and
 the reasoning behind the code, CODEMAP.md for its structure, and
-`src/optbench/README.md` before changing the package. If any of them
+`src/optibench/README.md` before changing the package. If any of them
 disagrees with the code, trust the code and fix the file.
 
 ## Commands
@@ -20,8 +20,8 @@ All commands run from the repo root with uv (Python 3.13).
 | Tests, with 100% branch coverage over `src` and `tests` enforced by `pytest.ini`, under the 2 GB memory watchdog (about 2 min at load 4 to 6, most of it the formula test's sympy work; run one file with the command below while working) | `uv run pytest` |
 | Run every pre-commit hook (the same checks through `uv run --locked`; installed with `uv run pre-commit install`) | `uv run pre-commit run --all-files` |
 | One test file quickly, no coverage | `uv run pytest tests/test_x.py -k name --no-cov` |
-| Time every function on 100,000 points, spec criterion 2 (about 5 s; table, `__data__/timing.csv`, exit status 1 if any is over 0.1 s, except the stated exceptions in `src/optbench/scripts/timing.py`) | `uv run python -m optbench.scripts.timing [--points N] [--repeats K]` |
-| Run the random-search baseline on every function, 10 seeds of 10,000 points (about 1 s; table, curves in `__data__/baseline/`) | `uv run python -m optbench.scripts.baseline [--budget N] [--seeds K]` |
+| Time every function on 100,000 points, spec criterion 2 (about 5 s; table, `__data__/timing.csv`, exit status 1 if any is over 0.1 s, except the stated exceptions in `src/optibench/scripts/timing.py`) | `uv run python -m optibench.scripts.timing [--points N] [--repeats K]` |
+| Run the random-search baseline on every function, 10 seeds of 10,000 points (about 1 s; table, curves in `__data__/baseline/`) | `uv run python -m optibench.scripts.baseline [--budget N] [--seeds K]` |
 
 `mypy.ini`, `ruff.toml`, `pytest.ini`, `pyrightconfig.json`, `.gitignore`
 (below its PROJECT section) and `tools/compress_images.py` are copies of the
@@ -59,7 +59,7 @@ Before every commit run format, lint, both type checks and the tests above.
   `_evaluate`, `default_bounds`, `minimum` and `_check` with
   `@typing.override`) (or of `AnyDimension` when any `d` works, which
   supplies the `d` field) in the module of its SFU group under
-  `src/optbench/functions/` (a function from another collection goes in
+  `src/optibench/functions/` (a function from another collection goes in
   that collection's modules, `classics_*.py`, with its `suite` set); every constant of the formula is a field with
   the published default (see DESIGN.md for which constants count);
   `name`, `group`, `url` and `references` as `ClassVar`s (shared references
@@ -67,7 +67,7 @@ Before every commit run format, lint, both type checks and the tests above.
   and `_evaluate`; a `_check` for parameters that can be wrong (call
   `super()._check()` in an `AnyDimension`). Export it from
   `functions/__init__.py` (the registry reads that list) and from
-  `optbench/__init__.py`. The tests in `tests/test_all_problems.py` then
+  `optibench/__init__.py`. The tests in `tests/test_all_problems.py` then
   cover it automatically; add tests of its published constants, its
   published minimum and its parameter handling in the group's test file.
 - A minimum that holds only for the published constants (found
@@ -91,7 +91,7 @@ Before every commit run format, lint, both type checks and the tests above.
   outright: no shims or old and new versions side by side.
 - Indentation in Python files, docstrings and comments included, is always a
   multiple of 4 spaces. Check with
-  `grep -rnE '^( {4})* {1,3}[^ ]' --include='*.py' src tests scripts`.
+  `grep -rnE '^( {4})* {1,3}[^ ]' --include='*.py' src tests`.
 - Put one blank line before every comment that introduces a block of code.
 - Docstrings follow the numpy convention (see ruff.toml); line length is 80.
 - Typed Python, pyright strict, numpy for data, one seeded
@@ -104,8 +104,8 @@ Before every commit run format, lint, both type checks and the tests above.
 | `.venv/` | generated | `uv sync` / `uv run` |
 | `uv.lock` | generated | `uv add`, `uv lock`; never edit by hand |
 | `.pytest_cache/`, `.ruff_cache/`, `__pycache__/`, `.coverage` | generated | pytest, ruff, the interpreter, pytest-cov |
-| `__data__/` | generated, git-ignored (`timing.csv`, `baseline/` curves, `plots/`) | `optbench.scripts.timing`, `optbench.scripts.baseline` |
-| `src/optbench/py.typed` | hand-written, empty marker | n/a |
+| `__data__/` | generated, git-ignored (`timing.csv`, `baseline/` curves, `plots/`) | `optibench.scripts.timing`, `optibench.scripts.baseline` |
+| `src/optibench/py.typed` | hand-written, empty marker | n/a |
 | `.typings/cocoex/__init__.pyi` | hand-written stub (only `Suite`) so pyright finds `cocoex`; mypy does not read it (`tests/test_bbob.py` casts instead) | n/a |
 
 ## Things that bite

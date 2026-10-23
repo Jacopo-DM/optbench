@@ -12,8 +12,8 @@ import cocoex
 import numpy as np
 import pytest
 
-import optbench
-from optbench import (
+import optibench
+from optibench import (
     BbobAttractiveSector,
     BbobBentCigar,
     BbobBucheRastrigin,
@@ -39,7 +39,7 @@ from optbench import (
     BbobStepEllipsoid,
     BbobWeierstrass,
 )
-from optbench.functions import bbob_common as bbob
+from optibench.functions import bbob_common as bbob
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -97,7 +97,7 @@ FUNCTIONS: dict[int, type[bbob.BbobProblem]] = {
 }
 DIMENSIONS = (2, 3, 5, 10, 20, 40)
 
-# Relative tolerance against COCO. optbench applies the matrices with
+# Relative tolerance against COCO. optibench applies the matrices with
 # einsum and COCO in its C loop, so z differs in the last bit; f16 to f19
 # take sines and cosines of large arguments (up to 3^11 z in f16, about
 # 1e5 in f19) and f23 uses 2^j z up to j = 32, which magnify that to at
@@ -243,14 +243,14 @@ def test_f18_is_f17_with_more_conditioning() -> None:
 
 def test_the_registry_lists_the_suite() -> None:
     names = sorted(cls.name for cls in FUNCTIONS.values())
-    assert optbench.names(suite="bbob") == names
+    assert optibench.names(suite="bbob") == names
     groups = {
-        optbench.Group.BBOB_SEPARABLE: range(1, 6),
-        optbench.Group.BBOB_MODERATE_CONDITIONING: range(6, 10),
-        optbench.Group.BBOB_HIGH_CONDITIONING: range(10, 15),
-        optbench.Group.BBOB_MULTIMODAL_ADEQUATE: range(15, 20),
-        optbench.Group.BBOB_MULTIMODAL_WEAK: range(20, 25),
+        optibench.Group.BBOB_SEPARABLE: range(1, 6),
+        optibench.Group.BBOB_MODERATE_CONDITIONING: range(6, 10),
+        optibench.Group.BBOB_HIGH_CONDITIONING: range(10, 15),
+        optibench.Group.BBOB_MULTIMODAL_ADEQUATE: range(15, 20),
+        optibench.Group.BBOB_MULTIMODAL_WEAK: range(20, 25),
     }
     for group, functions in groups.items():
         expected = sorted(FUNCTIONS[f].name for f in functions)
-        assert optbench.names(group) == expected
+        assert optibench.names(group) == expected

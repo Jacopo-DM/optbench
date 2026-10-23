@@ -7,8 +7,8 @@ import math
 import numpy as np
 import pytest
 
-import optbench
-from optbench import (
+import optibench
+from optibench import (
     AlpineN2,
     Bird,
     Deceptive,
@@ -56,10 +56,10 @@ CLASSICS = [
 
 
 def test_the_registry_lists_them_as_a_suite() -> None:
-    assert optbench.names(suite="classic") == CLASSICS
-    assert not set(CLASSICS) & set(optbench.names(suite="sfu"))
-    assert len(optbench.names(suite="sfu")) == SFU_FUNCTIONS
-    assert optbench.names(Group.BOWL, suite="classic") == [
+    assert optibench.names(suite="classic") == CLASSICS
+    assert not set(CLASSICS) & set(optibench.names(suite="sfu"))
+    assert len(optibench.names(suite="sfu")) == SFU_FUNCTIONS
+    assert optibench.names(Group.BOWL, suite="classic") == [
         "schwefel_2_21",
         "schwefel_2_22",
     ]

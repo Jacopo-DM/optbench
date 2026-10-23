@@ -11,17 +11,17 @@ other). The approved spec and task list are in DESIGN.md.
 
 - Tier 1 (walking skeleton) done and on `main` (4133d55; `main` had no
   commits, so the branch `tier1-skeleton` simply became `main`).
-- Private GitHub repo `Jacopo-DM/optbench` created and `main` pushed
+- Private GitHub repo `Jacopo-DM/optibench` created and `main` pushed
   (2026-10-16, the user's say-so).
 - Made public on 2026-10-18 (the user's choice), so ailigment's CI can
-  install optbench as a git dependency without credentials.
+  install optibench as a git dependency without credentials.
 - Tier 2, the functions: all six SFU groups are done, 49 functions, on
   `main` and pushed (ced98e3, 2026-10-17): 500 tests, coverage 100%, ruff and
   pyright clean, and every function evaluates 100,000 points in under 55 ms.
   Every feature branch so far was merged and deleted on the user's say-so;
   the working tree is clean.
-- Tier 2 is complete (2026-10-17): `optbench.random_search` (the baseline)
-  and the timing and baseline scripts (now `src/optbench/scripts/`);
+- Tier 2 is complete (2026-10-17): `optibench.random_search` (the baseline)
+  and the timing and baseline scripts (now `src/optibench/scripts/`);
   results in DESIGN.md.
   All 49 functions are under the 100 ms budget. On `main` and pushed
   (2026-10-17); the branch `tier2-baseline` was deleted.
@@ -38,8 +38,8 @@ other). The approved spec and task list are in DESIGN.md.
   user's say-so); `spec-formula` was deleted (the user's say-so). Module `formula` (569f452 to 0cea41b, then 690f912) was
   fast-forwarded into `main`, pushed at 690f912 and `formula` deleted
   (the user's say-so, 2026-10-18); CI passed on Linux (2005 tests, 100%
-  coverage, 2 min 15 s for the tests). 78cd59c and the notes commit after it are on
-  `main` but not pushed. Earlier: `main` was pushed (de53338, 2026-10-17,
+  coverage, 2 min 15 s for the tests). `main` was pushed again up to
+  6cac15e (2026-10-19; CI passed). Earlier: `main` was pushed (de53338, 2026-10-17,
   the user's say-so). Every push to `main` from f33326f to fb9bd7e
   failed f23 on Linux by 3.3e-9 relative; summing the rotations in COCO's
   order (DESIGN.md Decisions) fixed it, and CI passed on de53338 (1578
@@ -53,6 +53,10 @@ other). The approved spec and task list are in DESIGN.md.
   abstract on `Problem` (results, decisions and the amended spec in
   DESIGN.md). 2005 tests, 100% coverage; the suite takes about 2 min at
   load 4 to 6 (4 min at load 25).
+- Renamed from `optbench` to `optibench` (2026-10-23, the user's request):
+  distribution and import name, on `main`, not pushed. The GitHub repo is
+  still `Jacopo-DM/optbench` and the local folder keeps its old name, so
+  the README's links point to the new address before it exists.
 
 ## Constraints
 
@@ -63,8 +67,12 @@ other). The approved spec and task list are in DESIGN.md.
 
 ## Next step
 
-`ailigment`'s goal `optbench-symreg`, task S1, which pins optbench at
-690f912 (its PLAN.md). No optbench module is open.
+Finish the rename, each step on the user's say-so: rename the GitHub repo
+(`gh repo rename optibench`, which redirects the old URL), point `origin`
+at the new URL and push `main`. Then `ailigment` moves its pin
+(690f912, still the package `optbench`) and its imports to `optibench`.
+After that, `ailigment`'s goal `optbench-symreg`, task S1 (its PLAN.md).
+No optibench module is open.
 
 ## Next steps in priority order (approved modules, 2026-10-17)
 

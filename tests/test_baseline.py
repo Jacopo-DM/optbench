@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from optbench import Branin, Sphere, random_search
+from optibench import Branin, Sphere, random_search
 
 
 def test_uses_exactly_the_budget() -> None:

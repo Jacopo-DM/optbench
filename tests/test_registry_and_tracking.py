@@ -5,31 +5,31 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-import optbench
-from optbench import Group, Sphere, Tracked
+import optibench
+from optibench import Group, Sphere, Tracked
 
 
 def test_names_lists_every_exported_problem_and_filters_by_group() -> None:
     exported = {
-        getattr(optbench, name).name
-        for name in optbench.__all__
-        if isinstance(getattr(optbench, name), type)
-        and issubclass(getattr(optbench, name), optbench.Problem)
-        and hasattr(getattr(optbench, name), "name")
+        getattr(optibench, name).name
+        for name in optibench.__all__
+        if isinstance(getattr(optibench, name), type)
+        and issubclass(getattr(optibench, name), optibench.Problem)
+        and hasattr(getattr(optibench, name), "name")
     }
-    assert optbench.names() == sorted(exported)
+    assert optibench.names() == sorted(exported)
     for group in Group:
-        names = optbench.names(group)
-        assert all(optbench.make(name).group == group for name in names)
-    assert "sphere" in optbench.names(Group.BOWL)
+        names = optibench.names(group)
+        assert all(optibench.make(name).group == group for name in names)
+    assert "sphere" in optibench.names(Group.BOWL)
 
 
 def test_make_builds_with_changed_parameters() -> None:
-    branin = optbench.make("branin", s=5.0)
-    assert isinstance(branin, optbench.Branin)
+    branin = optibench.make("branin", s=5.0)
+    assert isinstance(branin, optibench.Branin)
     assert branin.s == pytest.approx(5.0)
     with pytest.raises(KeyError, match="no problem named"):
-        optbench.make("nope")
+        optibench.make("nope")
 
 
 def test_tracked_counts_and_keeps_the_best() -> None:

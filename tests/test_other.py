@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from optbench import (
+from optibench import (
     Beale,
     Colville,
     Forrester2008,
@@ -23,7 +23,7 @@ from optbench import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from optbench import Problem
+    from optibench import Problem
 
 # SFU's published minimum value and minimiser, rounded as printed there.
 PUBLISHED = [

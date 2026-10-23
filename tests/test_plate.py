@@ -9,10 +9,10 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from optbench import Booth, Matyas, McCormick, PowerSum, Zakharov
+from optibench import Booth, Matyas, McCormick, PowerSum, Zakharov
 
 if TYPE_CHECKING:
-    from optbench import Problem
+    from optibench import Problem
 
 
 def test_published_constants() -> None:

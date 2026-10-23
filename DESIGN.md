@@ -49,7 +49,7 @@ Acceptance criteria, each testable:
    points one at a time; a wrong shape raises `ValueError`.
 7. Metadata on each problem: name, SFU group, dimension (fixed, or free with
    a smallest d), references, and the page URL. A registry lists and builds
-   them: `optbench.names(group=None)`, `optbench.make(name, **params)`.
+   them: `optibench.names(group=None)`, `optibench.make(name, **params)`.
 8. An evaluation counter for running optimisers: `Tracked(problem)` counts
    evaluated points, keeps the best value and point so far, and records the
    best-so-far curve (evaluations, best) that a caller can save as CSV. It is
@@ -67,23 +67,23 @@ in `ailigment/benchmarks/` and get their own specs.
 
 Constraints: a separate uv project at
 `/Users/jmdm/Documents/projects/code/1xx_projects/optbench`, private GitHub
-repo `Jacopo-DM/optbench`; Python >=3.13 (same
+repo `Jacopo-DM/optibench`; Python >=3.13 (same
 interpreter as `ailigment`, which pulls it in); numpy; dev tools as in
 `ailigment` (ruff, pyright strict, pytest); its own four state files and
 module READMEs; feature branches and the user-level git rules.
 
 Architecture:
-- `src/optbench/problem.py`: `Problem`, the base class. Subclasses are frozen
+- `src/optibench/problem.py`: `Problem`, the base class. Subclasses are frozen
   pydantic models whose fields are the parameters, so `Rastrigin(d=5, a=12.0)`
   needs no hand-written constructor and `problem.replace(a=12.0)` makes a
   checked variant.
   It provides `__call__` (shape check, then the subclass's `_evaluate`),
   `bounds`, `minimum` (a `Minimum`: value, minimisers, source) and metadata.
-- `src/optbench/functions/`: one file per SFU group (`many_local_minima.py`,
+- `src/optibench/functions/`: one file per SFU group (`many_local_minima.py`,
   `bowl.py`, `plate.py`, `valley.py`, `steep.py`, `other.py`), each under
   400 lines.
-- `src/optbench/registry.py`: `names`, `make`.
-- `src/optbench/tracking.py`: `Tracked`.
+- `src/optibench/registry.py`: `names`, `make`.
+- `src/optibench/tracking.py`: `Tracked`.
 - Rejected: porting the GPL-2.0 R code (ties the license; the user chose
   formulas); one plain function per problem plus a metadata table (the
   parameters, bounds and minimum would live in three places); depending on an
@@ -123,7 +123,7 @@ Answers to the questions asked with the specs:
 
 ### Module `bbob` (build): the 24 noiseless COCO/BBOB functions
 
-Goal: the BBOB 2009 noiseless suite in optbench, so optimisers (CGP-evolved
+Goal: the BBOB 2009 noiseless suite in optibench, so optimisers (CGP-evolved
 ones included) can be compared with published COCO results.
 
 Acceptance criteria, each testable:
@@ -187,7 +187,7 @@ fits it. One commit; the minima are checked numerically as for SFU.
 
 ## Approved spec: formula (the user, 2026-10-17)
 
-Kind: build (new behaviour). Goal: every optbench problem returns its
+Kind: build (new behaviour). Goal: every optibench problem returns its
 formula as a sympy expression. Users: `ailigment`'s `optbench-symreg`,
 which checks whether an evolved formula equals the true one exactly, and
 anyone who wants a function's closed form (sympy can print or simplify
@@ -197,7 +197,7 @@ so they stay next to the functions and change with their parameters.
 Acceptance criteria:
 
 1. `Problem.formula()` returns a sympy expression in the variables
-   `optbench.variables(d)`, named `x1` to `xd` as the SFU pages write them
+   `optibench.variables(d)`, named `x1` to `xd` as the SFU pages write them
    (column j of the points is `x(j+1)`; the user's choice over `x0`), for
    every one of the 83 problems. Example: `Booth().formula()` prints
    `(x1 + 2*x2 - 7)**2 + (2*x1 + x2 - 5)**2`.
@@ -221,12 +221,12 @@ Acceptance criteria:
 3. It follows the parameters: a problem built with changed constants
    (for example `make("ackley", a=10.0)`) gives a formula that matches its
    own values, tested on one problem per file.
-4. sympy is a required dependency of optbench (the user's choice over an
+4. sympy is a required dependency of optibench (the user's choice over an
    optional extra: simpler, and no missing-extra path to handle).
 5. The standard holds: mypy strict with no `Any`, pyright strict, ruff,
    100% branch coverage, no change to the template configs. sympy has no
    type information (1.14 ships no `py.typed`), so one module,
-   `optbench/symbolic.py`, reaches it through typed Protocols with a
+   `optibench/symbolic.py`, reaches it through typed Protocols with a
    `cast`, as the standard's untyped-library pattern does, and nothing
    else imports sympy. (`untyped_calls_exclude` in `mypy.ini` is the
    standard's other route, but that file is a template copy.)
@@ -253,11 +253,18 @@ tests; the BBOB transforms are the largest part.
 
 ## Decisions and reasons
 
+- Name (2026-10-23, the user's request): the library was renamed from
+  `optbench` to `optibench`, the import name too, because a package
+  installed under one name and imported under another misleads readers,
+  and `ailigment` was its only user. Two old names stay on purpose: the
+  local folder (renaming it would orphan the per-folder Claude state) and
+  `ailigment`'s goal `optbench-symreg`, which belongs to that repo.
+
 - Module `formula` (2026-10-17): sympy is reached only through
   `symbolic.py`, typed as Protocols behind one `cast` of the imported
   module, because sympy 1.14 has no type information and `mypy.ini` is a
   template copy that cannot list it in `untyped_calls_exclude`. The facade
-  imports sympy on first use (`import optbench` stays at about 0.3 s; the
+  imports sympy on first use (`import optibench` stays at about 0.3 s; the
   first formula pays about 1 s). `Expr` is a Protocol with only the
   arithmetic the formulas use, and the facade grows a function only when a
   formula needs it (F1 needed `cos` and `absolute`, not `sin`). sympy's
@@ -482,7 +489,7 @@ tests; the BBOB transforms are the largest part.
 - Deceptive: Gavana's page formula leaves out the `+ 1` and `+ 4/5` of the
   last two pieces of g, so g would jump at alpha_i and at (1 + 4 alpha_i)/5;
   SciPy's benchmark code (BSD, "based on his code") has them and says the
-  page is wrong, and so does optbench. alpha_i defaults to i / (d + 1), as
+  page is wrong, and so does optibench. alpha_i defaults to i / (d + 1), as
   in that code; beta = 2. Outside [0, 1] the end pieces continue as lines.
 - Happy Cat's formula is Beyer and Finck's (PPSN 2012) as the soobench R
   package states it, alpha = 1/8; its domain [-100, 100]^d is the CEC 2014
@@ -491,7 +498,7 @@ tests; the BBOB transforms are the largest part.
 - Whitley is a stated exception to spec criterion 2 (the user, 2026-10-17):
   it has d^2 terms per point, so at d = 10 a batch of 100,000 points needs
   10 million cosines, which alone take 70 to 90 ms; it measures about 125
-  ms. `src/optbench/scripts/timing.py` lists it in `EXCEPTIONS`, marks it "over budget,
+  ms. `src/optibench/scripts/timing.py` lists it in `EXCEPTIONS`, marks it "over budget,
   stated exception" and still exits 0. Changing the budget to scale with
   the terms per point, or leaving the script failing, were the rejected
   options.
@@ -507,7 +514,7 @@ tests; the BBOB transforms are the largest part.
   sequence through a 32-entry shuffle table, 40 warm-up steps, Box-Muller
   for normals), in a Python loop: at most 2 d^2 numbers per instance, made
   once.
-- Where COCO's code and RR-6829 differ, optbench follows the code, so
+- Where COCO's code and RR-6829 differ, optibench follows the code, so
   values match published COCO data: f4's `x_opt` takes the absolute value
   in every even coordinate (0-based) and comes from f3's seed (so f3 and f4
   share `f_opt` and the odd coordinates of `x_opt`); f_opt of f4 and f18 use
@@ -596,7 +603,7 @@ tests; the BBOB transforms are the largest part.
 - `tests/test_bbob.py` compares with COCO to a relative 1e-12, and 1e-9
   for f16 to f19 and f23 (2^j z up to j = 32, with |z| up to about 100;
   worst 7e-10 before the rotations were summed in COCO's order, 3.8e-11
-  after): optbench and COCO sum in different orders, and those
+  after): optibench and COCO sum in different orders, and those
   four take sines and cosines of large arguments (2 pi 3^11 z in f16, t up
   to about 1e5 in f19). Measured worst cases, all 30 (d, instance) pairs,
   before that change:
@@ -615,16 +622,16 @@ tests; the BBOB transforms are the largest part.
 - Bird's minimum, -106.7645367492647 (Newton on the exact gradient), is
   3e-8 below Gavana's published -106.7645367198034.
 
-- The random-search baseline (2026-10-17) is `optbench.random_search`, in the
+- The random-search baseline (2026-10-17) is `optibench.random_search`, in the
   package rather than in a script, because the `ailigment` adapters will
   import it as the result to beat. It is not an optimiser library: one
   function, uniform points through `Tracked`, so `Tracked` stays the only
   state. Points come in batches of 1,000 (one `Tracked` curve row each) and
   the last batch is cut so the budget is exact.
-- The timing and baseline runners are scripts in `src/optbench/scripts/`
-  (run with `python -m optbench.scripts.<name>`, tested by
+- The timing and baseline runners are scripts in `src/optibench/scripts/`
+  (run with `python -m optibench.scripts.<name>`, tested by
   `tests/test_scripts.py`). Until 2026-10-17 they were a top-level
-  `scripts/` package outside `optbench`; the Python standard's `pytest.ini`
+  `scripts/` package outside `optibench`; the Python standard's `pytest.ini`
   (`pythonpath = src`, coverage over `src` and `tests`) moved them in (see
   "Python standard"). The package itself never imports them. They write to `__data__/` (git-ignored),
   as in `ailigment`. The scripts draw no plots, because matplotlib would be a
@@ -642,7 +649,7 @@ tests; the BBOB transforms are the largest part.
   functions).
 
 - Python standard, module `python-standard` (kind: change; spec and nine
-  tasks approved by the user on 2026-10-17). Goal: optbench passes the
+  tasks approved by the user on 2026-10-17). Goal: optibench passes the
   user's Python standard (`~/.claude/standards/python/core.md`) with the
   template configs unchanged and every value bit for bit the same.
   Non-goals: a Sphinx docs site (the user's `/zz-09-python-docs` prompt),
@@ -665,7 +672,7 @@ tests; the BBOB transforms are the largest part.
   - pre-commit and CI come in the same module; CI compiles cocoex from
     source (no Python 3.13 wheel), about a minute per run.
   - Mine, under the standard's "packaging is yours": `scripts/` moves into
-    the package as `optbench.scripts`, because the template's
+    the package as `optibench.scripts`, because the template's
     `pythonpath = src` and `--cov=src` must not change and the tests import
     the scripts; they have no import-time side effects. Overrides that
     ignore `self` take `@typing.override`, which ruff's `no-self-use`
@@ -694,13 +701,13 @@ tests; the BBOB transforms are the largest part.
 ## Other sources of test functions (reviewed 2026-10-17)
 
 The user shared a list of other collections on 2026-10-17. What each offers
-optbench, and what was decided:
+optibench, and what was decided:
 
 | Source | What it is | Decision |
 |--------|------------|----------|
 | COCO / BBOB (Hansen, Finck, Ros and Auger, 2009, INRIA RR-6829; https://github.com/numbbo/coco, BSD-3-Clause) | 24 noiseless functions in 5 groups, each a base function with seeded shifts, rotations and conditioning (no data files); the standard for comparing continuous optimisers, with published results for hundreds of algorithms | proposed as a new spec module (PLAN.md); it changes the non-goal "shifted, rotated or noisy variants", so it needs approval |
 | AMPGO test functions (Gavana, https://infinity77.net/global_optimization/test_functions.html; already cited as `GAVANA`) | 18 one-dimensional and about 184 multivariate functions with difficulty ratings | source for a short list of missing classics (PLAN.md); not imported wholesale, most add little beyond the 49 |
-| Wikipedia, "Test functions for optimization" (already cited as `WIKIPEDIA`) | formulas, domains and plots of about 25 single-objective functions, plus constrained and multi-objective ones | every single-objective one is in optbench except Himmelblau; the constrained and multi-objective ones are non-goals |
+| Wikipedia, "Test functions for optimization" (already cited as `WIKIPEDIA`) | formulas, domains and plots of about 25 single-objective functions, plus constrained and multi-objective ones | every single-objective one is in optibench except Himmelblau; the constrained and multi-objective ones are non-goals |
 | Jamil and Yang (2013), "A literature survey of benchmark functions for global optimisation problems", Int. J. Math. Modelling and Numerical Optimisation 4(2) | 175 functions with formulas, domains and minima | primary reference for the missing classics |
 | Opfunu (Python, numpy) and the CEC competition suites | about 200 functions including every CEC suite | not used: CEC needs per-suite shift and rotation data files (a download each, licences vary); a non-goal unless CEC comparisons are wanted |
 | TestFunctions (R package, Collin Erickson) | mostly emulation functions (borehole and others) from SFU's non-optimisation pages | not used: emulation pages are a non-goal |

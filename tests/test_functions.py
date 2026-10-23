@@ -7,7 +7,7 @@ import math
 import numpy as np
 import pytest
 
-from optbench import Branin, Shekel, Sphere
+from optibench import Branin, Shekel, Sphere
 
 
 def test_sphere_has_its_minimum_for_any_d_and_none_off_the_domain() -> None:

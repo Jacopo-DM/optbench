@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-import optbench
-from optbench import Problem
+import optibench
+from optibench import Problem
 
 SAMPLES = 10_000
 
@@ -19,7 +19,7 @@ def _problems() -> list[Problem]:
     list of Problem
         The problems to check.
     """
-    problems = [optbench.make(name) for name in optbench.names()]
+    problems = [optibench.make(name) for name in optibench.names()]
     free = [p for p in problems if hasattr(p, "d")]
     problems += [p.replace(d=8) for p in free]
     return problems
@@ -82,5 +82,5 @@ def test_the_metadata_is_complete(problem: Problem) -> None:
         assert problem.suite in {"classic", "bbob"}
         assert problem.url.startswith("https://")
     assert problem.references
-    assert problem.group in optbench.Group
+    assert problem.group in optibench.Group
     assert problem.bounds.shape == (problem.dimension, 2)
