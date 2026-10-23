@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from optibench import random_search
+from optibench.model import Model
 from optibench.scripts.common import DATA, every_problem
 
 if TYPE_CHECKING:
@@ -25,14 +26,32 @@ BUDGET = 10_000
 SEEDS = 10
 
 
-def main(argv: Sequence[str] | None = None) -> None:
-    """Command-line entry point."""
+class Arguments(Model):
+    """The command-line arguments, parsed from their text."""
+
+    budget: int = BUDGET
+    seeds: int = SEEDS
+
+
+def parse_arguments(argv: Sequence[str] | None = None) -> Arguments:
+    """Read ``--budget`` and ``--seeds`` from the command line.
+
+    Returns
+    -------
+    Arguments
+        The parsed arguments.
+    """
     parser = argparse.ArgumentParser(
         description=(__doc__ or "").splitlines()[0],
     )
-    parser.add_argument("--budget", type=int, default=BUDGET)
-    parser.add_argument("--seeds", type=int, default=SEEDS)
-    args = parser.parse_args(argv)
+    parser.add_argument("--budget", default=BUDGET)
+    parser.add_argument("--seeds", default=SEEDS)
+    return Arguments.model_validate(vars(parser.parse_args(argv)))
+
+
+def main(argv: Sequence[str] | None = None) -> None:
+    """Command-line entry point."""
+    args = parse_arguments(argv)
     folder = DATA / "baseline"
     folder.mkdir(parents=True, exist_ok=True)
 

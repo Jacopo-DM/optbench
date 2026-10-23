@@ -12,13 +12,13 @@ from __future__ import annotations
 
 import argparse
 import csv
-import operator
 import sys
 import time
 from typing import TYPE_CHECKING
 
 import numpy as np
 
+from optibench.model import Model
 from optibench.scripts.common import DATA, every_problem
 
 if TYPE_CHECKING:
@@ -33,6 +33,37 @@ BUDGET = 0.1
 # Problems allowed over the budget (the user, 2026-10-17): Whitley has d^2
 # terms per point, and their cosines alone take most of the budget at d = 10.
 EXCEPTIONS = frozenset({"whitley"})
+
+
+class Arguments(Model):
+    """The command-line arguments, parsed from their text."""
+
+    points: int = POINTS
+    repeats: int = REPEATS
+
+
+class Timing(Model):
+    """One problem's time, a row of the table and of ``timing.csv``."""
+
+    name: str
+    dimension: int
+    seconds: float
+
+
+def parse_arguments(argv: Sequence[str] | None = None) -> Arguments:
+    """Read ``--points`` and ``--repeats`` from the command line.
+
+    Returns
+    -------
+    Arguments
+        The parsed arguments.
+    """
+    parser = argparse.ArgumentParser(
+        description=(__doc__ or "").splitlines()[0],
+    )
+    parser.add_argument("--points", default=POINTS)
+    parser.add_argument("--repeats", default=REPEATS)
+    return Arguments.model_validate(vars(parser.parse_args(argv)))
 
 
 def time_problem(problem: Problem, points: int, repeats: int) -> float:
@@ -66,25 +97,25 @@ def main(argv: Sequence[str] | None = None) -> int:
     int
         0 if every problem is within the budget, else 1.
     """
-    parser = argparse.ArgumentParser(
-        description=(__doc__ or "").splitlines()[0],
-    )
-    parser.add_argument("--points", type=int, default=POINTS)
-    parser.add_argument("--repeats", type=int, default=REPEATS)
-    args = parser.parse_args(argv)
+    args = parse_arguments(argv)
 
     # Time every problem, slowest last in the table.
     rows = [
-        (p.name, p.dimension, time_problem(p, args.points, args.repeats))
+        Timing(
+            name=p.name,
+            dimension=p.dimension,
+            seconds=time_problem(p, args.points, args.repeats),
+        )
         for p in every_problem()
     ]
-    rows.sort(key=operator.itemgetter(2))
-    for name, d, seconds in rows:
+    rows.sort(key=lambda row: row.seconds)
+    for row in rows:
         flag = ""
-        if seconds > BUDGET:
-            excused = name in EXCEPTIONS
+        if row.seconds > BUDGET:
+            excused = row.name in EXCEPTIONS
             flag = "  over budget, stated exception" if excused else "  OVER"
-        print(f"{name:26} d={d:<3} {1000 * seconds:7.1f} ms{flag}")  # ruff: ignore[print]
+        ms = 1000 * row.seconds
+        print(f"{row.name:26} d={row.dimension:<3} {ms:7.1f} ms{flag}")  # ruff: ignore[print]
 
     # Save them for plotting.
     DATA.mkdir(exist_ok=True)
@@ -92,9 +123,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     with out.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle)
         writer.writerow(["name", "d", "seconds"])
-        writer.writerows(rows)
+        writer.writerows([row.name, row.dimension, row.seconds] for row in rows)
     over = sum(
-        seconds > BUDGET and name not in EXCEPTIONS for name, _, seconds in rows
+        row.seconds > BUDGET and row.name not in EXCEPTIONS for row in rows
     )
     print(f"{over} of {len(rows)} over {1000 * BUDGET:.0f} ms; saved {out}")  # ruff: ignore[print]
     return 1 if over else 0

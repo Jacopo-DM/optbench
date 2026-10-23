@@ -6,6 +6,9 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
+from hypothesis import example, given
+from hypothesis import strategies as st
+from pydantic import ValidationError
 
 import optibench
 from optibench import Sphere
@@ -74,3 +77,40 @@ def test_baseline_writes_one_curve_per_seed(data: Path) -> None:
         ndmin=2,
     )
     assert curve[-1, 0] == budget
+
+
+@given(st.text(), st.text())
+@example("100", "2")
+def test_timing_arguments_parse_or_raise_validation_error(
+    points: str,
+    repeats: str,
+) -> None:
+    """Any text parses to arguments or raises ValidationError."""
+    try:
+        args = timing.parse_arguments(
+            [f"--points={points}", f"--repeats={repeats}"],
+        )
+    except ValidationError:
+        return
+    assert (args.points, args.repeats) == (int(points), int(repeats))
+
+
+@given(st.text(), st.text())
+@example("50", "2")
+def test_baseline_arguments_parse_or_raise_validation_error(
+    budget: str,
+    seeds: str,
+) -> None:
+    """Any text parses to arguments or raises ValidationError."""
+    try:
+        args = baseline.parse_arguments(
+            [f"--budget={budget}", f"--seeds={seeds}"],
+        )
+    except ValidationError:
+        return
+    assert (args.budget, args.seeds) == (int(budget), int(seeds))
+
+
+def test_arguments_default_without_flags() -> None:
+    assert timing.parse_arguments([]) == timing.Arguments()
+    assert baseline.parse_arguments([]) == baseline.Arguments()

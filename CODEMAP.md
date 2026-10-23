@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optibench/__init__.py`.
 
-## `src/optibench` (7856 lines, 36 files)
+## `src/optibench` (7906 lines, 36 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -144,14 +144,16 @@ constants), `references.py`
 never imported by the package: `common.py` (`D = 10`, `DATA = __data__`,
 `every_problem(d)`: every registered problem with free dimensions at `d`,
 Powell at the largest multiple of 4 up to it), `timing.py`
-(`time_problem(problem, points, repeats)`, `BUDGET`, `EXCEPTIONS` (problems
-allowed over it), `main` returning the exit status), `baseline.py` (`main`));
+(`Arguments` and `parse_arguments(argv)`, the `Timing` row,
+`time_problem(problem, points, repeats)`, `BUDGET`, `EXCEPTIONS` (problems
+allowed over it), `main` returning the exit status), `baseline.py`
+(`Arguments`, `parse_arguments(argv)`, `main`));
 `__init__.py`. Order: `problem` is the leaf;
 `references` and `known_minima` use only `problem`; the group modules use
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (1957 lines, 18 files)
+## `tests` (2039 lines, 18 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
@@ -167,8 +169,11 @@ the nested-condition refusal; spec criterion 3, changed constants for one
 problem per function file, in `CHANGED`),
 `conftest.py` and `memory_guard.py` (a watchdog thread that stops the
 run past 2 GB of peak memory), `test_memory_guard.py`,
-`test_registry_and_tracking.py`, `test_baseline.py`, `test_scripts.py`
-(both scripts on small budgets in a temporary folder). Depends on: `optibench` (with `optibench.scripts`), numpy, pytest, `cocoex` (dev only).
+`test_registry_and_tracking.py` (with the Hypothesis boundary test of
+`make`), `test_baseline.py`, `test_scripts.py` (both scripts on small
+budgets in a temporary folder, and boundary tests of their arguments).
+`conftest.py` also loads the Hypothesis profile. Depends on: `optibench`
+(with `optibench.scripts`), numpy, pytest, hypothesis, `cocoex` (dev only).
 
 ## Other top-level folders
 
